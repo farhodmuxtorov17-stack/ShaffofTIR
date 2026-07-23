@@ -759,4 +759,529 @@
   let routeCheckInterval = setInterval(checkRoute, 1000);
   setTimeout(() => { clearInterval(routeCheckInterval); }, 10000); // Stop after 10s
 
+
+
+// TIR Page targeted patch
+(function() {
+
+const SHOOTER_CSS = `
+  @keyframes tir-blink-dot { 0%,100%{opacity:1}50%{opacity:0.2} }
+  @keyframes tir-flash { 0%{opacity:.9;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(2.5)} }
+  @keyframes tir-recoil { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-3px)} }
+
+  /* FIX: Range dashboard main grid — make lanes fill the width */
+  .range-dashboard-grid, [class*="range"][class*="grid"],
+  [class*="lane"][class*="grid"] {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  /* Lanes container must span full width, activity panel goes below or to side */
+  .lanes-section { width: 100% !important; }
+  .lane-card-wrap { min-width: 0 !important; }
+
+  /* Stats row responsive */
+  .tir-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  @media(max-width:1100px) {
+    .tir-stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media(max-width:600px) {
+    .tir-stats-row { grid-template-columns: 1fr 1fr; }
+  }
+  
+  /* Make the page main layout not overflow */
+  [class*="page-content"], [class*="main-content"], .flex-1.overflow-y-auto {
+    overflow-x: hidden !important;
+  }
+
+  /* Shooter canvas overlay */
+  .tir-shooter-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+  }
+`;
+
+const style = document.createElement('style');
+style.textContent = SHOOTER_CSS;
+document.head.appendChild(style);
+
+// ── Realistic Shooter Simulation ──
+function ShooterSim(canvas, options = {}) {
+  const ctx = canvas.getContext('2d');
+  let W, H;
+  let raf = null;
+  let t = 0;
+
+  const state = {
+    shooterX: 0.3,        // 0..1 normalized
+    shooterY: 0,          // vertical offset
+    shooting: false,
+    recoil: 0,
+    holes: [],
+    flash: null,
+    smoke: [],
+    muzzle: 0,
+    lastShot: 0,
+    interval: (options.interval || 2000) + Math.random() * 1000,
+    status: options.status || 'OCCUPIED',
+    shots: options.shots || 0,
+    score: options.score || 0,
+  };
+
+  // Pre-populate holes based on existing shots
+  for (let i = 0; i < Math.min(state.shots, 10); i++) {
+    const maxSpread = 35;
+    const a = Math.random() * Math.PI * 2;
+    const d = Math.random() * maxSpread * (state.score > 80 ? 0.5 : state.score > 60 ? 0.8 : 1.2);
+    state.holes.push({ dx: Math.cos(a) * d, dy: Math.sin(a) * d, age: 1 });
+  }
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    W = canvas.width = rect.width || 320;
+    H = canvas.height = rect.height || 180;
+  }
+
+  function shoot() {
+    if (state.status !== 'OCCUPIED') return;
+    state.shooting = true;
+    state.flash = { t: performance.now(), x: 0, y: 0 };
+    state.recoil = 1;
+    state.muzzle = 1;
+    state.lastShot = performance.now();
+
+    // Add bullet hole near center of target
+    const tx = W * 0.8, ty = H * 0.4;
+    const spread = state.score > 85 ? 18 : state.score > 70 ? 28 : 42;
+    const a = Math.random() * Math.PI * 2;
+    const d = Math.random() * spread;
+    state.holes.push({ dx: Math.cos(a)*d, dy: Math.sin(a)*d, age: 0 });
+    if (state.holes.length > 18) state.holes.shift();
+
+    // Smoke puff
+    for (let i = 0; i < 4; i++) {
+      state.smoke.push({
+        x: W * 0.38, y: H * 0.52,
+        vx: 0.5 + Math.random() * 2,
+        vy: -Math.random() * 1.5,
+        r: 2 + Math.random() * 4,
+        life: 1,
+        decay: 0.02 + Math.random() * 0.02,
+      });
+    }
+
+    setTimeout(() => { state.shooting = false; }, 150);
+  }
+
+  function drawFrame(now) {
+    resize();
+    t = now * 0.001;
+
+    // ── Background (night/twilight range) ──
+    const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+    bgGrad.addColorStop(0, '#07120a');
+    bgGrad.addColorStop(0.55, '#0b1e10');
+    bgGrad.addColorStop(1, '#050d06');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, W, H);
+
+    // Stars (subtle)
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    const starPositions = [[0.1,0.08],[0.25,0.05],[0.45,0.03],[0.62,0.09],[0.78,0.04],[0.9,0.07]];
+    starPositions.forEach(([sx,sy]) => {
+      ctx.beginPath();
+      ctx.arc(W*sx, H*sy, 0.6, 0, Math.PI*2);
+      ctx.fill();
+    });
+
+    // ── Ground ──
+    const groundGrad = ctx.createLinearGradient(0, H*0.72, 0, H);
+    groundGrad.addColorStop(0, '#0a180a');
+    groundGrad.addColorStop(1, '#050d05');
+    ctx.fillStyle = groundGrad;
+    ctx.fillRect(0, H*0.72, W, H*0.28);
+
+    // Lane distance markers
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    ctx.lineWidth = 0.5;
+    ctx.setLineDash([3, 8]);
+    for (let lx = 0.2; lx < 0.95; lx += 0.15) {
+      ctx.beginPath();
+      ctx.moveTo(W*lx, H*0.68);
+      ctx.lineTo(W*lx, H*0.78);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
+
+    // ── Target stand ──
+    const tx = W * 0.8, ty = H * 0.4;
+    // Stand pole
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(tx, ty + 44);
+    ctx.lineTo(tx, H * 0.75);
+    ctx.stroke();
+
+    // Target board bg
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    ctx.fillRect(tx - 46, ty - 48, 92, 92);
+
+    // Target rings — realistic concentric
+    const rings = [
+      { r: 44, color: 'rgba(255,255,255,0.06)' },
+      { r: 36, color: 'rgba(255,255,255,0.08)' },
+      { r: 28, color: 'rgba(255,255,255,0.10)' },
+      { r: 20, color: 'rgba(100,200,120,0.18)' },
+      { r: 12, color: 'rgba(80,200,100,0.28)' },
+      { r: 6,  color: 'rgba(50,220,80,0.45)' },
+    ];
+    rings.forEach(({ r, color }) => {
+      ctx.beginPath();
+      ctx.arc(tx, ty, r, 0, Math.PI*2);
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+    // Cross hairs on target
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(tx-44, ty); ctx.lineTo(tx+44, ty); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(tx, ty-44); ctx.lineTo(tx, ty+44); ctx.stroke();
+
+    // Target center
+    ctx.beginPath();
+    ctx.arc(tx, ty, 4, 0, Math.PI*2);
+    ctx.fillStyle = '#ef4444';
+    ctx.fill();
+
+    // ── Bullet holes ──
+    state.holes.forEach(h => {
+      h.age = Math.min(h.age + 0.04, 1);
+      const hx = tx + h.dx, hy = ty + h.dy;
+      // Outer glow
+      const g = ctx.createRadialGradient(hx, hy, 0, hx, hy, 8);
+      g.addColorStop(0, `rgba(16,185,129,${0.6*h.age})`);
+      g.addColorStop(1, 'rgba(16,185,129,0)');
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(hx, hy, 8, 0, Math.PI*2); ctx.fill();
+      // Hole
+      ctx.beginPath();
+      ctx.arc(hx, hy, 2.5, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(0,0,0,${h.age})`;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(hx, hy, 2.5, 0, Math.PI*2);
+      ctx.strokeStyle = `rgba(16,185,129,${0.9*h.age})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    });
+
+    // ── Shooter silhouette ──
+    const recoilAmount = state.recoil * 3;
+    const baseX = W * (state.shooterX + Math.sin(t * 0.3) * 0.005);
+    const baseY = H * 0.54 + recoilAmount;
+
+    state.recoil = Math.max(0, state.recoil - 0.08);
+
+    // Body (prone/standing silhouette)
+    ctx.fillStyle = '#1a3826';
+    // Torso
+    ctx.beginPath();
+    ctx.ellipse(baseX, baseY + 12, 8, 22, -0.1, 0, Math.PI*2);
+    ctx.fill();
+    // Head
+    ctx.beginPath();
+    ctx.arc(baseX + 2, baseY - 16, 9, 0, Math.PI*2);
+    ctx.fill();
+    // Helmet shape
+    ctx.beginPath();
+    ctx.ellipse(baseX + 2, baseY - 19, 10, 7, 0, Math.PI, Math.PI*2);
+    ctx.fill();
+    // Arm/shoulder holding weapon
+    ctx.beginPath();
+    ctx.ellipse(baseX + 10, baseY + 2, 5, 12, 0.4, 0, Math.PI*2);
+    ctx.fill();
+
+    // ── Weapon (rifle) ──
+    const wStartX = baseX + 14, wStartY = baseY + 2;
+    const wEndX = baseX + 46, wEndY = baseY + 2;
+
+    // Rifle body
+    ctx.strokeStyle = '#0e1e12';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(wStartX, wStartY);
+    ctx.lineTo(wEndX, wEndY);
+    ctx.stroke();
+
+    // Barrel (thinner)
+    ctx.strokeStyle = '#0a140d';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(wStartX + 8, wStartY - 1);
+    ctx.lineTo(wEndX + 4, wEndY - 1);
+    ctx.stroke();
+
+    // Scope
+    ctx.fillStyle = '#0a140d';
+    ctx.fillRect(wStartX + 4, wStartY - 5, 12, 5);
+
+    // ── Muzzle Flash ──
+    if (state.flash && state.muzzle > 0) {
+      const elapsed = performance.now() - state.flash.t;
+      const fProgress = elapsed / 120;
+      if (fProgress < 1) {
+        const fAlpha = 1 - fProgress;
+        const fSize = 6 + fProgress * 8;
+        const fx = wEndX + 4, fy = wEndY - 1;
+
+        // Core flash
+        ctx.beginPath();
+        ctx.arc(fx, fy, fSize * 0.6, 0, Math.PI*2);
+        ctx.fillStyle = `rgba(255,240,180,${fAlpha * 0.9})`;
+        ctx.fill();
+
+        // Outer glow
+        const flashGrad = ctx.createRadialGradient(fx, fy, 0, fx, fy, fSize * 1.5);
+        flashGrad.addColorStop(0, `rgba(255,200,50,${fAlpha * 0.7})`);
+        flashGrad.addColorStop(0.5, `rgba(255,150,20,${fAlpha * 0.3})`);
+        flashGrad.addColorStop(1, 'rgba(255,100,0,0)');
+        ctx.fillStyle = flashGrad;
+        ctx.beginPath();
+        ctx.arc(fx, fy, fSize * 1.5, 0, Math.PI*2);
+        ctx.fill();
+
+        // Muzzle streaks
+        ctx.strokeStyle = `rgba(255,220,100,${fAlpha * 0.5})`;
+        ctx.lineWidth = 1;
+        [-0.2, 0, 0.2].forEach(angle => {
+          ctx.beginPath();
+          ctx.moveTo(fx, fy);
+          ctx.lineTo(fx + Math.cos(angle) * fSize * 2, fy + Math.sin(angle) * fSize * 2);
+          ctx.stroke();
+        });
+      } else {
+        state.flash = null;
+        state.muzzle = 0;
+      }
+    }
+
+    // ── Smoke particles ──
+    state.smoke = state.smoke.filter(s => s.life > 0);
+    state.smoke.forEach(s => {
+      s.x += s.vx * 0.3;
+      s.y += s.vy * 0.3;
+      s.r += 0.1;
+      s.life -= s.decay;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(180,190,170,${s.life * 0.15})`;
+      ctx.fill();
+    });
+
+    // ── HUD overlay ──
+    // Top left: channel + live dot
+    ctx.font = `bold ${Math.max(8, W*0.032)}px monospace`;
+    ctx.fillStyle = 'rgba(16,185,129,0.75)';
+    ctx.fillText(`ВЫСТР: ${state.shots}`, 8, 14);
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.fillText(`БАЛЛ: ${state.score}`, 8, 27);
+
+    // Distance indicator (bottom)
+    if (state.status === 'OCCUPIED') {
+      ctx.font = `${Math.max(7,W*0.026)}px monospace`;
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.fillText(`◉ LIVE`, W - 40, H - 7);
+    }
+
+    // Schedule next shot
+    if (state.status === 'OCCUPIED' && performance.now() - state.lastShot > state.interval) {
+      shoot();
+    }
+
+    raf = requestAnimationFrame(drawFrame);
+  }
+
+  // Start
+  raf = requestAnimationFrame(drawFrame);
+
+  return {
+    stop() { if (raf) cancelAnimationFrame(raf); },
+    setShotData(shots, score) {
+      state.shots = shots;
+      state.score = score;
+    },
+  };
+}
+
+// ── Inject into TIR page ──
+let activeSimulators = [];
+
+function patchRangePage() {
+  const path = location.hash.replace('#', '');
+  if (!path.includes('/range') && !path.includes('/dashboard')) return;
+
+  setTimeout(() => {
+    // Find all lane camera feed containers (dark background divs with 16:9 aspect)
+    const darkDivs = Array.from(document.querySelectorAll('div')).filter(el => {
+      const bg = window.getComputedStyle(el).backgroundColor;
+      const rect = el.getBoundingClientRect();
+      const aspectRatio = rect.width / rect.height;
+      const hasCanvas = el.querySelector('canvas');
+      return (
+        rect.width > 100 &&
+        rect.height > 60 &&
+        aspectRatio > 1.3 && aspectRatio < 2.2 &&
+        (bg.includes('12') || bg.includes('13') || bg.includes('rgb(0') || bg.includes('rgb(1'))
+      );
+    });
+
+    // Also fix the main lanes grid responsiveness
+    // Find the grid that contains lane cards
+    const allGrids = Array.from(document.querySelectorAll('div')).filter(el => {
+      const s = window.getComputedStyle(el);
+      return s.display === 'grid' && el.children.length >= 3;
+    });
+
+    allGrids.forEach(grid => {
+      const rect = grid.getBoundingClientRect();
+      if (rect.width > 400 && grid.children.length >= 3) {
+        // Check if this looks like the lane grid (children have dark video-like elements)
+        const hasDarkChild = Array.from(grid.children).some(child => {
+          const bg = window.getComputedStyle(child).backgroundColor;
+          return bg.includes('rgb(1') || bg.includes('rgb(0') || child.querySelector('canvas');
+        });
+        if (hasDarkChild || grid.children.length === 6 || grid.children.length === 4) {
+          grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+          grid.style.gap = '14px';
+          grid.style.width = '100%';
+        }
+      }
+    });
+
+    // Inject shooter simulations into camera feed areas
+    let laneIndex = 0;
+    const laneConfigs = [
+      {status:'OCCUPIED', shots:7,  score:62},
+      {status:'OCCUPIED', shots:10, score:87},
+      {status:'OCCUPIED', shots:4,  score:38},
+      {status:'FREE',     shots:0,  score:0},
+      {status:'OCCUPIED', shots:3,  score:25},
+      {status:'MAINTENANCE', shots:0, score:0},
+    ];
+
+    darkDivs.forEach((el) => {
+      if (el.dataset.tirPatched) return;
+      el.dataset.tirPatched = 'true';
+
+      const cfg = laneConfigs[laneIndex % laneConfigs.length];
+      laneIndex++;
+
+      if (cfg.status !== 'OCCUPIED') return;
+
+      // Create canvas overlay
+      el.style.position = 'relative';
+      el.style.overflow = 'hidden';
+
+      const canvas = document.createElement('canvas');
+      canvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:10;pointer-events:none';
+      el.appendChild(canvas);
+
+      const sim = ShooterSim(canvas, {
+        status: cfg.status,
+        shots: cfg.shots,
+        score: cfg.score,
+        interval: 1800 + Math.random() * 1500,
+      });
+      activeSimulators.push(sim);
+    });
+
+  }, 400);
+}
+
+// ── Main grid layout override (CSS injection based on route) ──
+function fixRangeLayout() {
+  const path = location.hash.replace('#', '');
+  if (!path.includes('/range')) return;
+
+  setTimeout(() => {
+    // The page main container — force overflow hidden
+    const pageContainers = document.querySelectorAll('.flex-1, .overflow-y-auto, [class*="page"]');
+    pageContainers.forEach(el => {
+      if (el.scrollHeight > el.clientHeight + 10) return;
+      el.style.overflowX = 'hidden';
+    });
+
+    // Find the lane cards container specifically — it will have multiple children 
+    // that each contain a dark video-like div
+    const containers = Array.from(document.querySelectorAll('div')).filter(el => {
+      const children = Array.from(el.children);
+      if (children.length < 4) return false;
+      const darkChildren = children.filter(c => {
+        const hasDark = c.querySelector('div[class*="bg-gray-9"], div[class*="bg-black"]');
+        return hasDark || c.querySelector('canvas');
+      });
+      return darkChildren.length >= 3;
+    });
+
+    containers.forEach(grid => {
+      grid.style.cssText += `
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+        gap: 14px !important;
+        width: 100% !important;
+      `;
+    });
+  }, 500);
+}
+
+// Listen for route changes
+let prevPath = '';
+function onRouteChange() {
+  const path = location.hash;
+  if (path === prevPath) return;
+  prevPath = path;
+
+  // Stop old simulators
+  activeSimulators.forEach(s => s.stop());
+  activeSimulators = [];
+
+  if (path.includes('/range') || path.includes('/dashboard')) {
+    patchRangePage();
+    fixRangeLayout();
+  }
+}
+
+window.addEventListener('hashchange', onRouteChange);
+
+// Observe DOM for when Vue renders the range page
+const observer = new MutationObserver(() => {
+  const path = location.hash;
+  if ((path.includes('/range') || path.includes('/dashboard')) && path !== prevPath) {
+    prevPath = path;
+    patchRangePage();
+    fixRangeLayout();
+  }
+});
+observer.observe(document.body, { childList: true, subtree: true });
+
+// Initial
+setTimeout(() => onRouteChange(), 800);
+
+})();
+
+
 })();
