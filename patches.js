@@ -16,9 +16,13 @@
     else if (path.includes('/analytics')) page = 'analytics';
     else if (path.includes('/training')) page = 'training';
     document.body.setAttribute('data-page', page);
+    document.body.className = document.body.className.replace(/page-\S+/g, '').trim();
+    document.body.classList.add('page-' + page);
   }
   window.addEventListener('hashchange', updatePageAttr);
-  setTimeout(updatePageAttr, 100);
+  setTimeout(updatePageAttr, 50);
+  setTimeout(updatePageAttr, 200);
+  setTimeout(updatePageAttr, 500);
 
   // ── FIX: Responsive CSS overrides (Range/ТИР page only) ──
   const css = document.createElement('style');
@@ -1199,29 +1203,6 @@ function patchRangePage() {
       );
     });
 
-    // Also fix the main lanes grid responsiveness
-    // Find the grid that contains lane cards
-    const allGrids = Array.from(document.querySelectorAll('div')).filter(el => {
-      const s = window.getComputedStyle(el);
-      return s.display === 'grid' && el.children.length >= 3;
-    });
-
-    allGrids.forEach(grid => {
-      const rect = grid.getBoundingClientRect();
-      if (rect.width > 400 && grid.children.length >= 3) {
-        // Check if this looks like the lane grid (children have dark video-like elements)
-        const hasDarkChild = Array.from(grid.children).some(child => {
-          const bg = window.getComputedStyle(child).backgroundColor;
-          return bg.includes('rgb(1') || bg.includes('rgb(0') || child.querySelector('canvas');
-        });
-        if (hasDarkChild || grid.children.length === 6 || grid.children.length === 4) {
-          grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
-          grid.style.gap = '14px';
-          grid.style.width = '100%';
-        }
-      }
-    });
-
     // Inject shooter simulations into camera feed areas
     let laneIndex = 0;
     const laneConfigs = [
@@ -1268,88 +1249,19 @@ function fixRangeLayout() {
   if (!path.includes('/range')) return;
 
   setTimeout(() => {
-    const vw = window.innerWidth;
-    
-    // The page main container — force overflow hidden, use full width
+    // Ensure main content fills width
     const mainContent = document.querySelector('.flex-1.overflow-y-auto');
     if (mainContent) {
       mainContent.style.overflowX = 'hidden';
       mainContent.style.width = '100%';
     }
 
-    // Force all space-y-6 containers to fill width
+    // Full-width containers
     document.querySelectorAll('.space-y-6').forEach(el => {
       el.style.maxWidth = '100%';
       el.style.width = '100%';
     });
-
-    // Find ALL grid containers on the page and fix them
-    const allGrids = document.querySelectorAll('[class*="grid-cols"]');
-    allGrids.forEach(grid => {
-      const cls = grid.className;
-      const rect = grid.getBoundingClientRect();
-      
-      // Lane cards grid: lg:grid-cols-3 gap-5
-      if (cls.includes('lg:grid-cols-3') && cls.includes('gap-5')) {
-        // 4 columns on wide screens (4 top, 3 bottom = 7 lanes)
-        if (vw >= 1600) {
-          grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        } else if (vw >= 1280) {
-          grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
-        } else {
-          grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
-        }
-        grid.style.width = '100%';
-        grid.style.maxWidth = '100%';
-      }
-      
-      // Stats grid: grid-cols-2 md:grid-cols-4
-      if (cls.includes('md:grid-cols-4') && cls.includes('gap-4')) {
-        if (vw >= 1280) {
-          grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        } else if (vw >= 640) {
-          grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
-        } else {
-          grid.style.gridTemplateColumns = '1fr';
-        }
-      }
-
-      // Activity panel grid: grid-cols-3 gap-3  
-      if (cls.includes('grid-cols-3') && cls.includes('gap-3') && rect.height < 200) {
-        grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
-      }
-    });
-
-    // Also handle lane cards by looking for card containers with camera-like children
-    const cardContainers = Array.from(document.querySelectorAll('div')).filter(el => {
-      const children = Array.from(el.children);
-      if (children.length < 3) return false;
-      // Check if children look like lane cards (have dark backgrounds or canvas)
-      return children.some(c => {
-        const bg = window.getComputedStyle(c).backgroundColor;
-        return c.querySelector('canvas') || 
-               c.querySelector('[class*="bg-gray-9"]') ||
-               c.querySelector('[class*="bg-black"]');
-      });
-    });
-
-    cardContainers.forEach(grid => {
-      const rect = grid.getBoundingClientRect();
-      if (rect.width > 800 && grid.children.length >= 4) {
-        // This is likely the lane grid — force auto-fill
-        if (vw >= 1600) {
-          grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        } else if (vw >= 1280) {
-        } else if (vw >= 1200) {
-          grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
-        } else {
-          grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
-        }
-        grid.style.width = '100%';
-        grid.style.maxWidth = '100%';
-      }
-    });
-  }, 500);
+  }, 300);
 }
 
 // Listen for route changes
