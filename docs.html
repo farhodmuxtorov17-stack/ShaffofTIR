@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ShaffofTIR — Tizim hujjatlari</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--brand:#10b981;--brand-dark:#059669;--brand-light:#d1fae5;--bg:#f7f7f8;--surface:#fff;--border:#e5e7eb;--text:#111827;--text2:#6b7280;--text3:#9ca3af;--amber:#f59e0b;--red:#ef4444;--blue:#3b82f6}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;font-size:15px;line-height:1.6}
+.layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+.sidebar{background:var(--surface);border-right:1px solid var(--border);padding:24px 16px;position:sticky;top:0;height:100vh;overflow-y:auto}
+.logo{display:flex;align-items:center;gap:10px;padding:0 8px 20px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:var(--brand);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px}
+.logo-text{font-size:17px;font-weight:700}
+.nav-section{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);padding:12px 8px 6px;font-weight:600}
+.nav-link{display:block;padding:8px 12px;border-radius:8px;font-size:14px;color:var(--text2);cursor:pointer;transition:.15s;text-decoration:none}
+.nav-link:hover{background:#f3f4f6;color:var(--text)}
+.nav-link.active{background:var(--brand-light);color:var(--brand-dark);font-weight:500}
+.main{padding:40px;max-width:900px;overflow-y:auto}
+h1{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-bottom:8px}
+h2{font-size:20px;font-weight:600;margin:32px 0 12px;letter-spacing:-.01em}
+h3{font-size:16px;font-weight:600;margin:24px 0 8px}
+p{margin-bottom:12px;color:var(--text)}
+.subtitle{color:var(--text2);font-size:15px;margin-bottom:32px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:600;margin-bottom:8px}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:6px;font-size:12px;font-weight:500}
+.badge-green{background:#d1fae5;color:#059669}
+.badge-amber{background:#fef3c7;color:#92400e}
+.badge-red{background:#fee2e2;color:#dc2626}
+.badge-blue{background:#dbeafe;color:#2563eb}
+.badge-purple{background:#f3e8ff;color:#7c3aed}
+.badge-gray{background:#f3f4f6;color:#6b7280}
+table{width:100%;border-collapse:collapse;font-size:14px;margin:12px 0}
+th{text-align:left;padding:10px 12px;background:#f9fafb;border-bottom:2px solid var(--border);font-weight:600;font-size:13px;color:var(--text2)}
+td{padding:10px 12px;border-bottom:1px solid var(--border)}
+tr:hover td{background:#f9fafb}
+.code{background:#f3f4f6;border-radius:8px;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:13px;margin:12px 0;overflow-x:auto}
+.callout{border-left:3px solid var(--brand);background:var(--brand-light);padding:16px 20px;border-radius:0 8px 8px 0;margin:16px 0}
+.callout-amber{border-left-color:var(--amber);background:#fffbeb}
+.callout-blue{border-left-color:var(--blue);background:#eff6ff}
+.callout-title{font-weight:600;margin-bottom:4px}
+.score-formula{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.score-card{background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center}
+.score-card .num{font-size:32px;font-weight:700;color:var(--brand)}
+.score-card .label{font-size:13px;color:var(--text2);margin-top:4px}
+.step-list{counter-reset:step;list-style:none;padding:0}
+.step-list li{padding:12px 0 12px 48px;position:relative;border-bottom:1px solid var(--border)}
+.step-list li:before{counter-increment:step;content:counter(step);position:absolute;left:0;top:12px;width:32px;height:32px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:14px}
+.role-card{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.role-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+.role-item h3{margin:0 0 8px;display:flex;align-items:center;gap:8px}
+.role-perm{font-size:13px;color:var(--text2);line-height:1.8}
+.back-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:var(--brand);color:#fff;text-decoration:none;font-size:14px;font-weight:500;margin-bottom:24px}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+<div class="logo">
+<div class="logo-icon">S</div>
+<div class="logo-text">ShaffofTIR</div>
+</div>
+<a class="back-btn" href="/ShaffofTIR/#/help">← Tizimga qaytish</a>
+<div class="nav-section">Umumiy</div>
+<a class="nav-link active" data-sec="intro">Tizim haqida</a>
+<a class="nav-link" data-sec="roles">Rollar va huquqlar</a>
+<a class="nav-link" data-sec="workflow">Ish jarayoni</a>
+<div class="nav-section">Ballar tizimi</div>
+<a class="nav-link" data-sec="scoring">Ball qanday hisoblanadi</a>
+<a class="nav-link" data-sec="qualification">Malaka darajalari</a>
+<a class="nav-link" data-sec="weapons">Qurollar va normalar</a>
+<div class="nav-section">Modullar</div>
+<a class="nav-link" data-sec="sessions">Sessiyalar</a>
+<a class="nav-link" data-sec="cameras">Kameralar</a>
+<a class="nav-link" data-sec="training">O'quv-rejalar</a>
+<a class="nav-link" data-sec="reports">Hisobotlar va protokollar</a>
+<a class="nav-link" data-sec="hr">HR bo'limi</a>
+</aside>
+
+<main class="main">
+
+<!-- INTRO -->
+<div id="intro">
+<h1>ShaffofTIR — TIR Axborot Tizimi</h1>
+<p class="subtitle">Tirning axborot tizimi — otishmalarini boshqarish, ballarni hisoblash va hisobotlar yuritish uchun yagona platforma</p>
+
+<div class="callout">
+<div class="callout-title">Tizimning maqsadi</div>
+ShaffofTIR harbiy xodimlarning otish tayyorgarligini raqamli boshqarishni ta'minlaydi. Sessiyalar yaratish, real vaqtda kuzatish, ballarni avtomatik hisoblash va protokollar yuritish — barchasi bir joyda.
+</div>
+
+<h2>Tizim imkoniyatlari</h2>
+<div class="card">
+<div class="card-title">📊 Boshqaruv paneli</div>
+Viloyatlar, tumanlar va batalonlar bo'yicha filtrlangan statistika. Haftalik grafiklar, top o'qchilar reytingi.
+</div>
+<div class="card">
+<div class="card-title">🎯 Sessiyalar va kalendar</div>
+Yo'laklarni band qilish, konfliktlarni avtomatik aniqlash. Sinov (TEST) va asosiy (MAIN) otish turlari.
+</div>
+<div class="card">
+<div class="card-title">📷 Jonli kameralar</div>
+Har bir yo'lak uchun real vaqt kuzatuvi. Online/offline holatni nazorat qilish.
+</div>
+<div class="card">
+<div class="card-title">📚 O'quv-rejalar</div>
+Video darslar, 3D nishon vizualizatsiyasi, progress monitoring.
+</div>
+<div class="card">
+<div class="card-title">📋 Hisobotlar va protokollar</div>
+Avtomatik protokol generatsiyasi, QR kod bilan tekshirish, eksport.
+</div>
+<div class="card">
+<div class="card-title">👥 HR bo'limi</div>
+Xodimlar bazasi, FaceID identifikatsiyasi, viloyat/tuman/batalon bo'yicha filtr.
+</div>
+</div>
+
+<!-- ROLES -->
+<div id="roles" style="display:none">
+<h1>Rollar va huquqlar</h1>
+<p class="subtitle">Tizimda 3 ta rol mavjud. Har bir rol o'ziga xos huquqlarga ega.</p>
+
+<div class="role-card">
+<div class="role-item">
+<h3><span class="badge badge-purple">Раҳбар</span> Manager</h3>
+<div class="role-perm">
+✅ Boshqaruv paneli<br>
+✅ Barcha sessiyalar va kalendar<br>
+✅ Xodimlar (HR) — to'liq CRUD<br>
+✅ O'quv-rejalar — tahrir<br>
+✅ Kameralar — boshqaruv<br>
+✅ Hisobotlar va protokollar<br>
+✅ Sozlamalar<br>
+✅ Foydalanuvchilarni boshqarish
+</div>
+</div>
+<div class="role-item">
+<h3><span class="badge badge-green">Инструктор</span> Instructor</h3>
+<div class="role-perm">
+✅ Boshqaruv paneli<br>
+✅ Sessiyalar — yangi yaratish<br>
+✅ Xodimlar — ko'rish<br>
+✅ O'quv-rejalar — tayinlash<br>
+✅ Kameralar — ko'rish<br>
+✅ Hisobotlar va protokollar<br>
+✅ Sozlamalar
+</div>
+</div>
+</div>
+<div class="role-item" style="margin-top:16px">
+<h3><span class="badge badge-blue">Ҳодим</span> Employee</h3>
+<div class="role-perm">
+✅ O'z sessiyalarini ko'rish<br>
+✅ O'quv-rejalar (tayinlangan)<br>
+✅ O'z protokollarini ko'rish<br>
+✅ Profil va sozlamalar<br>
+❌ Boshqaruv paneli — yo'q<br>
+❌ Kalendar — yo'q<br>
+❅ HR bo'limi — faqat o'zini
+</div>
+</div>
+
+<div class="callout callout-blue">
+<div class="callout-title">Kirish ma'lumotlari (Demo)</div>
+<b>Раҳбар:</b> <code>manager@shaffoftir.uz / manager123</code><br>
+<b>Инструктор:</b> <code>instructor@shaffoftir.uz / inst123</code><br>
+<b>Ҳодим:</b> <code>employee@shaffoftir.uz / emp123</code>
+</div>
+</div>
+
+<!-- WORKFLOW -->
+<div id="workflow" style="display:none">
+<h1>Ish jarayoni</h1>
+<p class="subtitle">Otish mashg'uloti boshlanishidan protokol imzolanishgacha — to'liq bosqichlar</p>
+
+<h2>1. Yo'lak band qilish</h2>
+<ol class="step-list">
+<li><b>Sessiyalar → Kalendar</b> yoqasiga o'ting va "Yangi band qilish" tugmasini bosing</li>
+<li><b>Xodimni tanlang:</b> Ism, viloyat yoki tuman bo'yicha qidiruvdan foydalaning</li>
+<li><b>Sana, vaqt, yo'lak va qurol</b>ni tanlang. Tizim avtomatik ravishda konfliktlarni tekshiradi — agar yo'lak band bo'lsa, ogohlantirish chiqadi</li>
+<li><b>Tur:</b> Sinov (TEST) yoki Asosiy (MAIN) — sessiya turini tanlang</li>
+<li><b>Yuborish</b> — so'rov Раҳбар yoki Инструктор tomonidan tasdiqlanadi</li>
+</ol>
+
+<h2>2. Sessiya o'tkazish</h2>
+<ol class="step-list" style="counter-reset:step 5">
+<li><b>FaceID tekshiruv:</b> Xodim kelganda FaceID orqali identifikatsiya qilinadi</li>
+<li><b>Kamera yoqiladi:</b> Yo'lakdagi kamera avtomatik yonadi. Boshqaruv xonasidan kuzatiladi</li>
+<li><b>Otish boshlanadi:</b> Xodim otadi. Har bir o'q tizim tomonidan hisoblanadi</li>
+<li><b>3D nishon:</b> Real vaqtda nishondagi teshiklar 3D vizualizatsiyada ko'rsatiladi</li>
+</ol>
+
+<h2>3. Natija va protokol</h2>
+<ol class="step-list" style="counter-reset:step 9">
+<li><b>Ball hisoblanadi:</b> Tizim avtomatik ravishda ballarni hisoblaydi (pastdagi formulaga qarang)</li>
+<li><b>Protokol generatsiyasi:</b> PDF protokol avtomatik yaratiladi va QR kod bilan jihozlanadi</li>
+<li><b>Imzolash:</b> Protokol Инструктор va Раҳбар tomonidan imzolanadi</li>
+<li><b>Arxiv:</b> Protokol Hisobotlar bo'limida saqlanadi. QR kod orqali tekshirish mumkin</li>
+</ol>
+
+<div class="callout">
+<div class="callout-title">Konflikt aniqlash</div>
+Tizim bir yo'lakda bir vaqtda ikkita sessiyaga ruxsat bermaydi. Band qilishda avtomatik tekshiruv amalga oshiriladi.
+</div>
+</div>
+
+<!-- SCORING -->
+<div id="scoring" style="display:none">
+<h1>Ball qanday hisoblanadi</h1>
+<p class="subtitle">ShaffofTIR ballar tizimi — aniqlik, o'q soni va darajaga asoslangan</p>
+
+<h2>Asosiy formula</h2>
+<div class="score-formula">
+<div class="score-card">
+<div class="num">A</div>
+<div class="label">Aniqlik (%) = Aniq tegsa / Umumiy o'q × 100</div>
+</div>
+<div class="score-card">
+<div class="num">B</div>
+<div class="label">Ball = Aniqlik × Qurol koeffitsiyenti</div>
+</div>
+</div>
+
+<div class="callout callout-amber">
+<div class="callout-title">Misol</div>
+Xodim AK-74dan 10 ta o'q otgan, 8 tasi aniq teggan.<br>
+Aniqlik = 8/10 × 100 = 80%<br>
+Ball = 80 × 1.0 (AK-74 koeffitsiyenti) = <b>80 ball</b>
+</div>
+
+<h2>Qurol koeffitsiyentlari</h2>
+<table>
+<thead><tr><th>Qurol</th><th>Koeffitsiyent</th><th>O'q soni (norma)</th><th>Maksimal ball</th></tr></thead>
+<tbody>
+<tr><td>AK-74</td><td>1.0</td><td>10</td><td>100</td></tr>
+<tr><td>AK-74M</td><td>1.0</td><td>10</td><td>100</td></tr>
+<tr><td>AK-74U</td><td>0.9</td><td>10</td><td>90</td></tr>
+<tr><td>SVD Dragunov</td><td>1.5</td><td>5</td><td>150</td></tr>
+<tr><td>Makarov PM</td><td>0.8</td><td>10</td><td>80</td></tr>
+<tr><td>PKM</td><td>1.2</td><td>20</td><td>120</td></tr>
+</tbody>
+</table>
+
+<h2>Ball chegaralari</h2>
+<table>
+<thead><tr><th>Ball oralig'i</th><th>Baholash</th><th>Badge</th></tr></thead>
+<tbody>
+<tr><td>90-100+</td><td>A'lo (Excellent)</td><td><span class="badge badge-green">EXPERT</span></td></tr>
+<tr><td>75-89</td><td>Yaxshi (Good)</td><td><span class="badge badge-blue">ADVANCED</span></td></tr>
+<tr><td>60-74</td><td>Qoniqarli (Satisfactory)</td><td><span class="badge badge-amber">INTERMEDIATE</span></td></tr>
+<tr><td>0-59</td><td>Qoniqarsiz (Unsatisfactory)</td><td><span class="badge badge-red">BEGINNER</span></td></tr>
+</tbody>
+</table>
+
+<h2>Sessiya turlari</h2>
+<div class="card">
+<div class="card-title"><span class="badge badge-blue">TEST</span> Sinov sessiyasi</div>
+O'quv mashg'uloti. Ballar hisoblanadi, lekin rasmiy reytingga ta'sir qilmaydi. Malaka darajasini ko'tarish uchun ishlatilmaydi.
+</div>
+<div class="card">
+<div class="card-title"><span class="badge badge-purple">MAIN</span> Asosiy sessiya</div>
+Rasmiy baholash. Ballar reytingga qo'shiladi. Malaka darajasini ko'tarish uchun asos hisoblanadi. Protokol rasmiy ravishda imzolanadi.
+</div>
+</div>
+
+<!-- QUALIFICATION -->
+<div id="qualification" style="display:none">
+<h1>Malaka darajalari</h1>
+<p class="subtitle">Har bir xodimning malaka darajasi sessiyalar natijasiga ko'ra aniqlanadi</p>
+
+<div class="card">
+<h3 style="display:flex;align-items:center;gap:8px"><span class="badge badge-green">EXPERT</span> Mutaxassis</h3>
+<p>O'rtacha ball: <b>90+</b><br>
+Kamida 30+ sessiya o'tkazgan.<br>
+Barcha qurollardan otishga ruxsat beriladi. Instruktorga aylanish uchun asos.</p>
+</div>
+
+<div class="card">
+<h3 style="display:flex;align-items:center;gap:8px"><span class="badge badge-blue">ADVANCED</span> Yuqori daraja</h3>
+<p>O'rtacha ball: <b>75-89</b><br>
+Kamida 15+ sessiya o'tkazgan.<br>
+Murakkab mashg'ulotlar (harakatdagi otish, snayper) ruxsat etiladi.</p>
+</div>
+
+<div class="card">
+<h3 style="display:flex;align-items:center;gap:8px"><span class="badge badge-amber">INTERMEDIATE</span> O'rta daraja</h3>
+<p>O'rtacha ball: <b>60-74</b><br>
+Kamida 5+ sessiya o'tkazgan.<br>
+Asosiy mashg'ulotlar (turli pozitsiyalardan otish) ruxsat etiladi.</p>
+</div>
+
+<div class="card">
+<h3 style="display:flex;align-items:center;gap:8px"><span class="badge badge-gray">BEGINNER</span> Boshlang'ich</h3>
+<p>O'rtacha ball: <b>0-59</b><br>
+5 sessiyagacha.<br>
+Faqat asosiy otish tayyorgarligi (1-dars) ruxsat etiladi.</p>
+</div>
+
+<h2>Darajani ko'tarish shartlari</h2>
+<ol class="step-list">
+<li>Kerakli miqdorda sessiya o'tkazish (MAIN turida)</li>
+<li>O'rtacha ball tegishli chegaradan yuqori bo'lishi</li>
+<li>So'nggi 5 sessiyada o'rtacha ball stabil bo'lishi</li>
+<li>Инструктор tomonidan tavsiya berilishi</li>
+<li>Раҳбар tomonidan tasdiqlanishi</li>
+</ol>
+</div>
+
+<!-- WEAPONS -->
+<div id="weapons" style="display:none">
+<h1>Qurollar va normalar</h1>
+<p class="subtitle">Har bir qurol uchun o'q soni, vaqt va ball normalari</p>
+
+<table>
+<thead><tr><th>Qurol</th><th>Turi</th><th>O'q soni</th><th>Vaqt</th><th>Koef.</th><th>Max ball</th></tr></thead>
+<tbody>
+<tr><td>AK-74</td><td>Avtomat</td><td>10</td><td>2 daq</td><td>1.0</td><td>100</td></tr>
+<tr><td>AK-74M</td><td>Avtomat</td><td>10</td><td>2 daq</td><td>1.0</td><td>100</td></tr>
+<tr><td>AK-74U</td><td>Avtomat (qisqa)</td><td>10</td><td>1.5 daq</td><td>0.9</td><td>90</td></tr>
+<tr><td>SVD Dragunov</td><td>Snayper miltiq</td><td>5</td><td>5 daq</td><td>1.5</td><td>150</td></tr>
+<tr><td>Makarov PM</td><td>Pistolet</td><td>10</td><td>2 daq</td><td>0.8</td><td>80</td></tr>
+<tr><td>PKM</td><td>Pulemyot</td><td>20</td><td>3 daq</td><td>1.2</td><td>120</td></tr>
+</tbody>
+</table>
+
+<h2>Pozitsiyalar</h2>
+<div class="card">
+<div class="card-title">Yotgan holatdan</div>
+Eng aniq pozitsiya. Asosiy mashg'ulotlar uchun ishlatiladi. Aniqlik darajasi eng yuqori.
+</div>
+<div class="card">
+<div class="card-title">Turgan holatdan</div>
+O'rta aniqlik. ADVANCED darajadan yuqori xodimlar uchun.
+</div>
+<div class="card">
+<div class="card-title">Otirilgan holatdan</div>
+O'rta aniqlik. INTERMEDIATE va undan yuqori darajalar uchun.
+</div>
+<div class="card">
+<div class="card-title">Harakatdan keyin</div>
+Yurish/yugurishdan keyin darhol otish. EXPERT darajasi uchun murakkab mashg'ulot.
+</div>
+</div>
+
+<!-- MODULES -->
+<div id="sessions" style="display:none">
+<h1>Sessiyalar moduli</h1>
+<p class="subtitle">Otish sessiyalarini boshqarish — yaratish, kalendar, so'rovlar</p>
+
+<h2>Uchta tab</h2>
+<div class="card">
+<div class="card-title">📋 Sessiyalar (ro'yxat)</div>
+Barcha o'tkazilgan sessiyalar jadval ko'rinishida. Sana, vaqt, yo'lak, xodim, qurol, o'q/aniq, ball.
+</div>
+<div class="card">
+<div class="card-title">📅 Kalendar / Band qilish</div>
+Oylik kalendar ko'rinishida band qilingan vaqtlar. Yangi band qilish — modal oyna orqali.
+</div>
+<div class="card">
+<div class="card-title">✅ So'rovlar</div>
+Tasdiqlash kutilayotgan so'rovlar. Раҳбар/Инstructor tasdiqlaydi yoki rad etadi.
+</div>
+
+<h2>Konflikt aniqlash logikasi</h2>
+<div class="callout">
+Tizim <code> sana + yo'lak + vaqt</code> kombinatsiyasini tekshiradi. Agar bir xil yo'lak, bir xil vaqtda band qilingan bo'lsa — so'rov rad etiladi va foydalanuvchiga xabar beriladi.
+</div>
+</div>
+
+<div id="cameras" style="display:none">
+<h1>Kameralar moduli</h1>
+<p class="subtitle">Yo'laklardagi kameralarni real vaqtda kuzatish</p>
+
+<h2>Kamera holatlari</h2>
+<table>
+<thead><tr><th>Holat</th><th>Ma'no</th><th>Badge</th></tr></thead>
+<tbody>
+<tr><td>Online</td><td>Kamera ishlamoqda, jonli efir mavjud</td><td><span class="badge badge-green">online</span></td></tr>
+<tr><td>Offline</td><td>Kamera ishlamayapti, texnik xizmat kerak</td><td><span class="badge badge-red">offline</span></td></tr>
+</tbody>
+</table>
+
+<h2>Joylashuv</h2>
+<p>Kameralar joylashuv bo'yicha guruhlangan: Yo'lak 1, Yo'lak 2, Yo'lak 3, Boshqaruv xonasi, Qurol-xona.</p>
+
+<div class="callout callout-amber">
+<div class="callout-title">Diqqat</div>
+Har bir yo'lakda kamida 2 kamera bo'lishi tavsiya etiladi (A va B — turli burchaklardan).
+</div>
+</div>
+
+<div id="training" style="display:none">
+<h1>O'quv-rejalar moduli</h1>
+<p class="subtitle">Otish tayyorgarligi bo'yicha dasturli mashg'ulotlar</p>
+
+<h2>Reja tuzilishi</h2>
+<div class="card">
+<div class="card-title">📚 1-dars: Otish tayyorgarligi asoslari</div>
+Boshlang'ich daraja. 5 dars, 2 soat. O'q otish texnikasi, nishonga olish asoslari.
+</div>
+<div class="card">
+<div class="card-title">🎯 2-dars: Turli pozitsiyalardan otish</div>
+O'rta daraja. 6 dars, 3 soat. Yotgan, turgan, otirilgan holatda otish.
+</div>
+<div class="card">
+<div class="card-title">🏃 3-dars: Harakatdagi nishonga olish</div>
+Yuqori daraja. 4 dars, 2.5 soat. Yurish va yugurishdan keyin otish.
+</div>
+<div class="card">
+<div class="card-title">🔭 4-dars: Snayper otish texnikasi</div>
+Mutaxassis darajasi. 8 dars, 4 soat. Uzoq masofaga aniq otish.
+</div>
+
+<h2>Jonli kuzatuv</h2>
+<p>Davom etayotgan mashg'ulotni "Ko'rish" tugmasi orqali kuzatish mumkin:</p>
+<ul style="padding-left:20px;margin:8px 0 16px">
+<li><b>Kamera:</b> Yo'lakdagi jonli efir</li>
+<li><b>3D Nishon:</b> Real vaqtda teshiklar vizualizatsiyasi (yashil=aniq, sariq=chegara, qizil=tegma)</li>
+<li><b>Statistika:</b> Aniq tegsa / Tegmagan / Progress foizi</li>
+</ul>
+</div>
+
+<div id="reports" style="display:none">
+<h1>Hisobotlar va protokollar</h1>
+<p class="subtitle">Rasmiy hujjatlar yuritish — protokol generatsiyasi, QR kod, eksport</p>
+
+<h2>Uchta tab</h2>
+<div class="card">
+<div class="card-title">📊 Umumiy hisobot</div>
+Jami protokollar, imzolangan/imzolanmagan, o'rtacha ball. Batafsil jadval.
+</div>
+<div class="card">
+<div class="card-title">📋 Protokollar</div>
+Xodim bo'yicha qidiruv, eksport imkoniyati. Har bir protokol: sana, xodim, qurol, o'q, aniq, ball, imzo holati.
+</div>
+<div class="card">
+<div class="card-title">📈 Tahlil</div>
+Qurol turi bo'yicha statistika, Top-5 o'qchilar reytingi.
+</div>
+
+<h2>Protokol holatlari</h2>
+<table>
+<thead><tr><th>Holat</th><th>Ma'no</th><th>Badge</th></tr></thead>
+<tbody>
+<tr><td>Imzolangan</td><td>Protokol rasman tasdiqlangan va arxivlangan</td><td><span class="badge badge-green">Imzolangan</span></td></tr>
+<tr><td>Kutilmoqda</td><td>Imzo kutilmoqda — Instruktorga yuborilgan</td><td><span class="badge badge-amber">Kutilmoqda</span></td></tr>
+</tbody>
+</table>
+
+<h2>QR kod tizimi</h2>
+<div class="callout callout-blue">
+<div class="callout-title">QR kod orqali tekshirish</div>
+Har bir protokolga QR kod generatsiyalanadi. QR kodni skanerlash orqali protokolning haqiqiyligini tekshirish mumkin — bu manipulyatsiyani oldini oladi.
+</div>
+</div>
+
+<div id="hr" style="display:none">
+<h1>HR bo'limi</h1>
+<p class="subtitle">Xodimlar bazasi — boshqaruv, FaceID, filtrlash</p>
+
+<h2>Xodim ma'lumotlari</h2>
+<table>
+<thead><tr><th>Maydon</th><th>Tavsif</th></tr></thead>
+<tbody>
+<tr><td>F.I.O</td><td>To'liq ism (rus lotin yozuvi)</td></tr>
+<tr><td>Unvon</td><td>Harbiy unvon (Kapitan, Leytenant, Serjant, ...)</td></tr>
+<tr><td>Lavozim</td><td>Vazifa (Komandir, O'qchi, Instruktur, ...)</td></tr>
+<tr><td>Viloyat</td><td> hududiy birlik</td></tr>
+<tr><td>Tuman</td><td>Tuman/shahar</td></tr>
+<tr><td>Batalon</td><td>Bo'linma (1-motoo'chi, 2-motoo'chi, ...)</td></tr>
+<tr><td>Telefon</td><td>Aloqa telefoni</td></tr>
+<tr><td>Holat</td><td>ACTIVE (faol) / RESERVE (zaxira)</td></tr>
+<tr><td>Malaka</td><td>EXPERT / ADVANCED / INTERMEDIATE / BEGINNER</td></tr>
+<tr><td>FaceID</td><td>Ro'yxatdan o'tgan / O'qilmagan</td></tr>
+<tr><td>Sessiyalar</td><td>Umumiy o'tkazilgan sessiyalar soni</td></tr>
+<tr><td>O'rt. ball</td><td>Barcha sessiyalardagi o'rtacha ball</td></tr>
+</tbody>
+</table>
+
+<h2>Filtr imkoniyatlari</h2>
+<ul style="padding-left:20px;margin:8px 0">
+<li>Ism bo'yicha qidiruv</li>
+<li>Viloyat bo'yicha</li>
+<li>Batalon bo'yicha</li>
+<li>Holat (Faol/Zaxira) bo'yicha</li>
+</ul>
+
+<h2>FaceID identifikatsiyasi</h2>
+<div class="callout">
+<div class="callout-title">FaceID nima uchun muhim?</div>
+FaceID xodimni sessiya boshlanishidan oldin avtomatik ravishda aniqlaydi. Bu noto'g'ri shaxs otishini oldini oladi. FaceID ro'yxatdan o'tmagan xodim sessiya boshlay olmaydi.
+</div>
+</div>
+
+</main>
+</div>
+
+<script>
+document.querySelectorAll('.nav-link').forEach(link=>{
+link.addEventListener('click',()=>{
+document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+link.classList.add('active');
+const sec=link.dataset.sec;
+document.querySelectorAll('main > div').forEach(d=>d.style.display='none');
+const el=document.getElementById(sec);
+if(el)el.style.display='block';
+window.scrollTo(0,0);
+});
+});
+</script>
+</body>
+</html>
