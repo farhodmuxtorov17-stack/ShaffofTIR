@@ -2074,3 +2074,148 @@ setTimeout(() => onRouteChange(), 800);
   
   setTimeout(() => onPatchRouteChange(), 800);
 })();
+
+// ════════════════════════════════════════════════════
+// RANGE DASHBOARD LAYOUT FIX — v2
+// Remove empty activity sidebar, lanes fill full width (4 cols)
+// Activity shown as horizontal strip BELOW lanes
+// ════════════════════════════════════════════════════
+(function() {
+  'use strict';
+
+  function fixRangeDashboardLayout() {
+    const path = location.hash.replace('#', '');
+    if (!path.includes('/range/dashboard') && !path.includes('/range') || path.includes('/range/lane') || path.includes('/range/instructor')) return;
+
+    setTimeout(() => {
+      if (document.body.dataset.rangeDashFixed === 'v2') return;
+
+      // Find the outer grid that has the 4-column layout (lanes + activity)
+      // It has class "grid grid-cols-1 lg:grid-cols-4 gap-6"
+      const outerGrids = Array.from(document.querySelectorAll('div')).filter(el => {
+        const cls = el.className || '';
+        return cls.includes('lg:grid-cols-4') && cls.includes('gap-6');
+      });
+
+      outerGrids.forEach(outerGrid => {
+        // Check it has the lanes child and activity child
+        const laneGrid = outerGrid.querySelector('[class*="lg:col-span-3"]');
+        if (!laneGrid) return;
+
+        // Mark as fixed
+        document.body.dataset.rangeDashFixed = 'v2';
+
+        // 1. Change outer grid: remove 4-col, make it a single column
+        outerGrid.style.display = 'flex';
+        outerGrid.style.flexDirection = 'column';
+        outerGrid.style.gap = '16px';
+        outerGrid.style.width = '100%';
+
+        // 2. Lane grid: remove col-span-3 limitation, make it 4 columns full width
+        laneGrid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        laneGrid.style.width = '100%';
+        laneGrid.style.maxWidth = '100%';
+
+        // On smaller screens: 3 cols
+        const vw = window.innerWidth;
+        if (vw < 1600) {
+          laneGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        }
+        if (vw < 1024) {
+          laneGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        }
+
+        // 3. Find the activity sidebar (sibling of laneGrid)
+        const activitySidebar = Array.from(outerGrid.children).find(el => el !== laneGrid);
+        if (activitySidebar) {
+          // Move it BELOW the lane grid as a horizontal strip
+          activitySidebar.style.width = '100%';
+          activitySidebar.style.minHeight = '80px';
+          activitySidebar.style.maxHeight = '220px';
+          
+          // Make activity content horizontal
+          const activityContent = activitySidebar.querySelector('[class*="space-y"], [class*="divide"]');
+          if (activityContent) {
+            activityContent.style.display = 'flex';
+            activityContent.style.flexDirection = 'row';
+            activityContent.style.flexWrap = 'wrap';
+            activityContent.style.gap = '12px';
+            activityContent.style.overflow = 'hidden';
+          }
+          
+          // Style the activity container card
+          activitySidebar.style.borderRadius = '16px';
+          activitySidebar.style.background = '#ffffff';
+          activitySidebar.style.border = '1px solid #f3f4f6';
+          activitySidebar.style.padding = '16px 20px';
+          
+          // Make sure it appears after the lanes
+          outerGrid.appendChild(activitySidebar);
+        }
+      });
+
+      // Also handle CSS — inject scoped styles for range dashboard
+      const styleId = 'range-dash-fix-v2';
+      if (!document.getElementById(styleId)) {
+        const style = document.createElement('style');
+        style.id = styleId;
+        style.textContent = `
+          /* Range dashboard outer container */
+          [class*="lg:grid-cols-4"][class*="gap-6"] {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 16px !important;
+            width: 100% !important;
+          }
+          /* Lane cards: take full width, 4 columns */
+          [class*="lg:col-span-3"][class*="lg:grid-cols-3"] {
+            grid-template-columns: repeat(4, 1fr) !important;
+            width: 100% !important;
+            max-width: 100% !important;
+          }
+          @media (max-width: 1599px) {
+            [class*="lg:col-span-3"][class*="lg:grid-cols-3"] {
+              grid-template-columns: repeat(3, 1fr) !important;
+            }
+          }
+          @media (max-width: 1023px) {
+            [class*="lg:col-span-3"][class*="lg:grid-cols-3"] {
+              grid-template-columns: repeat(2, 1fr) !important;
+            }
+          }
+          @media (max-width: 639px) {
+            [class*="lg:col-span-3"][class*="lg:grid-cols-3"] {
+              grid-template-columns: 1fr !important;
+            }
+          }
+          /* Activity section: full width horizontal */
+          [class*="lg:grid-cols-4"] > div:not([class*="col-span-3"]) {
+            width: 100% !important;
+            min-height: unset !important;
+            max-height: 200px !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }, 400);
+  }
+
+  // Also fix the fixRangeLayout to NOT reset these changes
+  // Listen for route changes
+  window.addEventListener('hashchange', () => {
+    document.body.dataset.rangeDashFixed = '';
+    if (location.hash.includes('/range')) {
+      fixRangeDashboardLayout();
+    }
+  });
+
+  const rangeDashObserver = new MutationObserver(() => {
+    const path = location.hash;
+    if (path.includes('/range') && !path.includes('/range/lane') && !path.includes('/range/instructor')) {
+      fixRangeDashboardLayout();
+    }
+  });
+  rangeDashObserver.observe(document.body, { childList: true, subtree: true });
+
+  setTimeout(fixRangeDashboardLayout, 600);
+})();
