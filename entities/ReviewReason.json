@@ -1,0 +1,19 @@
+{
+  "properties": {
+    "reason": {
+      "type": "string"
+    },
+    "reviewer": {
+      "type": "string"
+    },
+    "session_id": {
+      "type": "string"
+    },
+    "soldier_seq": {
+      "type": "number"
+    }
+  },
+  "type": "object",
+  "required": [],
+  "name": "ReviewReason"
+}

@@ -1,0 +1,13 @@
+{
+  "properties": {
+    "preferences": {
+      "type": "object"
+    },
+    "user_id": {
+      "type": "string"
+    }
+  },
+  "type": "object",
+  "required": [],
+  "name": "UIPreference"
+}
