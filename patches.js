@@ -2089,6 +2089,17 @@ setTimeout(() => onRouteChange(), 800);
       const pageContent = document.querySelector('.space-y-6');
       if (!pageContent) return;
       if (document.getElementById('compare-enhanced')) return;
+      
+      // Hide ALL old session/soldier comparison content — show only before/after workflow
+      const oldChildren = pageContent.children;
+      for (let i = 0; i < oldChildren.length; i++) {
+        const child = oldChildren[i];
+        // Keep the header (back button + title) and our enhancement
+        if (child.id === 'compare-enhanced') continue;
+        if (child.querySelector && child.querySelector('button.btn-ghost')) continue; // keep header
+        // Hide everything else (old tables, old stat cards, old soldier data)
+        child.style.display = 'none';
+      }
 
       // Create the enhanced compare UI
       const container = document.createElement('div');
