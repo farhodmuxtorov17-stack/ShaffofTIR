@@ -18,13 +18,40 @@
     padding-left: 16px !important;
     padding-right: 16px !important;
   }
-  /* Grid responsive */
+  /* Grid responsive — 1920x1080 optimization */
+  /* On large screens, use more columns for lane grid */
+  @media (min-width: 1600px) {
+    .lg\:grid-cols-3 { grid-template-columns: repeat(4, 1fr) !important; }
+  }
+  @media (min-width: 1920px) {
+    .lg\:grid-cols-3 { grid-template-columns: repeat(5, 1fr) !important; }
+  }
   @media (max-width: 1400px) {
     .grid-cols-4 { grid-template-columns: repeat(2, 1fr) !important; }
   }
   @media (max-width: 900px) {
     .grid-cols-3, .grid-cols-4 { grid-template-columns: 1fr !important; }
     .grid-cols-2 { grid-template-columns: 1fr !important; }
+    .lg\:grid-cols-3 { grid-template-columns: 1fr !important; }
+  }
+  
+  /* Force main content to fill width on 1920px */
+  @media (min-width: 1600px) {
+    .flex-1.overflow-y-auto.px-6.py-5 {
+      padding-left: 24px !important;
+      padding-right: 24px !important;
+    }
+    .space-y-6 {
+      max-width: 100% !important;
+    }
+  }
+  
+  /* Lane cards grid — force auto-fill on wide screens */
+  @media (min-width: 1280px) {
+    .lg\:grid-cols-3.gap-5,
+    .grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.gap-5 {
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
+    }
   }
   /* Sidebar collapse on small screens */
   @media (max-width: 768px) {
@@ -1218,32 +1245,89 @@ function fixRangeLayout() {
   if (!path.includes('/range')) return;
 
   setTimeout(() => {
-    // The page main container — force overflow hidden
-    const pageContainers = document.querySelectorAll('.flex-1, .overflow-y-auto, [class*="page"]');
-    pageContainers.forEach(el => {
-      if (el.scrollHeight > el.clientHeight + 10) return;
-      el.style.overflowX = 'hidden';
+    const vw = window.innerWidth;
+    
+    // The page main container — force overflow hidden, use full width
+    const mainContent = document.querySelector('.flex-1.overflow-y-auto');
+    if (mainContent) {
+      mainContent.style.overflowX = 'hidden';
+      mainContent.style.width = '100%';
+    }
+
+    // Force all space-y-6 containers to fill width
+    document.querySelectorAll('.space-y-6').forEach(el => {
+      el.style.maxWidth = '100%';
+      el.style.width = '100%';
     });
 
-    // Find the lane cards container specifically — it will have multiple children 
-    // that each contain a dark video-like div
-    const containers = Array.from(document.querySelectorAll('div')).filter(el => {
+    // Find ALL grid containers on the page and fix them
+    const allGrids = document.querySelectorAll('[class*="grid-cols"]');
+    allGrids.forEach(grid => {
+      const cls = grid.className;
+      const rect = grid.getBoundingClientRect();
+      
+      // Lane cards grid: lg:grid-cols-3 gap-5
+      if (cls.includes('lg:grid-cols-3') && cls.includes('gap-5')) {
+        // On 1920px: use 5 columns, on 1600px: 4, on 1280px: 3
+        if (vw >= 1920) {
+          grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+        } else if (vw >= 1600) {
+          grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        } else if (vw >= 1280) {
+          grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        } else {
+          grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+        }
+        grid.style.width = '100%';
+        grid.style.maxWidth = '100%';
+      }
+      
+      // Stats grid: grid-cols-2 md:grid-cols-4
+      if (cls.includes('md:grid-cols-4') && cls.includes('gap-4')) {
+        if (vw >= 1280) {
+          grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        } else if (vw >= 640) {
+          grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        } else {
+          grid.style.gridTemplateColumns = '1fr';
+        }
+      }
+
+      // Activity panel grid: grid-cols-3 gap-3  
+      if (cls.includes('grid-cols-3') && cls.includes('gap-3') && rect.height < 200) {
+        grid.style.gridTemplateColumns = 'repeat(auto-fit, minmax(200px, 1fr))';
+      }
+    });
+
+    // Also handle lane cards by looking for card containers with camera-like children
+    const cardContainers = Array.from(document.querySelectorAll('div')).filter(el => {
       const children = Array.from(el.children);
-      if (children.length < 4) return false;
-      const darkChildren = children.filter(c => {
-        const hasDark = c.querySelector('div[class*="bg-gray-9"], div[class*="bg-black"]');
-        return hasDark || c.querySelector('canvas');
+      if (children.length < 3) return false;
+      // Check if children look like lane cards (have dark backgrounds or canvas)
+      return children.some(c => {
+        const bg = window.getComputedStyle(c).backgroundColor;
+        return c.querySelector('canvas') || 
+               c.querySelector('[class*="bg-gray-9"]') ||
+               c.querySelector('[class*="bg-black"]');
       });
-      return darkChildren.length >= 3;
     });
 
-    containers.forEach(grid => {
-      grid.style.cssText += `
-        display: grid !important;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-        gap: 14px !important;
-        width: 100% !important;
-      `;
+    cardContainers.forEach(grid => {
+      const rect = grid.getBoundingClientRect();
+      if (rect.width > 800 && grid.children.length >= 4) {
+        // This is likely the lane grid — force auto-fill
+        if (vw >= 1920) {
+          grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
+        } else if (vw >= 1600) {
+          grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        } else if (vw >= 1200) {
+          grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        } else {
+          grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+        }
+        grid.style.width = '100%';
+        grid.style.maxWidth = '100%';
+      }
     });
   }, 500);
 }
