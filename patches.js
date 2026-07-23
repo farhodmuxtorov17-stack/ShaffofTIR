@@ -3,55 +3,50 @@
 (function() {
   'use strict';
 
-  // ── FIX 2,3,4: Responsive CSS overrides ──
+  // Track current page for CSS targeting
+  function updatePageAttr() {
+    const path = location.hash.replace('#', '');
+    let page = 'other';
+    if (path.includes('/range') || path.includes('/dashboard')) page = 'range';
+    else if (path.includes('/sessions')) page = 'sessions';
+    else if (path.includes('/hr')) page = 'hr';
+    else if (path.includes('/protocols') || path.includes('/reports')) page = 'protocols';
+    else if (path.includes('/cameras')) page = 'cameras';
+    else if (path.includes('/settings')) page = 'settings';
+    else if (path.includes('/analytics')) page = 'analytics';
+    else if (path.includes('/training')) page = 'training';
+    document.body.setAttribute('data-page', page);
+  }
+  window.addEventListener('hashchange', updatePageAttr);
+  setTimeout(updatePageAttr, 100);
+
+  // ── FIX: Responsive CSS overrides (Range/ТИР page only) ──
   const css = document.createElement('style');
   css.textContent = `
-  /* Make all pages fill available width */
-  .main-content, main[class], [class*="main"] {
-    width: 100% !important;
+  /* === RANGE PAGE ONLY === */
+  /* Lane cards: 4 per row on 1920px (4 top, 3 bottom = 7 lanes) */
+  body[data-page="range"] .lg\:grid-cols-3,
+  body[data-page="range"] .grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  /* On smaller screens, 3 per row */
+  @media (max-width: 1599px) {
+    body[data-page="range"] .lg\:grid-cols-3,
+    body[data-page="range"] .grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+      grid-template-columns: repeat(3, 1fr) !important;
+    }
+  }
+  @media (max-width: 768px) {
+    body[data-page="range"] .lg\:grid-cols-3,
+    body[data-page="range"] .grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+      grid-template-columns: 1fr !important;
+    }
+  }
+  /* Range page: fill width */
+  body[data-page="range"] .max-w-7xl,
+  body[data-page="range"] .max-w-6xl,
+  body[data-page="range"] .max-w-5xl {
     max-width: 100% !important;
-    overflow-x: auto;
-  }
-  /* Page containers should be responsive */
-  .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl, .max-w-3xl {
-    max-width: 100% !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-  }
-  /* Grid responsive — 1920x1080 optimization */
-  /* On large screens, use more columns for lane grid */
-  @media (min-width: 1600px) {
-    .lg\:grid-cols-3 { grid-template-columns: repeat(4, 1fr) !important; }
-  }
-  @media (min-width: 1920px) {
-    .lg\:grid-cols-3 { grid-template-columns: repeat(5, 1fr) !important; }
-  }
-  @media (max-width: 1400px) {
-    .grid-cols-4 { grid-template-columns: repeat(2, 1fr) !important; }
-  }
-  @media (max-width: 900px) {
-    .grid-cols-3, .grid-cols-4 { grid-template-columns: 1fr !important; }
-    .grid-cols-2 { grid-template-columns: 1fr !important; }
-    .lg\:grid-cols-3 { grid-template-columns: 1fr !important; }
-  }
-  
-  /* Force main content to fill width on 1920px */
-  @media (min-width: 1600px) {
-    .flex-1.overflow-y-auto.px-6.py-5 {
-      padding-left: 24px !important;
-      padding-right: 24px !important;
-    }
-    .space-y-6 {
-      max-width: 100% !important;
-    }
-  }
-  
-  /* Lane cards grid — force auto-fill on wide screens */
-  @media (min-width: 1280px) {
-    .lg\:grid-cols-3.gap-5,
-    .grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3.gap-5 {
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)) !important;
-    }
   }
   /* Sidebar collapse on small screens */
   @media (max-width: 768px) {
@@ -71,85 +66,15 @@
     max-width: 100% !important;
     overflow: hidden;
   }
-  `;
-
-  // ── FIX 5: Camera Security Monitor ──
-  const camCSS = document.createElement('style');
-  camCSS.textContent = `
-  .tir-cam-monitor {
-    background: #0a0c0f;
-    border-radius: 14px;
-    overflow: hidden;
-    border: 1px solid #1a1a2a;
-    width: 100%;
+  
+  /* === MOBILE ONLY (all pages) === */
+  @media (max-width: 900px) {
+    .grid-cols-3, .grid-cols-4 { grid-template-columns: 1fr !important; }
+    .grid-cols-2 { grid-template-columns: 1fr !important; }
+    .lg\:grid-cols-3 { grid-template-columns: 1fr !important; }
   }
-  .tir-cam-bar {
-    background: #060809;
-    padding: 6px 12px;
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    font-size: 10px;
-    color: rgba(255,255,255,.4);
-    font-family: monospace;
-    border-bottom: 1px solid #1a1a2a;
-  }
-  .tir-cam-grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
-  .tir-cam-grid-6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
-  .tir-cam-grid-9 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
-  .tir-cam-cell {
-    aspect-ratio: 16/9;
-    background: #0a0c0f;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-  }
-  .tir-cam-cell:hover { outline: 2px solid #10b981; }
-  .tir-cam-hud-tl {
-    position: absolute; top: 6px; left: 6px;
-    font-size: 9px; color: rgba(255,255,255,.7); font-family: monospace;
-    background: rgba(0,0,0,.5); padding: 2px 6px; border-radius: 3px;
-  }
-  .tir-cam-hud-tr {
-    position: absolute; top: 6px; right: 6px;
-    font-size: 9px; font-family: monospace;
-  }
-  .tir-cam-hud-bl {
-    position: absolute; bottom: 6px; left: 6px;
-    font-size: 9px; color: rgba(255,255,255,.5); font-family: monospace;
-    background: rgba(0,0,0,.5); padding: 2px 6px; border-radius: 3px;
-  }
-  .tir-cam-hud-br {
-    position: absolute; bottom: 6px; right: 6px;
-    font-size: 9px; font-family: monospace;
-    background: rgba(0,0,0,.5); padding: 2px 6px; border-radius: 3px;
-  }
-  .tir-cam-scan {
-    position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(16,185,129,.4), transparent);
-    animation: tir-scan 3s linear infinite;
-  }
-  @keyframes tir-scan { 0% { top: 0; } 100% { top: 100%; } }
-  .tir-cam-offline {
-    position: absolute; inset: 0; background: #080a0d;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-  }
-  .tir-cam-controls {
-    background: #0d0f14; border-top: 1px solid #1a1a2a;
-    padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;
-  }
-  .tir-cam-btn {
-    padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 500;
-    color: rgba(255,255,255,.5); background: transparent; border: none; cursor: pointer;
-    transition: .15s;
-  }
-  .tir-cam-btn.active, .tir-cam-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
-  .tir-cam-live-dot {
-    width: 5px; height: 5px; border-radius: 50%; background: #ef4444;
-    animation: tir-blink 1s infinite; display: inline-block;
-  }
-  @keyframes tir-blink { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
-  /* TIR shooter animation */
+  
+  /* === TIR shooter animation ===  /* TIR shooter animation */
   .tir-shooter-canvas { width: 100%; height: 100%; display: block; }
   `;
 
@@ -1268,10 +1193,8 @@ function fixRangeLayout() {
       
       // Lane cards grid: lg:grid-cols-3 gap-5
       if (cls.includes('lg:grid-cols-3') && cls.includes('gap-5')) {
-        // On 1920px: use 5 columns, on 1600px: 4, on 1280px: 3
-        if (vw >= 1920) {
-          grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
-        } else if (vw >= 1600) {
+        // 4 columns on wide screens (4 top, 3 bottom = 7 lanes)
+        if (vw >= 1600) {
           grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
         } else if (vw >= 1280) {
           grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
@@ -1316,10 +1239,9 @@ function fixRangeLayout() {
       const rect = grid.getBoundingClientRect();
       if (rect.width > 800 && grid.children.length >= 4) {
         // This is likely the lane grid — force auto-fill
-        if (vw >= 1920) {
-          grid.style.gridTemplateColumns = 'repeat(5, 1fr)';
-        } else if (vw >= 1600) {
+        if (vw >= 1600) {
           grid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+        } else if (vw >= 1280) {
         } else if (vw >= 1200) {
           grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
         } else {
@@ -1343,7 +1265,7 @@ function onRouteChange() {
   activeSimulators.forEach(s => s.stop());
   activeSimulators = [];
 
-  if (path.includes('/range') || path.includes('/dashboard')) {
+  if (path.includes('/range/dashboard') || path.includes('/range/lane')) {
     patchRangePage();
     fixRangeLayout();
   }
