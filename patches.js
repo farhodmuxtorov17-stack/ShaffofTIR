@@ -1790,3 +1790,365 @@ setTimeout(() => onRouteChange(), 800);
   setTimeout(() => onProtocolRouteChange(), 800);
 
 })();
+
+// ════════════════════════════════════════════════════
+// SESSION DETAIL FIX — Show historical session data
+// ════════════════════════════════════════════════════
+(function() {
+  'use strict';
+
+  function patchSessionDetail() {
+    const path = location.hash.replace('#', '');
+    if (!path.includes('/sessions/') || path.includes('/sessions/new')) return;
+    
+    setTimeout(() => {
+      if (document.getElementById('session-history-patch')) return;
+      
+      // Find the Vue store
+      const app = document.querySelector('#app');
+      if (!app || !app.__vue_app__) return;
+      const pinia = app.__vue_app__.config.globalProperties.$pinia;
+      if (!pinia) return;
+      
+      let sessions, protocols;
+      try {
+        for (const [key, store] of pinia._s) {
+          if (key === 'sessionsHistory') {
+            sessions = store.sessions;
+            protocols = store.protocols;
+            break;
+          }
+        }
+      } catch(e) { return; }
+      
+      if (!sessions || !sessions.value) return;
+      
+      // Get session ID from URL
+      const sessionId = path.split('/sessions/')[1];
+      const session = sessions.value.find(s => s.id === sessionId);
+      
+      if (!session) {
+        // Check if this is a live session
+        let liveSession = null;
+        for (const [key, store] of pinia._s) {
+          if (key === 'session' && store.currentSession) {
+            liveSession = store.currentSession;
+            break;
+          }
+        }
+        if (!liveSession) return; // Not found anywhere
+      }
+      
+      // If we found a historical session, inject its data
+      if (session) {
+        // Find the session detail page content
+        const contentArea = document.querySelector('.space-y-6, [class*="space-y-6"]');
+        if (!contentArea) return;
+        
+        // Create historical session info card
+        const histCard = document.createElement('div');
+        histCard.id = 'session-history-patch';
+        histCard.className = 'bg-white rounded-2xl border border-gray-100 p-6 mt-4';
+        
+        const statusText = session.status === 'COMPLETED' ? 'Завершена' : 
+                          session.status === 'REVIEWED' ? 'Проверена' : 'В ожидании';
+        const statusColor = session.status === 'COMPLETED' ? '#16a34a' : 
+                            session.status === 'REVIEWED' ? '#3b82f6' : '#f59e0b';
+        const qualText = session.accuracy >= 85 ? 'Отлично' : 
+                        session.accuracy >= 60 ? 'Сдан' : 'Не сдан';
+        const qualColor = session.accuracy >= 85 ? '#16a34a' : 
+                         session.accuracy >= 60 ? '#3b82f6' : '#ef4444';
+        const date = session.completed_at ? new Date(session.completed_at).toLocaleString('ru') : 
+                    new Date(session.created_at).toLocaleString('ru');
+        
+        // Generate shot visualization
+        let shotDots = '';
+        if (session.shots && session.shots.length > 0) {
+          session.shots.forEach(shot => {
+            if (shot.score > 0) {
+              shotDots += `<div style="position:absolute;left:${shot.x}%;top:${shot.y}%;width:6px;height:6px;border-radius:50%;background:#ef4444;transform:translate(-50%,-50%);box-shadow:0 0 2px rgba(0,0,0,.3)"></div>`;
+            }
+          });
+        }
+        
+        histCard.innerHTML = `
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <div>
+              <h3 style="font-size:14px;font-weight:700;color:#111827">Историческая сессия</h3>
+              <p style="font-size:12px;color:#9ca3af;margin-top:2px">${date}</p>
+            </div>
+            <span style="padding:4px 12px;border-radius:8px;font-size:12px;font-weight:500;background:${statusColor}20;color:${statusColor}">${statusText}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+            <div style="text-align:center;padding:10px;border-radius:10px;background:#f9fafb">
+              <p style="font-size:9px;color:#9ca3af;text-transform:uppercase">Балл</p>
+              <p style="font-size:20px;font-weight:700;color:#16a34a">${session.total_score || 0}</p>
+            </div>
+            <div style="text-align:center;padding:10px;border-radius:10px;background:#f9fafb">
+              <p style="font-size:9px;color:#9ca3af;text-transform:uppercase">Точность</p>
+              <p style="font-size:20px;font-weight:700;color:#3b82f6">${session.accuracy || 0}%</p>
+            </div>
+            <div style="text-align:center;padding:10px;border-radius:10px;background:#f9fafb">
+              <p style="font-size:9px;color:#9ca3af;text-transform:uppercase">Попаданий</p>
+              <p style="font-size:20px;font-weight:700;color:#16a34a">${session.hit_count || 0}/${session.total_shots || 0}</p>
+            </div>
+            <div style="text-align:center;padding:10px;border-radius:10px;background:#f9fafb">
+              <p style="font-size:9px;color:#9ca3af;text-transform:uppercase">Оценка</p>
+              <p style="font-size:14px;font-weight:700;color:${qualColor};padding-top:4px">${qualText}</p>
+            </div>
+          </div>
+          <div style="display:flex;gap:20px;align-items:flex-start">
+            <div style="position:relative;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,#fff 0%,#f0f0f0 100%);border:2px solid #e5e7eb;flex-shrink:0">
+              ${shotDots}
+            </div>
+            <div style="flex:1">
+              <p style="font-size:12px;font-weight:600;color:#374151;margin-bottom:8px">Информация о сессии</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px">
+                <div><span style="color:#9ca3af">Сотрудник:</span> <span style="font-weight:500">${session.employee_name || '—'}</span></div>
+                <div><span style="color:#9ca3af">Дорожка:</span> <span style="font-weight:500">№${session.lane_number || '—'}</span></div>
+                <div><span style="color:#9ca3af">Оружие:</span> <span style="font-weight:500">${session.weapon_name || '—'}</span></div>
+                <div><span style="color:#9ca3af">Инструктор:</span> <span style="font-weight:500">${session.instructor_name || '—'}</span></div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        // Insert at the top of the content area
+        contentArea.insertBefore(histCard, contentArea.firstChild);
+      }
+    }, 600);
+  }
+
+  // ════════════════════════════════════════════════════
+  // HR EMPLOYEE DETAIL FIX — Show real session history
+  // ════════════════════════════════════════════════════
+  function patchHREmployeeDetail() {
+    const path = location.hash.replace('#', '');
+    if (!path.includes('/hr/employee/')) return;
+    
+    setTimeout(() => {
+      if (document.getElementById('hr-employee-history-patch')) return;
+      
+      const app = document.querySelector('#app');
+      if (!app || !app.__vue_app__) return;
+      const pinia = app.__vue_app__.config.globalProperties.$pinia;
+      if (!pinia) return;
+      
+      let sessions;
+      try {
+        for (const [key, store] of pinia._s) {
+          if (key === 'sessionsHistory') {
+            sessions = store.sessions;
+            break;
+          }
+        }
+      } catch(e) { return; }
+      
+      if (!sessions || !sessions.value) return;
+      
+      // Get employee ID from URL
+      const empId = path.split('/hr/employee/')[1];
+      const empSessions = sessions.value.filter(s => s.employee_id === empId);
+      
+      if (empSessions.length === 0) return;
+      
+      // Find the page content area
+      const cards = document.querySelectorAll('.card, [class*="rounded-2xl"][class*="border"]');
+      let lastCard = null;
+      for (const c of cards) {
+        if (c.textContent.includes('Личная') || c.textContent.includes('Статистика') || c.textContent.includes('Квалификация')) {
+          lastCard = c;
+        }
+      }
+      if (!lastCard) {
+        const contentArea = document.querySelector('.space-y-6, [class*="space-y"]');
+        if (!contentArea) return;
+        lastCard = contentArea.lastElementChild;
+      }
+      
+      // Create session history card
+      const histCard = document.createElement('div');
+      histCard.id = 'hr-employee-history-patch';
+      histCard.className = 'bg-white rounded-2xl border border-gray-100 overflow-hidden mt-4';
+      
+      let rows = '';
+      empSessions.slice(0, 15).forEach(s => {
+        const date = new Date(s.created_at).toLocaleDateString('ru');
+        const qualColor = s.accuracy >= 85 ? '#16a34a' : s.accuracy >= 60 ? '#3b82f6' : '#ef4444';
+        const statusBadge = s.status === 'COMPLETED' ? '<span style="color:#16a34a">✓</span>' : 
+                           s.status === 'REVIEWED' ? '<span style="color:#3b82f6">⊙</span>' : 
+                           '<span style="color:#f59e0b">○</span>';
+        rows += `
+          <tr style="cursor:pointer" data-session-id="${s.id}">
+            <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:12px;color:#6b7280">${date}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:12px">${s.weapon_name || '—'}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:12px;text-align:center">№${s.lane_number || '—'}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:12px;text-align:center;font-weight:600;color:#16a34a">${s.total_score || 0}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:12px;text-align:center;color:${qualColor};font-weight:600">${s.accuracy || 0}%</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:12px;text-align:center">${s.hit_count || 0}/${s.total_shots || 0}</td>
+            <td style="padding:8px 12px;border-bottom:1px solid #f3f4f6;font-size:12px;text-align:center">${statusBadge}</td>
+          </tr>
+        `;
+      });
+      
+      const avgScore = Math.round(empSessions.reduce((sum, s) => sum + (s.total_score || 0), 0) / empSessions.length);
+      const avgAcc = Math.round(empSessions.reduce((sum, s) => sum + (s.accuracy || 0), 0) / empSessions.length);
+      
+      histCard.innerHTML = `
+        <div style="padding:16px 20px;border-bottom:1px solid #f3f4f6">
+          <h3 style="font-size:14px;font-weight:700;color:#111827">История стрельб (${empSessions.length})</h3>
+          <div style="display:flex;gap:16px;margin-top:8px">
+            <span style="font-size:12px;color:#6b7280">Средний балл: <b style="color:#16a34a">${avgScore}</b></span>
+            <span style="font-size:12px;color:#6b7280">Средняя точность: <b style="color:#3b82f6">${avgAcc}%</b></span>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:#f9fafb">
+                <th style="padding:8px 12px;text-align:left;font-size:10px;text-transform:uppercase;color:#6b7280;font-weight:600">Дата</th>
+                <th style="padding:8px 12px;text-align:left;font-size:10px;text-transform:uppercase;color:#6b7280;font-weight:600">Оружие</th>
+                <th style="padding:8px 12px;text-align:center;font-size:10px;text-transform:uppercase;color:#6b7280;font-weight:600">Дорожка</th>
+                <th style="padding:8px 12px;text-align:center;font-size:10px;text-transform:uppercase;color:#6b7280;font-weight:600">Балл</th>
+                <th style="padding:8px 12px;text-align:center;font-size:10px;text-transform:uppercase;color:#6b7280;font-weight:600">Точность</th>
+                <th style="padding:8px 12px;text-align:center;font-size:10px;text-transform:uppercase;color:#6b7280;font-weight:600">П/В</th>
+                <th style="padding:8px 12px;text-align:center;font-size:10px;text-transform:uppercase;color:#6b7280;font-weight:600">Статус</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+      
+      // Insert after the last card
+      if (lastCard && lastCard.parentNode) {
+        lastCard.parentNode.insertBefore(histCard, lastCard.nextSibling);
+      }
+      
+      // Add click handlers to navigate to session detail
+      histCard.querySelectorAll('tr[data-session-id]').forEach(tr => {
+        tr.addEventListener('mouseenter', () => tr.style.background = '#f9fafb');
+        tr.addEventListener('mouseleave', () => tr.style.background = '');
+        tr.addEventListener('click', () => {
+          location.hash = '/sessions/' + tr.dataset.sessionId;
+        });
+      });
+    }, 600);
+  }
+
+  // ════════════════════════════════════════════════════
+  // REPORTS PAGE FIX — Add protocol statistics
+  // ════════════════════════════════════════════════════
+  function patchReportsPage() {
+    const path = location.hash.replace('#', '');
+    if (!path.includes('/reports')) return;
+    
+    setTimeout(() => {
+      if (document.getElementById('reports-protocols-patch')) return;
+      
+      const app = document.querySelector('#app');
+      if (!app || !app.__vue_app__) return;
+      const pinia = app.__vue_app__.config.globalProperties.$pinia;
+      if (!pinia) return;
+      
+      let protocols, sessions;
+      try {
+        for (const [key, store] of pinia._s) {
+          if (key === 'sessionsHistory') {
+            protocols = store.protocols;
+            sessions = store.sessions;
+            break;
+          }
+        }
+      } catch(e) { return; }
+      
+      if (!protocols || !protocols.value) return;
+      
+      // Find the page content
+      const h1 = document.querySelector('h1');
+      if (!h1) return;
+      const contentArea = h1.closest('.space-y-5, .space-y-6, [class*="space-y"]');
+      if (!contentArea) return;
+      
+      const total = protocols.value.length;
+      const signed = protocols.value.filter(p => p.status === 'SIGNED').length;
+      const drafts = protocols.value.filter(p => p.status === 'DRAFT').length;
+      const approved = protocols.value.filter(p => p.status === 'APPROVED').length;
+      const excellent = protocols.value.filter(p => p.qualification === 'EXCELLENT').length;
+      const passed = protocols.value.filter(p => p.qualification === 'PASSED').length;
+      const failed = protocols.value.filter(p => p.qualification === 'FAILED').length;
+      
+      const protCard = document.createElement('div');
+      protCard.id = 'reports-protocols-patch';
+      protCard.className = 'bg-white rounded-2xl border border-gray-100 p-6 mt-4';
+      
+      protCard.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+          <h3 style="font-size:14px;font-weight:700;color:#111827">Статистика протоколов</h3>
+          <span style="font-size:12px;color:#9ca3af">Всего: ${total}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:10px">
+          <div style="text-align:center;padding:12px;border-radius:10px;background:#f9fafb">
+            <p style="font-size:9px;color:#9ca3af;text-transform:uppercase;margin-bottom:4px">Всего</p>
+            <p style="font-size:22px;font-weight:700;color:#374151">${total}</p>
+          </div>
+          <div style="text-align:center;padding:12px;border-radius:10px;background:#dcfce7">
+            <p style="font-size:9px;color:#16a34a;text-transform:uppercase;margin-bottom:4px">Подписано</p>
+            <p style="font-size:22px;font-weight:700;color:#16a34a">${signed}</p>
+          </div>
+          <div style="text-align:center;padding:12px;border-radius:10px;background:#dbeafe">
+            <p style="font-size:9px;color:#3b82f6;text-transform:uppercase;margin-bottom:4px">Утверждено</p>
+            <p style="font-size:22px;font-weight:700;color:#3b82f6">${approved}</p>
+          </div>
+          <div style="text-align:center;padding:12px;border-radius:10px;background:#fef3c7">
+            <p style="font-size:9px;color:#f59e0b;text-transform:uppercase;margin-bottom:4px">Черновики</p>
+            <p style="font-size:22px;font-weight:700;color:#f59e0b">${drafts}</p>
+          </div>
+          <div style="text-align:center;padding:12px;border-radius:10px;background:#dcfce7">
+            <p style="font-size:9px;color:#16a34a;text-transform:uppercase;margin-bottom:4px">Отлично</p>
+            <p style="font-size:22px;font-weight:700;color:#16a34a">${excellent}</p>
+          </div>
+          <div style="text-align:center;padding:12px;border-radius:10px;background:#fee2e2">
+            <p style="font-size:9px;color:#ef4444;text-transform:uppercase;margin-bottom:4px">Не сдан</p>
+            <p style="font-size:22px;font-weight:700;color:#ef4444">${failed}</p>
+          </div>
+        </div>
+      `;
+      
+      // Insert after the first card
+      const firstCard = contentArea.querySelector('.card, [class*="rounded-2xl"]');
+      if (firstCard && firstCard.parentNode) {
+        firstCard.parentNode.insertBefore(protCard, firstCard.nextSibling);
+      } else {
+        contentArea.appendChild(protCard);
+      }
+    }, 600);
+  }
+
+  // Route observer
+  let prevPatchPath = '';
+  function onPatchRouteChange() {
+    const path = location.hash;
+    if (path === prevPatchPath) return;
+    prevPatchPath = path;
+    
+    setTimeout(() => {
+      patchSessionDetail();
+      patchHREmployeeDetail();
+      patchReportsPage();
+    }, 300);
+  }
+
+  window.addEventListener('hashchange', onPatchRouteChange);
+  const patchObserver = new MutationObserver(() => {
+    const path = location.hash;
+    if (path.includes('/sessions/') || path.includes('/hr/employee/') || path.includes('/reports')) {
+      patchSessionDetail();
+      patchHREmployeeDetail();
+      patchReportsPage();
+    }
+  });
+  patchObserver.observe(document.body, { childList: true, subtree: true });
+  
+  setTimeout(() => onPatchRouteChange(), 800);
+})();
