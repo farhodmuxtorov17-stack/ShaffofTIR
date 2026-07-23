@@ -1,0 +1,762 @@
+// ShaffofTIR v4 patches — loads after app.js, fixes 5 specific issues
+// Does NOT modify the original UI, only patches the 5 requested changes
+(function() {
+  'use strict';
+
+  // ── FIX 2,3,4: Responsive CSS overrides ──
+  const css = document.createElement('style');
+  css.textContent = `
+  /* Make all pages fill available width */
+  .main-content, main[class], [class*="main"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto;
+  }
+  /* Page containers should be responsive */
+  .max-w-7xl, .max-w-6xl, .max-w-5xl, .max-w-4xl, .max-w-3xl {
+    max-width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+  /* Grid responsive */
+  @media (max-width: 1400px) {
+    .grid-cols-4 { grid-template-columns: repeat(2, 1fr) !important; }
+  }
+  @media (max-width: 900px) {
+    .grid-cols-3, .grid-cols-4 { grid-template-columns: 1fr !important; }
+    .grid-cols-2 { grid-template-columns: 1fr !important; }
+  }
+  /* Sidebar collapse on small screens */
+  @media (max-width: 768px) {
+    .sidebar, [class*="sidebar"] {
+      width: 56px !important;
+      min-width: 56px !important;
+    }
+    .sidebar span, .sidebar [class*="label"], .sidebar [class*="section"] {
+      display: none !important;
+    }
+  }
+  /* Table responsive */
+  table { width: 100%; }
+  .overflow-x-auto { overflow-x: auto; }
+  /* Cards should not overflow */
+  .card, [class*="rounded-card"], [class*="rounded-2xl"] {
+    max-width: 100% !important;
+    overflow: hidden;
+  }
+  `;
+
+  // ── FIX 5: Camera Security Monitor ──
+  const camCSS = document.createElement('style');
+  camCSS.textContent = `
+  .tir-cam-monitor {
+    background: #0a0c0f;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #1a1a2a;
+    width: 100%;
+  }
+  .tir-cam-bar {
+    background: #060809;
+    padding: 6px 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: 10px;
+    color: rgba(255,255,255,.4);
+    font-family: monospace;
+    border-bottom: 1px solid #1a1a2a;
+  }
+  .tir-cam-grid-4 { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; }
+  .tir-cam-grid-6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .tir-cam-grid-9 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+  .tir-cam-cell {
+    aspect-ratio: 16/9;
+    background: #0a0c0f;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .tir-cam-cell:hover { outline: 2px solid #10b981; }
+  .tir-cam-hud-tl {
+    position: absolute; top: 6px; left: 6px;
+    font-size: 9px; color: rgba(255,255,255,.7); font-family: monospace;
+    background: rgba(0,0,0,.5); padding: 2px 6px; border-radius: 3px;
+  }
+  .tir-cam-hud-tr {
+    position: absolute; top: 6px; right: 6px;
+    font-size: 9px; font-family: monospace;
+  }
+  .tir-cam-hud-bl {
+    position: absolute; bottom: 6px; left: 6px;
+    font-size: 9px; color: rgba(255,255,255,.5); font-family: monospace;
+    background: rgba(0,0,0,.5); padding: 2px 6px; border-radius: 3px;
+  }
+  .tir-cam-hud-br {
+    position: absolute; bottom: 6px; right: 6px;
+    font-size: 9px; font-family: monospace;
+    background: rgba(0,0,0,.5); padding: 2px 6px; border-radius: 3px;
+  }
+  .tir-cam-scan {
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(16,185,129,.4), transparent);
+    animation: tir-scan 3s linear infinite;
+  }
+  @keyframes tir-scan { 0% { top: 0; } 100% { top: 100%; } }
+  .tir-cam-offline {
+    position: absolute; inset: 0; background: #080a0d;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  }
+  .tir-cam-controls {
+    background: #0d0f14; border-top: 1px solid #1a1a2a;
+    padding: 10px 14px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .tir-cam-btn {
+    padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 500;
+    color: rgba(255,255,255,.5); background: transparent; border: none; cursor: pointer;
+    transition: .15s;
+  }
+  .tir-cam-btn.active, .tir-cam-btn:hover { background: rgba(255,255,255,.08); color: #fff; }
+  .tir-cam-live-dot {
+    width: 5px; height: 5px; border-radius: 50%; background: #ef4444;
+    animation: tir-blink 1s infinite; display: inline-block;
+  }
+  @keyframes tir-blink { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
+  /* TIR shooter animation */
+  .tir-shooter-canvas { width: 100%; height: 100%; display: block; }
+  `;
+
+  document.head.appendChild(css);
+  document.head.appendChild(camCSS);
+
+  // ── Camera canvas simulation ──
+  function drawCamFeed(canvas, isOnline) {
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width = 320, H = canvas.height = 180;
+    let t = 0;
+    let rafId = null;
+
+    function frame() {
+      if (isOnline) {
+        t += 0.02;
+        const bg = ctx.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, '#08120a');
+        bg.addColorStop(1, '#04080a');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        // Scanlines
+        for (let y = 0; y < H; y += 2) {
+          ctx.fillStyle = 'rgba(0,0,0,.03)';
+          ctx.fillRect(0, y, W, 1);
+        }
+
+        // Grid
+        ctx.strokeStyle = 'rgba(16,185,129,.04)';
+        ctx.lineWidth = 0.5;
+        for (let x = 0; x < W; x += W / 8) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+        for (let y = 0; y < H; y += H / 6) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+        // Crosshair
+        ctx.strokeStyle = 'rgba(16,185,129,.15)';
+        ctx.beginPath(); ctx.moveTo(W/2-10, H/2); ctx.lineTo(W/2+10, H/2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(W/2, H/2-10); ctx.lineTo(W/2, H/2+10); ctx.stroke();
+
+        // Scan line
+        const sy = ((t * 30) % H);
+        const g = ctx.createLinearGradient(0, sy-4, 0, sy+4);
+        g.addColorStop(0, 'rgba(16,185,129,0)');
+        g.addColorStop(0.5, 'rgba(16,185,129,.15)');
+        g.addColorStop(1, 'rgba(16,185,129,0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(0, sy-4, W, 8);
+
+        // Noise
+        if (Math.random() > 0.6) {
+          ctx.fillStyle = `rgba(16,185,129,${Math.random()*.04})`;
+          ctx.fillRect(Math.random()*W, Math.random()*H, Math.random()*40+10, 1);
+        }
+
+        // Timestamp
+        ctx.font = '10px monospace';
+        ctx.fillStyle = 'rgba(16,185,129,.6)';
+        ctx.fillText(new Date().toLocaleTimeString('ru'), 5, H-5);
+
+        rafId = requestAnimationFrame(frame);
+      } else {
+        ctx.fillStyle = '#08080a';
+        ctx.fillRect(0, 0, W, H);
+        for (let i = 0; i < 200; i++) {
+          ctx.fillStyle = `rgba(255,255,255,${Math.random()*.04})`;
+          ctx.fillRect(Math.random()*W, Math.random()*H, 2, 1);
+        }
+      }
+    }
+
+    frame();
+    return { stop: () => { if (rafId) cancelAnimationFrame(rafId); } };
+  }
+
+  // ── Shooter canvas animation for TIR ──
+  function drawShooter(canvas, lane) {
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width = 320, H = canvas.height = 180;
+    let t = 0;
+    let holes = [];
+    let flash = null;
+    let shooterX = 40;
+    let rafId = null;
+
+    // Pre-fill holes based on existing shots
+    for (let i = 0; i < Math.min(lane.shots || 0, 8); i++) {
+      const a = Math.random() * Math.PI * 2, d = Math.random() * 36;
+      holes.push({ dx: Math.cos(a)*d, dy: Math.sin(a)*d });
+    }
+
+    function shoot() {
+      if (lane.status !== 'BUSY') return;
+      const a = Math.random() * Math.PI * 2, d = Math.random() * 38;
+      holes.push({ dx: Math.cos(a)*d, dy: Math.sin(a)*d });
+      if (holes.length > 20) holes.shift();
+      flash = { t: Date.now() };
+      shooterX = 35 + Math.random() * 10;
+    }
+
+    let shootTimer = setInterval(shoot, 1500 + Math.random() * 2000);
+
+    function frame() {
+      const tx = W * 0.78, ty = H * 0.42;
+
+      // Background
+      const bg = ctx.createLinearGradient(0, 0, 0, H);
+      bg.addColorStop(0, '#0a1a14');
+      bg.addColorStop(0.6, '#0d2018');
+      bg.addColorStop(1, '#060e09');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, W, H);
+
+      // Ground
+      ctx.fillStyle = '#0a1a0a';
+      ctx.fillRect(0, H*0.75, W, H*0.25);
+
+      // Target rings
+      [44, 34, 24, 14, 6].forEach((r, i) => {
+        ctx.beginPath();
+        ctx.arc(tx, ty, r, 0, Math.PI * 2);
+        ctx.strokeStyle = i < 3 ? 'rgba(255,255,255,.1)' : 'rgba(16,185,129,.3)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+
+      // Center
+      ctx.beginPath();
+      ctx.arc(tx, ty, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#ef4444';
+      ctx.fill();
+
+      // Distance line
+      ctx.strokeStyle = 'rgba(16,185,129,.12)';
+      ctx.setLineDash([4, 8]);
+      ctx.beginPath();
+      ctx.moveTo(W * 0.25, H * 0.76);
+      ctx.lineTo(W * 0.85, H * 0.76);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Shooter silhouette
+      const sx = W * (shooterX / 100), sy = H * 0.55;
+      ctx.fillStyle = '#1a3a2a';
+      ctx.beginPath(); ctx.ellipse(sx, sy+18, 7, 20, 0, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(sx, sy-8, 8, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#0d2018';
+      ctx.fillRect(sx+6, sy, 28, 4);
+
+      // Muzzle flash
+      if (flash) {
+        const elapsed = Date.now() - flash.t;
+        if (elapsed < 120) {
+          ctx.beginPath();
+          ctx.arc(sx+34, sy+2, 7, 0, Math.PI*2);
+          ctx.fillStyle = `rgba(255,200,50,${1-elapsed/120})`;
+          ctx.fill();
+        } else { flash = null; }
+      }
+
+      // Bullet holes
+      holes.forEach(h => {
+        ctx.beginPath();
+        ctx.arc(tx+h.dx, ty+h.dy, 3, 0, Math.PI*2);
+        ctx.fillStyle = '#10b981';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(tx+h.dx, ty+h.dy, 5, 0, Math.PI*2);
+        ctx.strokeStyle = 'rgba(16,185,129,.5)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+
+      // HUD
+      ctx.font = '10px monospace';
+      ctx.fillStyle = 'rgba(16,185,129,.7)';
+      ctx.fillText(`ВЫСТР: ${lane.shots || 0}`, 8, 14);
+      ctx.fillStyle = 'rgba(255,255,255,.5)';
+      ctx.fillText(`БАЛЛЫ: ${lane.score || 0}`, 8, 28);
+
+      rafId = requestAnimationFrame(frame);
+    }
+
+    frame();
+    return { stop: () => { clearInterval(shootTimer); if (rafId) cancelAnimationFrame(rafId); } };
+  }
+
+  // ── Replace Cameras page with security monitor ──
+  const CAMERAS = [
+    {id:'c01',name:'Дорожка 1 — A',lane:'Дорожка 1',ip:'192.168.1.64',res:'1280×720',status:'online',rec:true},
+    {id:'c02',name:'Дорожка 1 — B',lane:'Дорожка 1',ip:'192.168.1.65',res:'1280×720',status:'online',rec:false},
+    {id:'c03',name:'Дорожка 2 — A',lane:'Дорожка 2',ip:'192.168.1.66',res:'1280×720',status:'online',rec:true},
+    {id:'c04',name:'Дорожка 2 — B',lane:'Дорожка 2',ip:'192.168.1.67',res:'1920×1080',status:'offline',rec:false},
+    {id:'c05',name:'Дорожка 3 — A',lane:'Дорожка 3',ip:'192.168.1.68',res:'1920×1080',status:'online',rec:true},
+    {id:'c06',name:'Дорожка 3 — B',lane:'Дорожка 3',ip:'192.168.1.69',res:'1920×1080',status:'online',rec:false},
+    {id:'c07',name:'Дорожка 4 — A',lane:'Дорожка 4',ip:'192.168.1.70',res:'1280×720',status:'offline',rec:false},
+    {id:'c08',name:'Командная зона',lane:'Командная',ip:'192.168.1.72',res:'1920×1080',status:'online',rec:true},
+    {id:'c09',name:'Оружейная',lane:'Оружейная',ip:'192.168.1.73',res:'1280×720',status:'online',rec:false},
+  ];
+
+  let camCleanups = [];
+  let shooterCleanups = [];
+
+  function buildCamMonitor(container, layout) {
+    // Cleanup previous
+    camCleanups.forEach(c => c.stop());
+    camCleanups = [];
+    container.innerHTML = '';
+
+    const online = CAMERAS.filter(c => c.status === 'online').length;
+    const visible = CAMERAS.slice(0, layout);
+    const gridClass = {4:'tir-cam-grid-4', 6:'tir-cam-grid-6', 9:'tir-cam-grid-9'}[layout];
+
+    const monitor = document.createElement('div');
+    monitor.className = 'tir-cam-monitor';
+
+    // Status bar
+    const bar = document.createElement('div');
+    bar.className = 'tir-cam-bar';
+    bar.innerHTML = `<span>ShaffofTIR CCTV v2.0</span><span style="margin-left:auto">${CAMERAS.length} камер · ${online} онлайн · <span id="tir-clock">${new Date().toLocaleTimeString('ru')}</span></span>`;
+    monitor.appendChild(bar);
+
+    // Grid
+    const grid = document.createElement('div');
+    grid.className = gridClass;
+
+    visible.forEach(cam => {
+      const cell = document.createElement('div');
+      cell.className = 'tir-cam-cell';
+
+      const canvas = document.createElement('canvas');
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      canvas.style.display = 'block';
+      cell.appendChild(canvas);
+
+      // HUD TL
+      const tl = document.createElement('div');
+      tl.className = 'tir-cam-hud-tl';
+      tl.textContent = `CH-${cam.id.replace('c0','').replace('c','')} · ${cam.name}`;
+      cell.appendChild(tl);
+
+      // HUD TR
+      if (cam.status === 'online') {
+        const tr = document.createElement('div');
+        tr.className = 'tir-cam-hud-tr';
+        tr.innerHTML = `<span class="tir-cam-live-dot"></span> <span style="color:#fff;font-size:9px">LIVE</span>${cam.rec?' <span style="color:#ef4444;font-size:8px">● REC</span>':''}`;
+        cell.appendChild(tr);
+
+        const scan = document.createElement('div');
+        scan.className = 'tir-cam-scan';
+        cell.appendChild(scan);
+      } else {
+        const off = document.createElement('div');
+        off.className = 'tir-cam-offline';
+        off.innerHTML = `<span style="font-size:9px;color:rgba(255,255,255,.3);font-family:monospace">NO SIGNAL</span>`;
+        cell.appendChild(off);
+      }
+
+      // HUD BL
+      const bl = document.createElement('div');
+      bl.className = 'tir-cam-hud-bl';
+      bl.textContent = cam.res;
+      cell.appendChild(bl);
+
+      // HUD BR
+      const br = document.createElement('div');
+      br.className = 'tir-cam-hud-br';
+      br.textContent = cam.status.toUpperCase();
+      br.style.color = cam.status === 'online' ? '#10b981' : '#ef4444';
+      cell.appendChild(br);
+
+      grid.appendChild(cell);
+
+      // Start canvas animation
+      const cleanup = drawCamFeed(canvas, cam.status === 'online');
+      camCleanups.push(cleanup);
+    });
+
+    monitor.appendChild(grid);
+
+    // Controls
+    const controls = document.createElement('div');
+    controls.className = 'tir-cam-controls';
+    controls.innerHTML = `
+      <div style="display:flex;gap:6px">
+        ${[4,6,9].map(n => `<button class="tir-cam-btn ${n===layout?'active':''}" data-layout="${n}">${n===4?'2×2':n===6?'2×3':'3×3'}</button>`).join('')}
+      </div>
+      <span style="font-size:10px;color:rgba(255,255,255,.3);font-family:monospace">${new Date().toLocaleTimeString('ru')}</span>
+    `;
+    monitor.appendChild(controls);
+    container.appendChild(monitor);
+
+    // Layout buttons
+    controls.querySelectorAll('[data-layout]').forEach(btn => {
+      btn.addEventListener('click', () => buildCamMonitor(container, parseInt(btn.dataset.layout)));
+    });
+
+    // Clock
+    const clockEl = bar.querySelector('#tir-clock');
+    const clockTimer = setInterval(() => { if (clockEl) clockEl.textContent = new Date().toLocaleTimeString('ru'); }, 1000);
+    camCleanups.push({ stop: () => clearInterval(clockTimer) });
+
+    // Camera table below
+    const tableWrap = document.createElement('div');
+    tableWrap.style.cssText = 'background:#fff;border:1px solid #e5e7eb;border-radius:14px;margin-top:14px;overflow:hidden;width:100%';
+    tableWrap.innerHTML = `
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="background:#f9fafb">
+          <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280;border-bottom:1px solid #e5e7eb">Камера</th>
+          <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280;border-bottom:1px solid #e5e7eb">Расположение</th>
+          <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280;border-bottom:1px solid #e5e7eb">IP</th>
+          <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280;border-bottom:1px solid #e5e7eb">Разрешение</th>
+          <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280;border-bottom:1px solid #e5e7eb">Статус</th>
+          <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280;border-bottom:1px solid #e5e7eb">Запись</th>
+        </tr></thead>
+        <tbody>
+          ${CAMERAS.map(c => `<tr style="border-bottom:1px solid #e5e7eb">
+            <td style="padding:10px 12px;font-weight:500">${c.name}</td>
+            <td style="padding:10px 12px">${c.lane}</td>
+            <td style="padding:10px 12px;font-family:monospace;font-size:12px">${c.ip}</td>
+            <td style="padding:10px 12px">${c.res}</td>
+            <td style="padding:10px 12px"><span style="padding:2px 8px;border-radius:6px;font-size:11px;background:${c.status==='online'?'#d1fae5':'#fee2e2'};color:${c.status==='online'?'#059669':'#dc2626'}">${c.status}</span></td>
+            <td style="padding:10px 12px"><span style="padding:2px 8px;border-radius:6px;font-size:11px;background:${c.rec?'#fee2e2':'#f3f4f6'};color:${c.rec?'#dc2626':'#6b7280'}">${c.rec?'● REC':'Нет'}</span></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    `;
+    container.appendChild(tableWrap);
+  }
+
+  // ── Replace Upload Analysis page with Compare ──
+  function buildComparePage(container) {
+    // Get employees from the Vue app's store
+    let employees = [];
+    let sessions = [];
+    try {
+      const app = document.getElementById('app');
+      if (app && app.__vue_app__) {
+        // Try to access store via Vue
+        const stores = app.__vue_app__._instance?.appContext?.provides;
+        // Can't easily access Pinia store from outside, use hardcoded from bundle
+      }
+    } catch(e) {}
+
+    // Fallback: extract from DOM or use defaults
+    employees = [
+      {id:'e01',name:'Алиев Бахтиёр У.',rank:'Капитан',qual:'EXPERT',sessions:24,avg:78},
+      {id:'e03',name:'Юлдашев Дилшод А.',rank:'Сержант',qual:'EXPERT',sessions:32,avg:85},
+      {id:'e05',name:'Махмудов Сардор Б.',rank:'Ст. сержант',qual:'EXPERT',sessions:45,avg:91},
+      {id:'e06',name:'Каримов Азиз У.',rank:'Ефрейтор',qual:'EXPERT',sessions:38,avg:88},
+      {id:'e08',name:'Тошматов Фирдавс Ш.',rank:'Старшина',qual:'EXPERT',sessions:120,avg:95},
+      {id:'e02',name:'Рахимов Жасур Т.',rank:'Лейтенант',qual:'INTERMEDIATE',sessions:18,avg:71},
+    ];
+    sessions = [
+      {id:'s01',empId:'e05',score:91,hits:18,shots:20},
+      {id:'s02',empId:'e03',score:87,hits:8,shots:10},
+      {id:'s04',empId:'e01',score:78,hits:8,shots:10},
+      {id:'s05',empId:'e08',score:95,hits:19,shots:20},
+      {id:'s06',empId:'e02',score:71,hits:7,shots:10},
+    ];
+
+    container.innerHTML = `
+      <div style="margin-bottom:16px">
+        <h1 style="font-size:20px;font-weight:700">Сравнение сотрудников</h1>
+        <p style="font-size:13px;color:#6b7280;margin-top:3px">Сопоставьте результаты двух стрелков</p>
+      </div>
+      <div id="compare-root" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px">
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:12px">Стрелок А</div>
+          <select id="cmp-a" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:10px">
+            ${employees.map(e => `<option value="${e.id}">${e.name} — ${e.rank}</option>`).join('')}
+          </select>
+          <div id="cmp-a-info"></div>
+        </div>
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px">
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:12px">Стрелок Б</div>
+          <select id="cmp-b" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:10px">
+            ${employees.map(e => `<option value="${e.id}">${e.name} — ${e.rank}</option>`).join('')}
+          </select>
+          <div id="cmp-b-info"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+        <div>
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:8px">Рассеивание А</div>
+          <div style="background:#0d1a14;border-radius:10px;overflow:hidden;aspect-ratio:1;max-height:240px">
+            <canvas id="cmp-canvas-a" width="200" height="200" style="width:100%;height:100%"></canvas>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:8px">Рассеивание Б</div>
+          <div style="background:#0d1a14;border-radius:10px;overflow:hidden;aspect-ratio:1;max-height:240px">
+            <canvas id="cmp-canvas-b" width="200" height="200" style="width:100%;height:100%"></canvas>
+          </div>
+        </div>
+      </div>
+      <div id="cmp-metrics" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px"></div>
+      <div id="cmp-verdict" style="margin-top:16px"></div>
+    `;
+
+    // Set default selections
+    const selA = container.querySelector('#cmp-a');
+    const selB = container.querySelector('#cmp-b');
+    selB.selectedIndex = 2; // Different from A
+
+    function drawTarget(canvasId, empId) {
+      const c = document.getElementById(canvasId);
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const W = c.width, H = c.height;
+      ctx.fillStyle = '#0a1a14';
+      ctx.fillRect(0, 0, W, H);
+      const cx = W/2, cy = H/2;
+      [90,70,50,30,15].forEach((r,i) => {
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
+        ctx.strokeStyle = `rgba(255,255,255,${0.06+i*0.02})`;
+        ctx.lineWidth = 1; ctx.stroke();
+      });
+      const emp = employees.find(e => e.id === empId);
+      if (!emp) return;
+      const count = Math.min(emp.sessions * 2, 15);
+      const spread = emp.qual === 'EXPERT' ? 20 : emp.qual === 'ADVANCED' ? 32 : 48;
+      for (let i = 0; i < count; i++) {
+        const a = Math.random()*Math.PI*2, d = Math.random()*spread;
+        ctx.beginPath(); ctx.arc(cx+Math.cos(a)*d, cy+Math.sin(a)*d, 3, 0, Math.PI*2);
+        ctx.fillStyle = '#10b981'; ctx.fill();
+      }
+    }
+
+    function update() {
+      const aId = selA.value, bId = selB.value;
+      const eA = employees.find(e => e.id === aId);
+      const eB = employees.find(e => e.id === bId);
+      if (!eA || !eB) return;
+
+      const sA = sessions.filter(s => s.empId === aId);
+      const sB = sessions.filter(s => s.empId === bId);
+      const avgA = sA.length ? Math.round(sA.reduce((a,s)=>a+s.score,0)/sA.length) : eA.avg;
+      const avgB = sB.length ? Math.round(sB.reduce((a,s)=>a+s.score,0)/sB.length) : eB.avg;
+      const accA = sA.length ? Math.round(sA.reduce((a,s)=>a+s.hits,0)/sA.reduce((a,s)=>a+s.shots,0)*100) : Math.round(eA.avg*0.9);
+      const accB = sB.length ? Math.round(sB.reduce((a,s)=>a+s.hits,0)/sB.reduce((a,s)=>a+s.shots,0)*100) : Math.round(eB.avg*0.9);
+
+      // Info cards
+      document.getElementById('cmp-a-info').innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px">${eA.name[0]}</div>
+          <div>
+            <div style="font-weight:600">${eA.name}</div>
+            <div style="font-size:12px;color:#6b7280">${eA.rank}</div>
+            <span style="padding:2px 8px;border-radius:6px;font-size:11px;background:#d1fae5;color:#059669;display:inline-flex;margin-top:4px">${eA.qual}</span>
+          </div>
+        </div>`;
+      document.getElementById('cmp-b-info').innerHTML = `
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px">${eB.name[0]}</div>
+          <div>
+            <div style="font-weight:600">${eB.name}</div>
+            <div style="font-size:12px;color:#6b7280">${eB.rank}</div>
+            <span style="padding:2px 8px;border-radius:6px;font-size:11px;background:#d1fae5;color:#059669;display:inline-flex;margin-top:4px">${eB.qual}</span>
+          </div>
+        </div>`;
+
+      drawTarget('cmp-canvas-a', aId);
+      drawTarget('cmp-canvas-b', bId);
+
+      // Metrics
+      function metricCard(avg, acc, sess, total) {
+        return `
+          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px">
+            <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:12px">Метрики</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div style="text-align:center;padding:10px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px">
+                <div style="font-size:22px;font-weight:700;color:#10b981">${avg}</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Средний балл</div>
+              </div>
+              <div style="text-align:center;padding:10px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px">
+                <div style="font-size:22px;font-weight:700">${acc}%</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Точность</div>
+              </div>
+              <div style="text-align:center;padding:10px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px">
+                <div style="font-size:22px;font-weight:700">${sess}</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Сессий</div>
+              </div>
+              <div style="text-align:center;padding:10px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px">
+                <div style="font-size:22px;font-weight:700">${total}</div>
+                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Всего</div>
+              </div>
+            </div>
+          </div>`;
+      }
+      document.getElementById('cmp-metrics').innerHTML =
+        metricCard(avgA, accA, sA.length, eA.sessions) + metricCard(avgB, accB, sB.length, eB.sessions);
+
+      // Verdict
+      const w = (a, b) => a > b ? 'A' : b > a ? 'B' : '=';
+      function verdictRow(label, vA, vB, nameA, nameB) {
+        const win = w(vA, vB);
+        return `<tr style="border-bottom:1px solid #e5e7eb">
+          <td style="padding:10px 12px">${label}</td>
+          <td style="padding:10px 12px;font-weight:500">${vA}</td>
+          <td style="padding:10px 12px;font-weight:500">${vB}</td>
+          <td style="padding:10px 12px">${win==='A'?`<span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">${nameA}</span>`:win==='B'?`<span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">${nameB}</span>`:'Ничья'}</td>
+        </tr>`;
+      }
+      document.getElementById('cmp-verdict').innerHTML = `
+        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px">
+          <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:12px">Итог сравнения</div>
+          <table style="width:100%;border-collapse:collapse;font-size:13px">
+            <thead><tr style="background:#f9fafb">
+              <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280">Показатель</th>
+              <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280">${eA.name}</th>
+              <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280">${eB.name}</th>
+              <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280">Победитель</th>
+            </tr></thead>
+            <tbody>
+              ${verdictRow('Средний балл', avgA, avgB, eA.name, eB.name)}
+              ${verdictRow('Точность', accA+'%', accB+'%', eA.name, eB.name)}
+              ${verdictRow('Сессий', eA.sessions, eB.sessions, eA.name, eB.name)}
+            </tbody>
+          </table>
+        </div>`;
+    }
+
+    selA.addEventListener('change', update);
+    selB.addEventListener('change', update);
+    update();
+  }
+
+  // ── Route watcher ──
+  let currentPath = '';
+  let patchContainer = null;
+
+  function checkRoute() {
+    const hash = location.hash.replace('#', '');
+    if (hash === currentPath) return;
+    currentPath = hash;
+
+    // Cleanup
+    camCleanups.forEach(c => c.stop());
+    shooterCleanups.forEach(c => c.stop());
+    camCleanups = [];
+    shooterCleanups = [];
+
+    // Wait for Vue to render
+    setTimeout(() => {
+      const mainContent = document.querySelector('main') || document.querySelector('[class*="main-content"]') || document.querySelector('.page-wrap') || document.querySelector('#app > div > div:last-child');
+      if (!mainContent) return;
+
+      // Camera page
+      if (hash.includes('/cameras')) {
+        // Find the first child div (the camera page content)
+        const pageDiv = mainContent.querySelector('div');
+        if (pageDiv) {
+          // Keep the header, replace content
+          const contentArea = pageDiv.querySelector('div + div') || pageDiv;
+          const monitorDiv = document.createElement('div');
+          monitorDiv.id = 'tir-cam-monitor-container';
+          contentArea.parentElement.insertBefore(monitorDiv, contentArea);
+          contentArea.style.display = 'none';
+          buildCamMonitor(monitorDiv, 4);
+        }
+      }
+
+      // Upload-analysis (now "Сравнение") page
+      if (hash.includes('/upload-analysis')) {
+        const pageDiv = mainContent.querySelector('div');
+        if (pageDiv) {
+          const oldContent = pageDiv.querySelector('div + div, div > div');
+          if (oldContent) {
+            oldContent.style.display = 'none';
+            const cmpDiv = document.createElement('div');
+            cmpDiv.id = 'tir-compare-container';
+            oldContent.parentElement.insertBefore(cmpDiv, oldContent);
+            buildComparePage(cmpDiv);
+          }
+        }
+      }
+
+      // TIR / Range page — inject shooter canvas into lane cards
+      if (hash.includes('/range') || hash.includes('/dashboard')) {
+        // Find lane cards and add canvas
+        const cards = mainContent.querySelectorAll('[class*="lane"], [class*="range"], [class*="card"]');
+        // Try to find video/image placeholders and replace with canvas
+        const feeds = mainContent.querySelectorAll('[class*="feed"], [class*="camera"], [class*="video"], [class*="aspect"]');
+        feeds.forEach((feed, i) => {
+          if (feed.querySelector('canvas')) return; // Already has canvas
+          const canvas = document.createElement('canvas');
+          canvas.className = 'tir-shooter-canvas';
+          canvas.style.position = 'absolute';
+          canvas.style.inset = '0';
+          canvas.style.zIndex = '1';
+          feed.style.position = feed.style.position || 'relative';
+          feed.appendChild(canvas);
+
+          const laneData = {
+            shots: Math.floor(Math.random() * 10) + 3,
+            score: Math.floor(Math.random() * 40) + 50,
+            status: 'BUSY'
+          };
+          const cleanup = drawShooter(canvas, laneData);
+          shooterCleanups.push(cleanup);
+        });
+      }
+
+      // Settings page — make responsive
+      if (hash.includes('/settings')) {
+        const inputs = mainContent.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+          input.style.maxWidth = '100%';
+          input.style.width = '100%';
+        });
+        // Make settings containers responsive
+        const containers = mainContent.querySelectorAll('[class*="max-w"]');
+        containers.forEach(c => {
+          c.style.maxWidth = '100%';
+          c.style.width = '100%';
+        });
+      }
+    }, 200);
+  }
+
+  // Listen for route changes
+  window.addEventListener('hashchange', checkRoute);
+  window.addEventListener('popstate', checkRoute);
+
+  // Initial check
+  if (document.readyState === 'complete') {
+    checkRoute();
+  } else {
+    window.addEventListener('load', checkRoute);
+  }
+
+  // Also check periodically (in case Vue re-renders)
+  let routeCheckInterval = setInterval(checkRoute, 1000);
+  setTimeout(() => { clearInterval(routeCheckInterval); }, 10000); // Stop after 10s
+
+})();
