@@ -79,8 +79,7 @@
   `;
 
   document.head.appendChild(css);
-  document.head.appendChild(camCSS);
-
+  
   // ── Camera canvas simulation ──
   function drawCamFeed(canvas, isOnline) {
     const ctx = canvas.getContext('2d');
