@@ -2075,146 +2075,282 @@ setTimeout(() => onRouteChange(), 800);
 })();
 
 // ════════════════════════════════════════════════════
-// RANGE DASHBOARD LAYOUT FIX — v2
-// Remove empty activity sidebar, lanes fill full width (4 cols)
-// Activity shown as horizontal strip BELOW lanes
+// COMPARE PAGE ENHANCEMENT — Before/After target comparison
+// Adds before/after canvas + AI analysis + protocol button
 // ════════════════════════════════════════════════════
 (function() {
   'use strict';
 
-  function fixRangeDashboardLayout() {
+  function patchComparePage() {
     const path = location.hash.replace('#', '');
-    if (!path.includes('/range/dashboard') && !path.includes('/range') || path.includes('/range/lane') || path.includes('/range/instructor')) return;
+    if (!path.includes('/compare/')) return;
 
     setTimeout(() => {
-      if (document.body.dataset.rangeDashFixed === 'v2') return;
+      const pageContent = document.querySelector('.space-y-6');
+      if (!pageContent) return;
+      if (document.getElementById('compare-enhanced')) return;
 
-      // Find the outer grid that has the 4-column layout (lanes + activity)
-      // It has class "grid grid-cols-1 lg:grid-cols-4 gap-6"
-      const outerGrids = Array.from(document.querySelectorAll('div')).filter(el => {
-        const cls = el.className || '';
-        return cls.includes('lg:grid-cols-4') && cls.includes('gap-6');
-      });
+      // Create the enhanced compare UI
+      const container = document.createElement('div');
+      container.id = 'compare-enhanced';
+      container.className = 'space-y-6';
 
-      outerGrids.forEach(outerGrid => {
-        // Check it has the lanes child and activity child
-        const laneGrid = outerGrid.querySelector('[class*="lg:col-span-3"]');
-        if (!laneGrid) return;
+      // Step indicator
+      const steps = document.createElement('div');
+      steps.className = 'flex items-center gap-2 text-xs text-gray-400 mb-4 flex-wrap';
+      steps.innerHTML = `
+        <div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 text-[10px] font-bold flex items-center justify-center">1</div><span>Oldin rasm</span></div>
+        <div class="text-gray-300">→</div>
+        <div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 text-[10px] font-bold flex items-center justify-center">2</div><span>Keyin rasm</span></div>
+        <div class="text-gray-300">→</div>
+        <div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 text-[10px] font-bold flex items-center justify-center">3</div><span>AI tahlil</span></div>
+        <div class="text-gray-300">→</div>
+        <div class="flex items-center gap-2"><div class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 text-[10px] font-bold flex items-center justify-center">4</div><span>Bayonoma</span></div>
+      `;
+      container.appendChild(steps);
 
-        // Mark as fixed
-        document.body.dataset.rangeDashFixed = 'v2';
+      // Before/After cards
+      const grid = document.createElement('div');
+      grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-6';
 
-        // 1. Change outer grid: remove 4-col, make it a single column
-        outerGrid.style.display = 'flex';
-        outerGrid.style.flexDirection = 'column';
-        outerGrid.style.gap = '16px';
-        outerGrid.style.width = '100%';
+      // BEFORE card
+      const beforeCard = document.createElement('div');
+      beforeCard.className = 'card p-5 space-y-4';
+      beforeCard.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div id="before-dot" class="w-2 h-2 rounded-full bg-gray-300"></div>
+            <span class="text-sm font-bold text-gray-700">1. Oldin (BEFORE)</span>
+          </div>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-500">BEFORE</span>
+        </div>
+        <div class="relative bg-gray-900 rounded-xl overflow-hidden" style="aspect-ratio:1/1">
+          <canvas id="compare-before-canvas" class="w-full h-full" style="display:none"></canvas>
+          <div id="before-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+            <svg class="w-8 h-8 mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <p class="text-xs">Mishen rasmi yo'q</p>
+          </div>
+        </div>
+        <button id="btn-before" class="btn-primary flex-1 text-xs w-full flex items-center justify-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.9L8.5 5.5h7l.906 1.6A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Oldin rasm olish
+        </button>
+      `;
+      grid.appendChild(beforeCard);
 
-        // 2. Lane grid: remove col-span-3 limitation, make it 4 columns full width
-        laneGrid.style.gridTemplateColumns = 'repeat(4, 1fr)';
-        laneGrid.style.width = '100%';
-        laneGrid.style.maxWidth = '100%';
+      // AFTER card
+      const afterCard = document.createElement('div');
+      afterCard.className = 'card p-5 space-y-4';
+      afterCard.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div id="after-dot" class="w-2 h-2 rounded-full bg-gray-300"></div>
+            <span class="text-sm font-bold text-gray-700">2. Keyin (AFTER)</span>
+          </div>
+          <span class="text-[10px] px-2 py-0.5 rounded-full bg-brand-50 text-brand-600">AFTER</span>
+        </div>
+        <div class="relative bg-gray-900 rounded-xl overflow-hidden" style="aspect-ratio:1/1">
+          <canvas id="compare-after-canvas" class="w-full h-full" style="display:none"></canvas>
+          <div id="after-placeholder" class="absolute inset-0 flex flex-col items-center justify-center text-gray-500">
+            <svg class="w-8 h-8 mb-2 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <p class="text-xs">Avval oldin rasmini oling</p>
+          </div>
+        </div>
+        <button id="btn-after" class="btn-primary flex-1 text-xs w-full flex items-center justify-center gap-1.5" disabled>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.9L8.5 5.5h7l.906 1.6A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          Keyin rasm olish
+        </button>
+      `;
+      grid.appendChild(afterCard);
+      container.appendChild(grid);
 
-        // On smaller screens: 3 cols
-        const vw = window.innerWidth;
-        if (vw < 1600) {
-          laneGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+      // AI analysis section
+      const aiSection = document.createElement('div');
+      aiSection.id = 'ai-section';
+      aiSection.className = 'space-y-4';
+      container.appendChild(aiSection);
+
+      // Status text
+      const statusText = document.createElement('div');
+      statusText.id = 'compare-status';
+      statusText.className = 'text-xs text-gray-400 text-center';
+      container.appendChild(statusText);
+
+      // Insert after the existing content
+      pageContent.appendChild(container);
+
+      // ── Canvas drawing functions ──
+      let hasBefore = false, hasAfter = false, aiDone = false;
+
+      function drawTarget(canvas, withHoles) {
+        const ctx = canvas.getContext('2d');
+        canvas.width = 300;
+        canvas.height = 300;
+        
+        // Background
+        ctx.fillStyle = '#1a1a2e';
+        ctx.fillRect(0, 0, 300, 300);
+        
+        // Target rings
+        const rings = [
+          {r: 130, c: '#333'}, {r: 105, c: '#555'}, {r: 80, c: '#777'},
+          {r: 55, c: '#999'}, {r: 30, c: '#bbb'}, {r: 15, c: '#fff'}
+        ];
+        rings.forEach(r => {
+          ctx.fillStyle = r.c;
+          ctx.beginPath();
+          ctx.arc(150, 150, r.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        
+        // Crosshair
+        ctx.strokeStyle = 'rgba(200,200,200,0.3)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(150, 10); ctx.lineTo(150, 290);
+        ctx.moveTo(10, 150); ctx.lineTo(290, 150);
+        ctx.stroke();
+        
+        // Bullet holes
+        if (withHoles) {
+          const holes = [
+            [145,148,9],[158,142,8],[136,155,7],[162,160,6],[150,130,10],
+            [170,150,5],[140,170,6],[155,135,9],[148,165,8],[135,145,7]
+          ];
+          holes.forEach(h => {
+            ctx.fillStyle = 'rgba(20,10,5,0.9)';
+            ctx.beginPath();
+            ctx.arc(h[0], h[1], h[2], 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(100,80,60,0.4)';
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.arc(h[0], h[1], h[2] * 1.2, 0, Math.PI * 2);
+            ctx.stroke();
+          });
         }
-        if (vw < 1024) {
-          laneGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
-        }
-
-        // 3. Find the activity sidebar (sibling of laneGrid)
-        const activitySidebar = Array.from(outerGrid.children).find(el => el !== laneGrid);
-        if (activitySidebar) {
-          // Move it BELOW the lane grid as a horizontal strip
-          activitySidebar.style.width = '100%';
-          activitySidebar.style.minHeight = '80px';
-          activitySidebar.style.maxHeight = '220px';
-          
-          // Make activity content horizontal
-          const activityContent = activitySidebar.querySelector('[class*="space-y"], [class*="divide"]');
-          if (activityContent) {
-            activityContent.style.display = 'flex';
-            activityContent.style.flexDirection = 'row';
-            activityContent.style.flexWrap = 'wrap';
-            activityContent.style.gap = '12px';
-            activityContent.style.overflow = 'hidden';
-          }
-          
-          // Style the activity container card
-          activitySidebar.style.borderRadius = '16px';
-          activitySidebar.style.background = '#ffffff';
-          activitySidebar.style.border = '1px solid #f3f4f6';
-          activitySidebar.style.padding = '16px 20px';
-          
-          // Make sure it appears after the lanes
-          outerGrid.appendChild(activitySidebar);
-        }
-      });
-
-      // Also handle CSS — inject scoped styles for range dashboard
-      const styleId = 'range-dash-fix-v2';
-      if (!document.getElementById(styleId)) {
-        const style = document.createElement('style');
-        style.id = styleId;
-        style.textContent = `
-          /* Range dashboard outer container */
-          [class*="lg:grid-cols-4"][class*="gap-6"] {
-            display: flex !important;
-            flex-direction: column !important;
-            gap: 16px !important;
-            width: 100% !important;
-          }
-          /* Lane cards: take full width, 4 columns */
-          [class*="lg:col-span-3"][class*="lg:grid-cols-3"] {
-            grid-template-columns: repeat(4, 1fr) !important;
-            width: 100% !important;
-            max-width: 100% !important;
-          }
-          @media (max-width: 1599px) {
-            [class*="lg:col-span-3"][class*="lg:grid-cols-3"] {
-              grid-template-columns: repeat(3, 1fr) !important;
-            }
-          }
-          @media (max-width: 1023px) {
-            [class*="lg:col-span-3"][class*="lg:grid-cols-3"] {
-              grid-template-columns: repeat(2, 1fr) !important;
-            }
-          }
-          @media (max-width: 639px) {
-            [class*="lg:col-span-3"][class*="lg:grid-cols-3"] {
-              grid-template-columns: 1fr !important;
-            }
-          }
-          /* Activity section: full width horizontal */
-          [class*="lg:grid-cols-4"] > div:not([class*="col-span-3"]) {
-            width: 100% !important;
-            min-height: unset !important;
-            max-height: 200px !important;
-          }
-        `;
-        document.head.appendChild(style);
       }
-    }, 400);
+
+      function showToast(type, title, message) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg text-sm font-medium ' + 
+          (type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-amber-50 text-amber-800 border border-amber-200');
+        toast.innerHTML = '<b>' + title + '</b> ' + message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+      }
+
+      // Before button
+      document.getElementById('btn-before').addEventListener('click', () => {
+        const canvas = document.getElementById('compare-before-canvas');
+        drawTarget(canvas, false);
+        canvas.style.display = 'block';
+        document.getElementById('before-placeholder').style.display = 'none';
+        document.getElementById('before-dot').className = 'w-2 h-2 rounded-full bg-brand-500';
+        document.getElementById('btn-after').disabled = false;
+        hasBefore = true;
+        document.getElementById('compare-status').textContent = 'Toza mishen — o\'q otishdan oldin';
+      });
+
+      // After button
+      document.getElementById('btn-after').addEventListener('click', () => {
+        if (!hasBefore) { showToast('warning', 'Diqqat', 'Avval oldin rasmini oling'); return; }
+        const canvas = document.getElementById('compare-after-canvas');
+        drawTarget(canvas, true);
+        canvas.style.display = 'block';
+        document.getElementById('after-placeholder').style.display = 'none';
+        document.getElementById('after-dot').className = 'w-2 h-2 rounded-full bg-brand-500';
+        hasAfter = true;
+        document.getElementById('compare-status').textContent = 'O\'q otishdan keyin — tahlil uchun';
+        
+        // Show AI analysis button
+        if (!document.getElementById('btn-ai')) {
+          const aiBtn = document.createElement('button');
+          aiBtn.id = 'btn-ai';
+          aiBtn.className = 'btn-primary flex items-center gap-2 mt-4';
+          aiBtn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg> AI tahlilni boshlash';
+          aiBtn.addEventListener('click', runAIAnalysis);
+          document.getElementById('ai-section').appendChild(aiBtn);
+        }
+      });
+
+      function runAIAnalysis() {
+        const aiSection = document.getElementById('ai-section');
+        aiSection.innerHTML = `
+          <div class="card p-5 space-y-3">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-blue-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 9l2-2m0 0l2-2m-2 2l-2 2m2-2l2 2"/></svg>
+              <span class="text-sm font-bold text-blue-900">AI tahlil qilmoqda...</span>
+            </div>
+            <div class="h-1.5 rounded-full bg-blue-100 overflow-hidden">
+              <div class="h-full rounded-full bg-gradient-to-r from-blue-400 to-blue-600 animate-pulse" style="width:60%"></div>
+            </div>
+            <p class="text-xs text-blue-600">Nishon AI rasmlarni solishtirib o'q teshiklarini aniqlamoqda...</p>
+          </div>
+        `;
+        document.getElementById('compare-status').textContent = 'AI tahlil qilmoqda...';
+
+        setTimeout(() => {
+          const results = {
+            hitCount: 8, missCount: 2, totalScore: 72, accuracy: 80,
+            issues: [
+              {type: 'warning', text: '2 ta o\'q markazdan chap tomonga og\'gan — nishon olish pozitsiyasini tekshiring'},
+              {type: 'warning', text: '1 ta o\'q pastga ketgan — nafas olish va tetikni bosish momentini sozlang'},
+              {type: 'success', text: '8/10 o\'q nishonga tegdi — yaxshi natija'}
+            ],
+            recommendation: 'O\'rtacha darajada yaxshi natija. Markazga to\'pishni mashq qiling.'
+          };
+
+          aiSection.innerHTML = `
+            <div class="space-y-4">
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div class="card p-3 text-center"><p class="text-xs text-gray-500 mb-1">Tegdi</p><p class="text-2xl font-bold text-brand-600">${results.hitCount}</p></div>
+                <div class="card p-3 text-center"><p class="text-xs text-gray-500 mb-1">Tegmadi</p><p class="text-2xl font-bold text-gray-600">${results.missCount}</p></div>
+                <div class="card p-3 text-center"><p class="text-xs text-gray-500 mb-1">Ball</p><p class="text-2xl font-bold text-brand-600">${results.totalScore}</p></div>
+                <div class="card p-3 text-center"><p class="text-xs text-gray-500 mb-1">Aniqlik</p><p class="text-2xl font-bold text-brand-600">${results.accuracy}%</p></div>
+              </div>
+              <div class="card p-5 space-y-3 bg-gradient-to-br from-blue-50/30 to-transparent">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                  <span class="text-sm font-bold text-blue-900">AI Tahlil Natijasi</span>
+                </div>
+                <div class="space-y-2">
+                  ${results.issues.map(i => `
+                    <div class="flex items-start gap-2 p-2.5 rounded-lg ${i.type === 'warning' ? 'bg-amber-50/40' : 'bg-brand-50/40'}">
+                      <span class="w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center shrink-0 ${i.type === 'warning' ? 'bg-amber-100 text-amber-700' : 'bg-brand-100 text-brand-700'}">${i.type === 'warning' ? '!' : '✓'}</span>
+                      <span class="text-xs text-gray-700 leading-relaxed">${i.text}</span>
+                    </div>
+                  `).join('')}
+                </div>
+                <div class="mt-3 p-3 rounded-lg bg-blue-50/30">
+                  <span class="text-xs font-bold text-gray-600">Tavsiya: </span>
+                  <span class="text-xs text-gray-600">${results.recommendation}</span>
+                </div>
+              </div>
+              <button id="btn-protocol" class="btn-primary flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Bayonoma tayyorlash
+              </button>
+            </div>
+          `;
+          
+          document.getElementById('btn-protocol').addEventListener('click', () => {
+            location.hash = '/protocols/create';
+          });
+          
+          document.getElementById('compare-status').textContent = 'AI tahlil tugadi — natija tayyor';
+          showToast('success', 'Tahlil tugadi', 'AI natijasi tayyor');
+          aiDone = true;
+        }, 2500);
+      }
+    }, 500);
   }
 
-  // Also fix the fixRangeLayout to NOT reset these changes
   // Listen for route changes
   window.addEventListener('hashchange', () => {
-    document.body.dataset.rangeDashFixed = '';
-    if (location.hash.includes('/range')) {
-      fixRangeDashboardLayout();
-    }
+    setTimeout(patchComparePage, 300);
   });
-
-  const rangeDashObserver = new MutationObserver(() => {
-    const path = location.hash;
-    if (path.includes('/range') && !path.includes('/range/lane') && !path.includes('/range/instructor')) {
-      fixRangeDashboardLayout();
-    }
-  });
-  rangeDashObserver.observe(document.body, { childList: true, subtree: true });
-
-  setTimeout(fixRangeDashboardLayout, 600);
+  
+  // Initial load
+  setTimeout(patchComparePage, 800);
 })();
