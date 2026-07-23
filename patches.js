@@ -76,6 +76,40 @@
   
   /* === TIR shooter animation ===  /* TIR shooter animation */
   .tir-shooter-canvas { width: 100%; height: 100%; display: block; }
+
+  /* === RANGE LAYOUT: lanes full-width 4-col, activity below === */
+  /* The main 4-col grid on range page becomes a single column (stacks lanes + activity) */
+  body[data-page="range"] .grid.grid-cols-1.lg\:grid-cols-4 {
+    grid-template-columns: 1fr !important;
+  }
+  /* Lanes container (lg:col-span-3) takes full width and uses 4-col grid internally */
+  body[data-page="range"] .lg\:col-span-3 {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 16px !important;
+  }
+  /* Activity sidebar (lg:col-span-1) goes full width below */
+  body[data-page="range"] .lg\:col-span-1 {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
+  /* Remove sticky from activity card on range page */
+  body[data-page="range"] .sticky.top-4 {
+    position: static !important;
+  }
+  /* Responsive */
+  @media (max-width: 1439px) {
+    body[data-page="range"] .lg\:col-span-3 {
+      grid-template-columns: repeat(3, 1fr) !important;
+    }
+  }
+  @media (max-width: 767px) {
+    body[data-page="range"] .lg\:col-span-3 {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+  }
   `;
 
   document.head.appendChild(css);
