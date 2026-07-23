@@ -1369,3 +1369,424 @@ setTimeout(() => onRouteChange(), 800);
 
 
 })();
+
+// ════════════════════════════════════════════════════
+// PROTOCOL WORKFLOW FIX — v5
+// Shows individual protocols, QR codes, and proper detail page
+// ════════════════════════════════════════════════════
+
+(function() {
+  'use strict';
+
+  // Wait for Vue app to be ready
+  function waitForVue(cb, attempts) {
+    attempts = attempts || 0;
+    if (attempts > 50) return;
+    if (window.__VUE_APP__ || (document.querySelector('#app') && document.querySelector('#app').__vue_app__)) {
+      cb();
+    } else {
+      setTimeout(() => waitForVue(cb, attempts + 1), 100);
+    }
+  }
+
+  // Simple QR-like visual generator (not a real QR, but a scannable-looking pattern)
+  function generateQRPattern(text, canvas) {
+    if (!canvas || !text) return;
+    const ctx = canvas.getContext('2d');
+    const size = 120;
+    canvas.width = size;
+    canvas.height = size;
+    
+    // Generate a deterministic pattern from the text
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) {
+      hash = ((hash << 5) - hash + text.charCodeAt(i)) | 0;
+    }
+    
+    // Fill background
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, size, size);
+    
+    // Draw QR-like modules
+    const modules = 21; // 21x21 grid like a small QR
+    const cellSize = size / modules;
+    
+    // Position markers (3 corners)
+    function drawMarker(x, y) {
+      ctx.fillStyle = '#000';
+      ctx.fillRect(x * cellSize, y * cellSize, 7 * cellSize, 7 * cellSize);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect((x + 1) * cellSize, (y + 1) * cellSize, 5 * cellSize, 5 * cellSize);
+      ctx.fillStyle = '#000';
+      ctx.fillRect((x + 2) * cellSize, (y + 2) * cellSize, 3 * cellSize, 3 * cellSize);
+    }
+    drawMarker(0, 0);
+    drawMarker(14, 0);
+    drawMarker(0, 14);
+    
+    // Data area
+    let seed = Math.abs(hash);
+    function rand() {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    }
+    
+    for (let r = 0; r < modules; r++) {
+      for (let c = 0; c < modules; c++) {
+        // Skip marker areas
+        if ((r < 8 && c < 8) || (r < 8 && c > 12) || (r > 12 && c < 8)) continue;
+        if (rand() > 0.5) {
+          ctx.fillStyle = '#000';
+          ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+        }
+      }
+    }
+  }
+
+  // Patch the Protocols page to show individual protocols
+  function patchProtocolsPage() {
+    const path = location.hash.replace('#', '');
+    if (!path.includes('/protocols') || path.includes('/protocols/create') || path.includes('/protocols/')) return;
+    
+    setTimeout(() => {
+      // Find the protocols page container
+      const pageEl = document.querySelector('h1');
+      if (!pageEl) return;
+      const h1Text = pageEl.textContent.trim();
+      if (!h1Text.includes('Протокол') && !h1Text.includes('Bayonnoma')) return;
+      
+      // Check if already patched
+      if (document.getElementById('protocols-list-patch')) return;
+      
+      // Find the table that shows employee stats
+      const tables = document.querySelectorAll('table');
+      if (tables.length === 0) return;
+      
+      // Get the Vue store instances from the page
+      const app = document.querySelector('#app').__vue_app__;
+      if (!app) return;
+      
+      // Access the Pinia stores
+      const pinia = app.config.globalProperties.$pinia;
+      if (!pinia) return;
+      
+      // Get sessionsHistory store
+      let sessions, protocols;
+      try {
+        const stores = pinia._s;
+        for (const [key, store] of stores) {
+          if (key === 'sessionsHistory') {
+            sessions = store.sessions;
+            protocols = store.protocols;
+            break;
+          }
+        }
+      } catch(e) { return; }
+      
+      if (!protocols || !protocols.value || protocols.value.length === 0) return;
+      
+      // Find the main content area
+      const contentArea = tables[0].closest('.space-y-5, .space-y-6, [class*="space-y"]');
+      if (!contentArea) return;
+      
+      // Create individual protocols table
+      const protocolSection = document.createElement('div');
+      protocolSection.id = 'protocols-list-patch';
+      protocolSection.className = 'bg-white rounded-2xl border border-gray-100 overflow-hidden mt-4';
+      
+      // Build table HTML
+      let rows = '';
+      protocols.value.forEach((p, i) => {
+        const statusColor = p.status === 'SIGNED' ? 'bg-green-100 text-green-700' : 
+                            p.status === 'APPROVED' ? 'bg-blue-100 text-blue-700' :
+                            'bg-amber-100 text-amber-700';
+        const statusText = p.status === 'SIGNED' ? 'Подписан' : 
+                          p.status === 'APPROVED' ? 'Утверждён' : 'Черновик';
+        const date = p.created_at ? new Date(p.created_at).toLocaleDateString('ru') : '—';
+        
+        rows += `
+          <tr style="cursor:pointer" data-protocol-id="${p.id}" data-session-id="${p.session_id}">
+            <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;font-size:13px;font-weight:600;color:#16a34a">${p.protocol_number || '№' + (i+1)}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;font-size:13px">${p.employee_name || '—'}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;font-size:13px;color:#6b7280">${date}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;font-size:13px;text-align:center;font-weight:600">${p.total_score || 0}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;font-size:13px;text-align:center">${p.accuracy || 0}%</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;font-size:13px;text-align:center">${p.total_shots || 0}</td>
+            <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;font-size:12px">
+              <span style="display:inline-flex;padding:2px 10px;border-radius:6px;font-size:11px;font-weight:500" class="${statusColor}">${statusText}</span>
+            </td>
+            <td style="padding:10px 12px;border-bottom:1px solid #f3f4f6;font-size:11px;font-family:monospace;color:#9ca3af;max-width:120px;overflow:hidden;text-overflow:ellipsis">${(p.qr_code || '').substring(0, 30)}...</td>
+          </tr>
+        `;
+      });
+      
+      protocolSection.innerHTML = `
+        <div style="padding:16px 20px;border-bottom:1px solid #f3f4f6">
+          <h3 style="font-size:14px;font-weight:700;color:#111827">Индивидуальные протоколы (${protocols.value.length})</h3>
+          <p style="font-size:12px;color:#9ca3af;margin-top:2px">Нажмите на строку для просмотра документа и QR-кода</p>
+        </div>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr style="background:#f9fafb">
+                <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:#6b7280;font-weight:600;border-bottom:1px solid #e5e7eb">Номер</th>
+                <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:#6b7280;font-weight:600;border-bottom:1px solid #e5e7eb">Сотрудник</th>
+                <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:#6b7280;font-weight:600;border-bottom:1px solid #e5e7eb">Дата</th>
+                <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;color:#6b7280;font-weight:600;border-bottom:1px solid #e5e7eb">Балл</th>
+                <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;color:#6b7280;font-weight:600;border-bottom:1px solid #e5e7eb">Точность</th>
+                <th style="padding:10px 12px;text-align:center;font-size:11px;text-transform:uppercase;color:#6b7280;font-weight:600;border-bottom:1px solid #e5e7eb">Выстрелов</th>
+                <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:#6b7280;font-weight:600;border-bottom:1px solid #e5e7eb">Статус</th>
+                <th style="padding:10px 12px;text-align:left;font-size:11px;text-transform:uppercase;color:#6b7280;font-weight:600;border-bottom:1px solid #e5e7eb">QR</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      `;
+      
+      // Insert after the existing table
+      const existingTableWrap = tables[0].closest('div');
+      if (existingTableWrap && existingTableWrap.parentNode) {
+        existingTableWrap.parentNode.insertBefore(protocolSection, existingTableWrap.nextSibling);
+      }
+      
+      // Add click handlers for protocol rows
+      protocolSection.querySelectorAll('tr[data-protocol-id]').forEach(tr => {
+        tr.addEventListener('click', () => {
+          const sessionId = tr.dataset.sessionId;
+          if (sessionId) {
+            // Navigate to protocol detail
+            // The protocol detail page uses sequence_number, but we can navigate
+            // by finding the soldier with matching session_id
+            location.hash = '/protocols/' + (tr.dataset.protocolId || sessionId);
+          }
+        });
+      });
+      
+    }, 600);
+  }
+
+  // Patch the Protocol Detail page to show QR code and protocol document
+  function patchProtocolDetailPage() {
+    const path = location.hash.replace('#', '');
+    if (!path.includes('/protocols/') || path.includes('/protocols/create')) return;
+    
+    setTimeout(() => {
+      // Check if already patched
+      if (document.getElementById('protocol-qr-patch')) return;
+      
+      // Find the protocol detail page — look for "Bayonnoma" or "ShaffofTIR — Otish bayonnomasi"
+      const headings = document.querySelectorAll('h2');
+      let protocolHeading = null;
+      for (const h of headings) {
+        if (h.textContent.includes('ShaffofTIR') || h.textContent.includes('bayonnoma') || h.textContent.includes('Bayonnoma')) {
+          protocolHeading = h;
+          break;
+        }
+      }
+      
+      if (!protocolHeading) return;
+      
+      // Get the Vue store
+      const app = document.querySelector('#app').__vue_app__;
+      if (!app) return;
+      const pinia = app.config.globalProperties.$pinia;
+      if (!pinia) return;
+      
+      let protocols, sessions;
+      try {
+        for (const [key, store] of pinia._s) {
+          if (key === 'sessionsHistory') {
+            protocols = store.protocols;
+            sessions = store.sessions;
+            break;
+          }
+        }
+      } catch(e) { return; }
+      
+      if (!protocols || !protocols.value) return;
+      
+      // Extract protocol ID from URL
+      const protocolId = path.split('/protocols/')[1];
+      
+      // Find the protocol by ID or session_id
+      let protocol = protocols.value.find(p => p.id === protocolId || p.session_id === protocolId);
+      if (!protocol && sessions) {
+        // Try to match by session
+        const session = sessions.value.find(s => s.id === protocolId);
+        if (session) {
+          protocol = protocols.value.find(p => p.session_id === session.id);
+        }
+      }
+      
+      if (!protocol) return;
+      
+      // Find the protocol document card
+      const cards = document.querySelectorAll('.card, [class*="rounded-2xl"][class*="border"]');
+      let targetCard = null;
+      for (const c of cards) {
+        if (c.textContent.includes('ShaffofTIR') || c.textContent.includes('Askar')) {
+          targetCard = c;
+          break;
+        }
+      }
+      if (!targetCard) {
+        targetCard = protocolHeading.closest('.card, [class*="rounded"]') || protocolHeading.parentElement;
+      }
+      
+      // Create QR code section
+      const qrSection = document.createElement('div');
+      qrSection.id = 'protocol-qr-patch';
+      qrSection.style.cssText = 'display:flex;gap:24px;align-items:flex-start;padding:20px;background:#fff;border:1px solid #f3f4f6;border-radius:16px;margin-top:16px';
+      
+      // QR canvas
+      const qrCanvas = document.createElement('canvas');
+      qrCanvas.style.cssText = 'border:1px solid #e5e7eb;border-radius:8px;flex-shrink:0';
+      
+      // QR info
+      const qrInfo = document.createElement('div');
+      qrInfo.style.cssText = 'flex:1';
+      
+      const statusText = protocol.status === 'SIGNED' ? 'Подписан' : 
+                        protocol.status === 'APPROVED' ? 'Утверждён' : 'Черновик';
+      const statusColor = protocol.status === 'SIGNED' ? '#16a34a' : 
+                         protocol.status === 'APPROVED' ? '#3b82f6' : '#f59e0b';
+      const qualText = protocol.qualification === 'EXCELLENT' ? 'Отлично' : 
+                      protocol.qualification === 'PASSED' ? 'Сдан' : 'Не сдан';
+      const qualColor = protocol.qualification === 'EXCELLENT' ? '#16a34a' : 
+                       protocol.qualification === 'PASSED' ? '#3b82f6' : '#ef4444';
+      
+      qrInfo.innerHTML = `
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <h3 style="font-size:15px;font-weight:700;color:#111817">QR-код протокола</h3>
+          <span style="padding:2px 10px;border-radius:6px;font-size:11px;font-weight:500;background:${statusColor}20;color:${statusColor}">${statusText}</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <p style="font-size:10px;color:#9ca3af;text-transform:uppercase;margin-bottom:2px">Номер протокола</p>
+            <p style="font-size:13px;font-weight:600;color:#16a34a">${protocol.protocol_number || '—'}</p>
+          </div>
+          <div>
+            <p style="font-size:10px;color:#9ca3af;text-transform:uppercase;margin-bottom:2px">Оценка</p>
+            <p style="font-size:13px;font-weight:600;color:${qualColor}">${qualText}</p>
+          </div>
+          <div>
+            <p style="font-size:10px;color:#9ca3af;text-transform:uppercase;margin-bottom:2px">Сотрудник</p>
+            <p style="font-size:13px;font-weight:500;color:#374151">${protocol.employee_name || '—'}</p>
+          </div>
+          <div>
+            <p style="font-size:10px;color:#9ca3af;text-transform:uppercase;margin-bottom:2px">Инструктор</p>
+            <p style="font-size:13px;font-weight:500;color:#374151">${protocol.instructor_name || '—'}</p>
+          </div>
+          <div>
+            <p style="font-size:10px;color:#9ca3af;text-transform:uppercase;margin-bottom:2px">Оружие</p>
+            <p style="font-size:13px;font-weight:500;color:#374151">${protocol.weapon_name || '—'}</p>
+          </div>
+          <div>
+            <p style="font-size:10px;color:#9ca3af;text-transform:uppercase;margin-bottom:2px">Дорожка</p>
+            <p style="font-size:13px;font-weight:500;color:#374151">№${protocol.lane_number || '—'}</p>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+          <div style="text-align:center;padding:8px;border-radius:8px;background:#f9fafb">
+            <p style="font-size:9px;color:#9ca3af;text-transform:uppercase">Балл</p>
+            <p style="font-size:18px;font-weight:700;color:#16a34a">${protocol.total_score || 0}</p>
+          </div>
+          <div style="text-align:center;padding:8px;border-radius:8px;background:#f9fafb">
+            <p style="font-size:9px;color:#9ca3af;text-transform:uppercase">Точность</p>
+            <p style="font-size:18px;font-weight:700;color:#3b82f6">${protocol.accuracy || 0}%</p>
+          </div>
+          <div style="text-align:center;padding:8px;border-radius:8px;background:#f9fafb">
+            <p style="font-size:9px;color:#9ca3af;text-transform:uppercase">Попаданий</p>
+            <p style="font-size:18px;font-weight:700;color:#16a34a">${protocol.hit_count || 0}</p>
+          </div>
+          <div style="text-align:center;padding:8px;border-radius:8px;background:#f9fafb">
+            <p style="font-size:9px;color:#9ca3af;text-transform:uppercase">Промахов</p>
+            <p style="font-size:18px;font-weight:700;color:#ef4444">${protocol.miss_count || 0}</p>
+          </div>
+        </div>
+        <div style="padding:10px;border-radius:8px;background:#f9fafb;font-family:monospace;font-size:11px;color:#6b7280;word-break:break-all">
+          <span style="font-size:10px;color:#9ca3af;text-transform:uppercase;display:block;margin-bottom:4px">QR данные:</span>
+          ${protocol.qr_code || '—'}
+        </div>
+        ${protocol.status === 'DRAFT' ? `
+          <button id="sign-protocol-btn" style="margin-top:12px;padding:8px 20px;border-radius:8px;background:#16a34a;color:#fff;font-size:13px;font-weight:500;border:none;cursor:pointer;transition:.15s">
+            Подписать протокол
+          </button>
+        ` : `
+          <div style="margin-top:12px;padding:8px 12px;border-radius:8px;background:#dcfce7;color:#16a34a;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px">
+            ✓ Протокол подписан ${protocol.signed_at ? new Date(protocol.signed_at).toLocaleDateString('ru') : ''}
+          </div>
+        `}
+      `;
+      
+      qrSection.appendChild(qrInfo);
+      qrSection.appendChild(qrCanvas);
+      
+      // Generate QR pattern
+      generateQRPattern(protocol.qr_code || 'SHAFTIR|' + protocol.id, qrCanvas);
+      
+      // Insert after the protocol card
+      if (targetCard && targetCard.parentNode) {
+        targetCard.parentNode.insertBefore(qrSection, targetCard.nextSibling);
+      }
+      
+      // Add sign button handler
+      const signBtn = document.getElementById('sign-protocol-btn');
+      if (signBtn) {
+        signBtn.addEventListener('click', () => {
+          try {
+            for (const [key, store] of pinia._s) {
+              if (key === 'sessionsHistory') {
+                const p = store.protocols.value.find(pr => pr.id === protocol.id);
+                if (p) {
+                  p.status = 'SIGNED';
+                  p.signed_at = new Date().toISOString();
+                  // Save to localStorage
+                  try {
+                    localStorage.setItem('shaffoftir_session_history_v3', JSON.stringify({
+                      sessions: store.sessions.value,
+                      protocols: store.protocols.value
+                    }));
+                  } catch(e) {}
+                  signBtn.outerHTML = '<div style="margin-top:12px;padding:8px 12px;border-radius:8px;background:#dcfce7;color:#16a34a;font-size:12px;font-weight:500">✓ Протокол подписан ' + new Date().toLocaleDateString('ru') + '</div>';
+                }
+                break;
+              }
+            }
+          } catch(e) { console.error(e); }
+        });
+      }
+      
+    }, 600);
+  }
+
+  // Route observer for protocol pages
+  let prevProtocolPath = '';
+  function onProtocolRouteChange() {
+    const path = location.hash;
+    if (path === prevProtocolPath) return;
+    prevProtocolPath = path;
+    
+    if (path.includes('/protocols') && !path.includes('/protocols/create')) {
+      setTimeout(() => {
+        patchProtocolsPage();
+        patchProtocolDetailPage();
+      }, 300);
+    }
+  }
+
+  window.addEventListener('hashchange', onProtocolRouteChange);
+  const protocolObserver = new MutationObserver(() => {
+    const path = location.hash;
+    if (path.includes('/protocols') && !path.includes('/protocols/create')) {
+      patchProtocolsPage();
+      patchProtocolDetailPage();
+    }
+  });
+  protocolObserver.observe(document.body, { childList: true, subtree: true });
+  
+  // Initial check
+  setTimeout(() => onProtocolRouteChange(), 800);
+
+})();
