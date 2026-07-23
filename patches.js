@@ -406,201 +406,266 @@
 
   // ── Replace Upload Analysis page with Compare ──
   function buildComparePage(container) {
-    // Get employees from the Vue app's store
-    let employees = [];
-    let sessions = [];
-    try {
-      const app = document.getElementById('app');
-      if (app && app.__vue_app__) {
-        // Try to access store via Vue
-        const stores = app.__vue_app__._instance?.appContext?.provides;
-        // Can't easily access Pinia store from outside, use hardcoded from bundle
-      }
-    } catch(e) {}
-
-    // Fallback: extract from DOM or use defaults
-    employees = [
-      {id:'e01',name:'Алиев Бахтиёр У.',rank:'Капитан',qual:'EXPERT',sessions:24,avg:78},
-      {id:'e03',name:'Юлдашев Дилшод А.',rank:'Сержант',qual:'EXPERT',sessions:32,avg:85},
-      {id:'e05',name:'Махмудов Сардор Б.',rank:'Ст. сержант',qual:'EXPERT',sessions:45,avg:91},
-      {id:'e06',name:'Каримов Азиз У.',rank:'Ефрейтор',qual:'EXPERT',sessions:38,avg:88},
-      {id:'e08',name:'Тошматов Фирдавс Ш.',rank:'Старшина',qual:'EXPERT',sessions:120,avg:95},
-      {id:'e02',name:'Рахимов Жасур Т.',rank:'Лейтенант',qual:'INTERMEDIATE',sessions:18,avg:71},
-    ];
-    sessions = [
-      {id:'s01',empId:'e05',score:91,hits:18,shots:20},
-      {id:'s02',empId:'e03',score:87,hits:8,shots:10},
-      {id:'s04',empId:'e01',score:78,hits:8,shots:10},
-      {id:'s05',empId:'e08',score:95,hits:19,shots:20},
-      {id:'s06',empId:'e02',score:71,hits:7,shots:10},
-    ];
-
-    container.innerHTML = `
-      <div style="margin-bottom:16px">
-        <h1 style="font-size:20px;font-weight:700">Сравнение сотрудников</h1>
-        <p style="font-size:13px;color:#6b7280;margin-top:3px">Сопоставьте результаты двух стрелков</p>
+  // BEFORE/AFTER TARGET COMPARISON WORKFLOW
+  // Clear container
+  container.innerHTML = '';
+  
+  let hasBefore = false;
+  let hasAfter = false;
+  
+  // Step indicator
+  const stepsDiv = document.createElement('div');
+  stepsDiv.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:11px;color:#9ca3af;margin-bottom:16px';
+  stepsDiv.innerHTML = `
+    <div style="display:flex;align-items:center;gap:6px">
+      <div id="step1-badge" style="width:20px;height:20px;border-radius:50%;background:#dcfce7;color:#16a34a;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">1</div>
+      <span>Oldin rasm</span>
+    </div>
+    <div style="color:#d1d5db">→</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div id="step2-badge" style="width:20px;height:20px;border-radius:50%;background:#f3f4f6;color:#6b7280;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">2</div>
+      <span>Keyin rasm</span>
+    </div>
+    <div style="color:#d1d5db">→</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div id="step3-badge" style="width:20px;height:20px;border-radius:50%;background:#f3f4f6;color:#6b7280;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">3</div>
+      <span>AI tahlil</span>
+    </div>
+    <div style="color:#d1d5db">→</div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <div id="step4-badge" style="width:20px;height:20px;border-radius:50%;background:#f3f4f6;color:#6b7280;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">4</div>
+      <span>Bayonoma</span>
+    </div>
+  `;
+  container.appendChild(stepsDiv);
+  
+  // Before/After grid
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px';
+  
+  // BEFORE card
+  grid.innerHTML = `
+    <div class="card" style="padding:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div id="dot-before" style="width:8px;height:8px;border-radius:50%;background:#d1d5db"></div>
+          <span style="font-size:13px;font-weight:700;color:#111827">1. Oldin (BEFORE)</span>
+        </div>
+        <span style="font-size:10px;padding:2px 8px;border-radius:6px;background:#f3f4f6;color:#6b7280">BEFORE</span>
       </div>
-      <div id="compare-root" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px">
-          <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:12px">Стрелок А</div>
-          <select id="cmp-a" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:10px">
-            ${employees.map(e => `<option value="${e.id}">${e.name} — ${e.rank}</option>`).join('')}
-          </select>
-          <div id="cmp-a-info"></div>
-        </div>
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px">
-          <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:12px">Стрелок Б</div>
-          <select id="cmp-b" style="width:100%;padding:8px 12px;border:1px solid #e5e7eb;border-radius:8px;font-size:13px;margin-bottom:10px">
-            ${employees.map(e => `<option value="${e.id}">${e.name} — ${e.rank}</option>`).join('')}
-          </select>
-          <div id="cmp-b-info"></div>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
-        <div>
-          <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:8px">Рассеивание А</div>
-          <div style="background:#0d1a14;border-radius:10px;overflow:hidden;aspect-ratio:1;max-height:240px">
-            <canvas id="cmp-canvas-a" width="200" height="200" style="width:100%;height:100%"></canvas>
-          </div>
-        </div>
-        <div>
-          <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:8px">Рассеивание Б</div>
-          <div style="background:#0d1a14;border-radius:10px;overflow:hidden;aspect-ratio:1;max-height:240px">
-            <canvas id="cmp-canvas-b" width="200" height="200" style="width:100%;height:100%"></canvas>
-          </div>
+      <div style="position:relative;background:#111827;border-radius:12px;overflow:hidden;aspect-ratio:1/1">
+        <canvas id="canvas-before" style="width:100%;height:100%;display:none"></canvas>
+        <div id="ph-before" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#6b7280">
+          <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="opacity:0.3;margin-bottom:8px"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.9L8.5 5.5h7l.906 1.6A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <p style="font-size:11px">Toza mishen rasmi yo'q</p>
         </div>
       </div>
-      <div id="cmp-metrics" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px"></div>
-      <div id="cmp-verdict" style="margin-top:16px"></div>
-    `;
-
-    // Set default selections
-    const selA = container.querySelector('#cmp-a');
-    const selB = container.querySelector('#cmp-b');
-    selB.selectedIndex = 2; // Different from A
-
-    function drawTarget(canvasId, empId) {
-      const c = document.getElementById(canvasId);
-      if (!c) return;
-      const ctx = c.getContext('2d');
-      const W = c.width, H = c.height;
-      ctx.fillStyle = '#0a1a14';
-      ctx.fillRect(0, 0, W, H);
-      const cx = W/2, cy = H/2;
-      [90,70,50,30,15].forEach((r,i) => {
-        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2);
-        ctx.strokeStyle = `rgba(255,255,255,${0.06+i*0.02})`;
-        ctx.lineWidth = 1; ctx.stroke();
+      <button id="btn-before" style="margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:8px;background:#16a34a;color:white;border:none;cursor:pointer;font-size:12px;font-weight:600">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.9L8.5 5.5h7l.906 1.6A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Kamera — Oldin rasm olish
+      </button>
+    </div>
+    <div class="card" style="padding:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div id="dot-after" style="width:8px;height:8px;border-radius:50%;background:#d1d5db"></div>
+          <span style="font-size:13px;font-weight:700;color:#111827">2. Keyin (AFTER)</span>
+        </div>
+        <span style="font-size:10px;padding:2px 8px;border-radius:6px;background:#dcfce7;color:#16a34a">AFTER</span>
+      </div>
+      <div style="position:relative;background:#111827;border-radius:12px;overflow:hidden;aspect-ratio:1/1">
+        <canvas id="canvas-after" style="width:100%;height:100%;display:none"></canvas>
+        <div id="ph-after" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#6b7280">
+          <svg width="32" height="32" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="opacity:0.3;margin-bottom:8px"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.9L8.5 5.5h7l.906 1.6A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+          <p style="font-size:11px">Avval "Oldin rasm" oling</p>
+        </div>
+      </div>
+      <button id="btn-after" style="margin-top:12px;width:100%;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:8px;background:#16a34a;color:white;border:none;cursor:pointer;font-size:12px;font-weight:600;opacity:0.4" disabled>
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.9L8.5 5.5h7l.906 1.6A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Kamera — Keyin rasm olish
+      </button>
+    </div>
+  `;
+  container.appendChild(grid);
+  
+  // Action area
+  const actionArea = document.createElement('div');
+  actionArea.id = 'action-area';
+  container.appendChild(actionArea);
+  
+  // Status text
+  const statusTxt = document.createElement('p');
+  statusTxt.id = 'compare-status-txt';
+  statusTxt.style.cssText = 'font-size:11px;color:#9ca3af;text-align:center;margin-top:8px';
+  container.appendChild(statusTxt);
+  
+  // Canvas drawing
+  function drawTarget(canvasId, withHoles) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    canvas.width = 300; canvas.height = 300;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0,0,300,300);
+    const rings = [{r:130,c:'#2d3748'},{r:105,c:'#4a5568'},{r:80,c:'#718096'},{r:55,c:'#a0aec0'},{r:30,c:'#e2e8f0'},{r:15,c:'#ffffff'}];
+    rings.forEach(r => {ctx.fillStyle=r.c;ctx.beginPath();ctx.arc(150,150,r.r,0,Math.PI*2);ctx.fill()});
+    // Crosshair
+    ctx.strokeStyle='rgba(200,200,200,0.25)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(150,5);ctx.lineTo(150,295);ctx.moveTo(5,150);ctx.lineTo(295,150);ctx.stroke();
+    // Ring numbers
+    ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font='10px sans-serif';ctx.textAlign='center';
+    [10,9,8,7,6,5].forEach((n,i)=>{ctx.fillText(n,150,150-[5,15,30,55,80,105][i]+4)});
+    if (withHoles) {
+      const holes = [[148,152,8],[155,144,7],[142,158,6],[160,155,5],[150,135,9],[165,148,5],[143,165,6],[157,138,8],[150,160,7],[138,148,6]];
+      holes.forEach(h => {
+        // Hole shadow
+        ctx.fillStyle='rgba(0,0,0,0.7)';ctx.beginPath();ctx.arc(h[0],h[1],h[2],0,Math.PI*2);ctx.fill();
+        // Hole center
+        ctx.fillStyle='rgba(20,5,5,0.95)';ctx.beginPath();ctx.arc(h[0],h[1],h[2]*0.65,0,Math.PI*2);ctx.fill();
+        // Torn edge
+        ctx.strokeStyle='rgba(120,80,50,0.5)';ctx.lineWidth=0.8;ctx.beginPath();ctx.arc(h[0],h[1],h[2]*1.15,0,Math.PI*2);ctx.stroke();
       });
-      const emp = employees.find(e => e.id === empId);
-      if (!emp) return;
-      const count = Math.min(emp.sessions * 2, 15);
-      const spread = emp.qual === 'EXPERT' ? 20 : emp.qual === 'ADVANCED' ? 32 : 48;
-      for (let i = 0; i < count; i++) {
-        const a = Math.random()*Math.PI*2, d = Math.random()*spread;
-        ctx.beginPath(); ctx.arc(cx+Math.cos(a)*d, cy+Math.sin(a)*d, 3, 0, Math.PI*2);
-        ctx.fillStyle = '#10b981'; ctx.fill();
-      }
     }
-
-    function update() {
-      const aId = selA.value, bId = selB.value;
-      const eA = employees.find(e => e.id === aId);
-      const eB = employees.find(e => e.id === bId);
-      if (!eA || !eB) return;
-
-      const sA = sessions.filter(s => s.empId === aId);
-      const sB = sessions.filter(s => s.empId === bId);
-      const avgA = sA.length ? Math.round(sA.reduce((a,s)=>a+s.score,0)/sA.length) : eA.avg;
-      const avgB = sB.length ? Math.round(sB.reduce((a,s)=>a+s.score,0)/sB.length) : eB.avg;
-      const accA = sA.length ? Math.round(sA.reduce((a,s)=>a+s.hits,0)/sA.reduce((a,s)=>a+s.shots,0)*100) : Math.round(eA.avg*0.9);
-      const accB = sB.length ? Math.round(sB.reduce((a,s)=>a+s.hits,0)/sB.reduce((a,s)=>a+s.shots,0)*100) : Math.round(eB.avg*0.9);
-
-      // Info cards
-      document.getElementById('cmp-a-info').innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px">${eA.name[0]}</div>
-          <div>
-            <div style="font-weight:600">${eA.name}</div>
-            <div style="font-size:12px;color:#6b7280">${eA.rank}</div>
-            <span style="padding:2px 8px;border-radius:6px;font-size:11px;background:#d1fae5;color:#059669;display:inline-flex;margin-top:4px">${eA.qual}</span>
-          </div>
-        </div>`;
-      document.getElementById('cmp-b-info').innerHTML = `
-        <div style="display:flex;align-items:center;gap:10px">
-          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:16px">${eB.name[0]}</div>
-          <div>
-            <div style="font-weight:600">${eB.name}</div>
-            <div style="font-size:12px;color:#6b7280">${eB.rank}</div>
-            <span style="padding:2px 8px;border-radius:6px;font-size:11px;background:#d1fae5;color:#059669;display:inline-flex;margin-top:4px">${eB.qual}</span>
-          </div>
-        </div>`;
-
-      drawTarget('cmp-canvas-a', aId);
-      drawTarget('cmp-canvas-b', bId);
-
-      // Metrics
-      function metricCard(avg, acc, sess, total) {
-        return `
-          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px">
-            <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:12px">Метрики</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-              <div style="text-align:center;padding:10px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px">
-                <div style="font-size:22px;font-weight:700;color:#10b981">${avg}</div>
-                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Средний балл</div>
-              </div>
-              <div style="text-align:center;padding:10px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px">
-                <div style="font-size:22px;font-weight:700">${acc}%</div>
-                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Точность</div>
-              </div>
-              <div style="text-align:center;padding:10px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px">
-                <div style="font-size:22px;font-weight:700">${sess}</div>
-                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Сессий</div>
-              </div>
-              <div style="text-align:center;padding:10px 14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px">
-                <div style="font-size:22px;font-weight:700">${total}</div>
-                <div style="font-size:11px;color:#9ca3af;margin-top:2px">Всего</div>
-              </div>
-            </div>
-          </div>`;
-      }
-      document.getElementById('cmp-metrics').innerHTML =
-        metricCard(avgA, accA, sA.length, eA.sessions) + metricCard(avgB, accB, sB.length, eB.sessions);
-
-      // Verdict
-      const w = (a, b) => a > b ? 'A' : b > a ? 'B' : '=';
-      function verdictRow(label, vA, vB, nameA, nameB) {
-        const win = w(vA, vB);
-        return `<tr style="border-bottom:1px solid #e5e7eb">
-          <td style="padding:10px 12px">${label}</td>
-          <td style="padding:10px 12px;font-weight:500">${vA}</td>
-          <td style="padding:10px 12px;font-weight:500">${vB}</td>
-          <td style="padding:10px 12px">${win==='A'?`<span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">${nameA}</span>`:win==='B'?`<span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600">${nameB}</span>`:'Ничья'}</td>
-        </tr>`;
-      }
-      document.getElementById('cmp-verdict').innerHTML = `
-        <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px">
-          <div style="font-size:12px;font-weight:600;text-transform:uppercase;color:#9ca3af;margin-bottom:12px">Итог сравнения</div>
-          <table style="width:100%;border-collapse:collapse;font-size:13px">
-            <thead><tr style="background:#f9fafb">
-              <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280">Показатель</th>
-              <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280">${eA.name}</th>
-              <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280">${eB.name}</th>
-              <th style="text-align:left;padding:9px 12px;font-size:11px;text-transform:uppercase;color:#6b7280">Победитель</th>
-            </tr></thead>
-            <tbody>
-              ${verdictRow('Средний балл', avgA, avgB, eA.name, eB.name)}
-              ${verdictRow('Точность', accA+'%', accB+'%', eA.name, eB.name)}
-              ${verdictRow('Сессий', eA.sessions, eB.sessions, eA.name, eB.name)}
-            </tbody>
-          </table>
-        </div>`;
-    }
-
-    selA.addEventListener('change', update);
-    selB.addEventListener('change', update);
-    update();
+    canvas.style.display = 'block';
   }
+  
+  function activateStep(num) {
+    for(let n=1;n<=4;n++){
+      const b = document.getElementById('step'+n+'-badge');
+      if(!b) continue;
+      if(n<=num){b.style.background='#dcfce7';b.style.color='#16a34a';}
+      else{b.style.background='#f3f4f6';b.style.color='#6b7280';}
+    }
+  }
+  
+  function showToast(msg, type) {
+    const t=document.createElement('div');
+    t.style.cssText='position:fixed;top:16px;right:16px;z-index:9999;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,0.1)';
+    t.style.background = type==='success'?'#f0fdf4':type==='warning'?'#fffbeb':'#fef2f2';
+    t.style.color = type==='success'?'#15803d':type==='warning'?'#b45309':'#dc2626';
+    t.style.border = 'solid 1px '+(type==='success'?'#bbf7d0':type==='warning'?'#fde68a':'#fecaca');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(),3000);
+  }
+  
+  // BEFORE button
+  document.getElementById('btn-before').addEventListener('click', () => {
+    drawTarget('canvas-before', false);
+    document.getElementById('ph-before').style.display = 'none';
+    document.getElementById('dot-before').style.background = '#16a34a';
+    const afterBtn = document.getElementById('btn-after');
+    afterBtn.disabled = false; afterBtn.style.opacity = '1';
+    hasBefore = true;
+    activateStep(2);
+    statusTxt.textContent = "Toza mishen olingan — endi askar o'q otadi";
+    showToast("✓ Oldin rasm saqlandi", 'success');
+  });
+  
+  // AFTER button
+  document.getElementById('btn-after').addEventListener('click', () => {
+    if (!hasBefore) { showToast("⚠ Avval 'Oldin rasm' oling", 'warning'); return; }
+    drawTarget('canvas-after', true);
+    document.getElementById('ph-after').style.display = 'none';
+    document.getElementById('dot-after').style.background = '#16a34a';
+    hasAfter = true;
+    activateStep(3);
+    statusTxt.textContent = "O'q otilgan mishen olingan — AI tahlil boshlash mumkin";
+    showToast("✓ Keyin rasm saqlandi", 'success');
+    
+    // Show AI analysis button
+    actionArea.innerHTML = `
+      <button id="btn-ai-analyze" style="display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:8px;background:#1d4ed8;color:white;border:none;cursor:pointer;font-size:13px;font-weight:600;margin:0 auto">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3"/></svg>
+        AI tahlilni boshlash
+      </button>
+    `;
+    document.getElementById('btn-ai-analyze').addEventListener('click', runAI);
+  });
+  
+  function runAI() {
+    activateStep(3);
+    actionArea.innerHTML = `
+      <div class="card" style="padding:16px;background:linear-gradient(135deg,#eff6ff,#fff)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="width:8px;height:8px;border-radius:50%;background:#3b82f6;animation:pulse 1s infinite"></div>
+          <span style="font-size:13px;font-weight:700;color:#1e40af">AI tahlil qilmoqda...</span>
+        </div>
+        <div style="height:6px;border-radius:3px;background:#dbeafe;overflow:hidden">
+          <div style="height:100%;width:70%;border-radius:3px;background:linear-gradient(90deg,#60a5fa,#3b82f6);animation:pulse 1.2s ease-in-out infinite"></div>
+        </div>
+        <p style="font-size:11px;color:#3b82f6;margin-top:8px">Nishon rasmlarni AI solishtirib, o'q teshiklarini aniqlamoqda...</p>
+      </div>
+    `;
+    statusTxt.textContent = 'AI ishlayapti...';
+    
+    setTimeout(() => {
+      activateStep(4);
+      actionArea.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
+          <div class="card" style="padding:12px;text-align:center">
+            <p style="font-size:10px;color:#6b7280;margin-bottom:4px">Tegdi</p>
+            <p style="font-size:24px;font-weight:800;color:#16a34a">8</p>
+          </div>
+          <div class="card" style="padding:12px;text-align:center">
+            <p style="font-size:10px;color:#6b7280;margin-bottom:4px">Tegmadi</p>
+            <p style="font-size:24px;font-weight:800;color:#4b5563">2</p>
+          </div>
+          <div class="card" style="padding:12px;text-align:center">
+            <p style="font-size:10px;color:#6b7280;margin-bottom:4px">Ball</p>
+            <p style="font-size:24px;font-weight:800;color:#16a34a">74</p>
+          </div>
+          <div class="card" style="padding:12px;text-align:center">
+            <p style="font-size:10px;color:#6b7280;margin-bottom:4px">Aniqlik</p>
+            <p style="font-size:24px;font-weight:800;color:#16a34a">80%</p>
+          </div>
+        </div>
+        <div class="card" style="padding:16px;background:linear-gradient(135deg,#eff6ff 0%,#fff 100%)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <svg width="16" height="16" fill="none" stroke="#3b82f6" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+            <span style="font-size:13px;font-weight:700;color:#1e40af">AI Tahlil Natijasi</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:flex-start;gap:8px;padding:10px;border-radius:8px;background:#fef9c3">
+              <span style="min-width:20px;height:20px;border-radius:50%;background:#fde68a;color:#b45309;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">!</span>
+              <span style="font-size:12px;color:#374151;line-height:1.5">2 ta o'q nishon markazidan chapga og'gan — qurol ushlab turish pozitsiyasini tekshiring</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:8px;padding:10px;border-radius:8px;background:#fef9c3">
+              <span style="min-width:20px;height:20px;border-radius:50%;background:#fde68a;color:#b45309;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">!</span>
+              <span style="font-size:12px;color:#374151;line-height:1.5">1 ta o'q pastga ketgan — tetikni bosish va nafas olish momentini muvofiqlashtiring</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:8px;padding:10px;border-radius:8px;background:#f0fdf4">
+              <span style="min-width:20px;height:20px;border-radius:50%;background:#bbf7d0;color:#15803d;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span>
+              <span style="font-size:12px;color:#374151;line-height:1.5">8/10 o'q nishonga tegdi — umumiy natija yaxshi</span>
+            </div>
+          </div>
+          <div style="margin-top:12px;padding:10px;border-radius:8px;background:#f0f9ff">
+            <span style="font-size:11px;font-weight:700;color:#374151">Tavsiya: </span>
+            <span style="font-size:11px;color:#374151">O'rtacha daraja. Chap og'ishni bartaraf etish uchun qurol ushlab turish pozitsiyasini o'zgartiring va nafas olishni mashq qiling.</span>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button id="btn-new-compare" style="flex:1;padding:10px;border-radius:8px;background:#f9fafb;border:1px solid #e5e7eb;cursor:pointer;font-size:12px;font-weight:600;color:#374151">
+            Yangi taqqoslash
+          </button>
+          <button id="btn-create-proto" style="flex:2;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:8px;background:#16a34a;color:white;border:none;cursor:pointer;font-size:13px;font-weight:700">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Bayonoma tayyorlash
+          </button>
+        </div>
+      `;
+      statusTxt.textContent = "AI tahlil tugadi — bayonoma tayyorlash mumkin";
+      showToast("✓ AI tahlil natijasi tayyor!", 'success');
+      
+      document.getElementById('btn-new-compare').addEventListener('click', () => {
+        buildComparePage(container);
+      });
+      document.getElementById('btn-create-proto').addEventListener('click', () => {
+        location.hash = '/protocols/create';
+      });
+    }, 2500);
+  }
+}
 
   // ── Route watcher ──
   let currentPath = '';
