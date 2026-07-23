@@ -29,20 +29,20 @@
   css.textContent = `
   /* === RANGE PAGE ONLY === */
   /* Lane cards: 4 per row on 1920px (4 top, 3 bottom = 7 lanes) */
-  body[data-page="range"] .lg\:grid-cols-3,
-  body[data-page="range"] .grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+  body[data-page="range"] .lg\\:grid-cols-3,
+  body[data-page="range"] .grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3 {
     grid-template-columns: repeat(4, 1fr) !important;
   }
   /* On smaller screens, 3 per row */
   @media (max-width: 1599px) {
-    body[data-page="range"] .lg\:grid-cols-3,
-    body[data-page="range"] .grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+    body[data-page="range"] .lg\\:grid-cols-3,
+    body[data-page="range"] .grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3 {
       grid-template-columns: repeat(3, 1fr) !important;
     }
   }
   @media (max-width: 768px) {
-    body[data-page="range"] .lg\:grid-cols-3,
-    body[data-page="range"] .grid-cols-1.md\:grid-cols-2.lg\:grid-cols-3 {
+    body[data-page="range"] .lg\\:grid-cols-3,
+    body[data-page="range"] .grid-cols-1.md\\:grid-cols-2.lg\\:grid-cols-3 {
       grid-template-columns: 1fr !important;
     }
   }
@@ -75,7 +75,7 @@
   @media (max-width: 900px) {
     .grid-cols-3, .grid-cols-4 { grid-template-columns: 1fr !important; }
     .grid-cols-2 { grid-template-columns: 1fr !important; }
-    .lg\:grid-cols-3 { grid-template-columns: 1fr !important; }
+    .lg\\:grid-cols-3 { grid-template-columns: 1fr !important; }
   }
   
   /* === TIR shooter animation ===  /* TIR shooter animation */
@@ -83,11 +83,11 @@
 
   /* === RANGE LAYOUT: lanes full-width 4-col, activity below === */
   /* The main 4-col grid on range page becomes a single column (stacks lanes + activity) */
-  body[data-page="range"] .grid.grid-cols-1.lg\:grid-cols-4 {
+  body[data-page="range"] .grid.grid-cols-1.lg\\:grid-cols-4 {
     grid-template-columns: 1fr !important;
   }
   /* Lanes container (lg:col-span-3) takes full width and uses 4-col grid internally */
-  body[data-page="range"] .lg\:col-span-3 {
+  body[data-page="range"] .lg\\:col-span-3 {
     grid-column: 1 / -1 !important;
     width: 100% !important;
     display: grid !important;
@@ -95,7 +95,7 @@
     gap: 16px !important;
   }
   /* Activity sidebar (lg:col-span-1) goes full width below */
-  body[data-page="range"] .lg\:col-span-1 {
+  body[data-page="range"] .lg\\:col-span-1 {
     grid-column: 1 / -1 !important;
     width: 100% !important;
   }
@@ -105,12 +105,12 @@
   }
   /* Responsive */
   @media (max-width: 1439px) {
-    body[data-page="range"] .lg\:col-span-3 {
+    body[data-page="range"] .lg\\:col-span-3 {
       grid-template-columns: repeat(3, 1fr) !important;
     }
   }
   @media (max-width: 767px) {
-    body[data-page="range"] .lg\:col-span-3 {
+    body[data-page="range"] .lg\\:col-span-3 {
       grid-template-columns: repeat(2, 1fr) !important;
     }
   }
