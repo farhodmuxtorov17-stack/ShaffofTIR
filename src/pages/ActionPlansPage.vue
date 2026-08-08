@@ -3,7 +3,7 @@
   <div v-if="!loading" class="fade-in p-6 space-y-6">
     <div>
       <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "Harakat rejalari" : "Планы действий" }}</h1>
-      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "система tavsiyalariga asoslangan rejalaringiz" : "Планы на основе авто-рекомендаций" }}</p>
+      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Avtomatik tavsiyalarga asoslangan rejalaringiz" : "Планы на основе авто-рекомендаций" }}</p>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div v-for="plan in plans" :key="plan.id" class="card p-4">

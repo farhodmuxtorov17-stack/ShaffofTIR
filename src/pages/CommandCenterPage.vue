@@ -72,8 +72,7 @@
           <!-- Region rows -->
           <div class="overflow-y-auto flex-1">
             <div
-              v-for="region in sortedRegions"
-              :key="region.id"
+              v-for="region in sortedRegions" :key="region.id"
               @click="goToRegion(region)"
               @mouseenter="hoveredRegion = region.id"
               @mouseleave="hoveredRegion = undefined"
@@ -185,8 +184,7 @@
               </thead>
               <tbody class="divide-y divide-gray-50">
                 <tr
-                  v-for="(d, i) in selectedRegion.districts"
-                  :key="d.id"
+                  v-for="(d, i) in selectedRegion.districts" :key="d.id"
                   @click="goToDistrict(d)"
                   class="hover:bg-green-50 cursor-pointer transition-colors group"
                 >

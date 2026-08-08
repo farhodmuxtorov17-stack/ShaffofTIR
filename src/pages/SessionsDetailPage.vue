@@ -213,9 +213,7 @@ onMounted(() => {
         <h2 class="text-sm font-bold text-gray-700 mb-4">{{ t('detail.soldierList') }}</h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
           <button
-            v-for="soldier in sessionStore.soldiers"
-            :key="soldier.id"
-            class="border rounded-btn p-3 text-center transition cursor-pointer"
+            v-for="soldier in sessionStore.soldiers" :key="soldier.id"
             :class="sessionStore.currentSoldierSeq === soldier.sequence_number
               ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-100'
               : 'border-shell-border hover:border-gray-300 bg-white'"

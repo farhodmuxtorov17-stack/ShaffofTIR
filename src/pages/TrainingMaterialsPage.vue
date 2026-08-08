@@ -403,8 +403,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
 
         <!-- Content -->
         <div class="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-          <div v-for="(point, idx) in (isUz ? sections[currentSection].content_uz : sections[currentSection].content_ru)"
-               :key="idx"
+          <div v-for="(point, idx) in (isUz ? sections[currentSection].content_uz : sections[currentSection].content_ru)" :key="idx"
                class="flex gap-3">
             <div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5"
                  :style="{ background: sections[currentSection].color + '15', color: sections[currentSection].color }">
@@ -466,9 +465,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
               </h3>
             </div>
             <div class="space-y-2 ml-10">
-              <button v-for="(opt, oi) in (isUz ? q.options_uz : q.options_ru)"
-                      :key="oi"
-                      @click="selectAnswer(q.id, oi)"
+              <button v-for="(opt, oi) in (isUz ? q.options_uz : q.options_ru)" :key="oi"
                       class="w-full text-left px-4 py-2.5 rounded-xl text-sm transition-all border"
                       :class="testAnswers[q.id] === oi
                         ? 'border-green-500 bg-green-50 text-green-900'

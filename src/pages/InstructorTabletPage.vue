@@ -463,8 +463,7 @@ function minsAgo(dateStr: string | null | undefined) {
             <!-- Search results -->
             <div v-if="searchResults.length > 0" class="space-y-1 max-h-48 overflow-y-auto">
               <button
-                v-for="emp in searchResults"
-                :key="emp.id"
+                v-for="emp in searchResults" :key="emp.id"
                 class="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-brand-50 transition text-left"
                 @click="identifyEmployee(emp)"
               >
@@ -573,10 +572,8 @@ function minsAgo(dateStr: string | null | undefined) {
 
           <div v-else class="space-y-2">
             <div
-              v-for="(item, idx) in assignmentQueue"
-              :key="item.employee.id"
-              class="flex items-center gap-3 p-2.5 rounded-lg border border-gray-200 bg-gray-50/50"
-            >
+              v-for="(item, idx) in assignmentQueue" :key="idx"
+>
               <span class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600 shrink-0">
                 {{ idx + 1 }}
               </span>
@@ -643,8 +640,7 @@ function minsAgo(dateStr: string | null | undefined) {
           <!-- Lane grid -->
           <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
             <div
-              v-for="lane in lanes"
-              :key="lane.id"
+              v-for="lane in lanes" :key="lane.id"
               class="rounded-xl border-2 p-3 transition"
               :class="getLaneColor(lane.status)"
             >

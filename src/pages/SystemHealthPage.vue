@@ -51,7 +51,7 @@ onMounted(() => {
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-xl font-bold text-gray-900">{{ isUz ? 'Tizim holati' : 'Состояние системы' }}</h1>
-        <p class="text-sm text-gray-500 mt-1">{{ isUz ? 'Backend va система modellarini tekshirish' : 'Проверка backend и система моделей' }}</p>
+        <p class="text-sm text-gray-500 mt-1">{{ isUz ? 'Backend va avtomatik modellarni tekshirish' : 'Проверка backend и автоматических моделей' }}</p>
       </div>
       <button class="btn-secondary text-xs" :disabled="loading" @click="checkAll">
         <Loader2 v-if="loading" class="w-3.5 h-3.5 animate-spin" />
@@ -84,7 +84,7 @@ onMounted(() => {
           <Cpu class="w-6 h-6" />
         </div>
         <div>
-          <h2 class="text-sm font-bold text-gray-800">{{ isUz ? 'система model' : 'система модель' }}</h2>
+          <h2 class="text-sm font-bold text-gray-800">{{ isUz ? 'Avtomatik model' : 'Автоматическая модель' }}</h2>
           <p class="text-xs text-gray-400">{{ isUz ? 'Oʻqlarni aniqlash uchun kompyuter koʻrish' : 'Компьютерное зрение для обнаружения пуль' }}</p>
         </div>
         <span class="ml-auto" :class="uiStore.aiHealthy ? 'badge-success' : 'badge-danger'">

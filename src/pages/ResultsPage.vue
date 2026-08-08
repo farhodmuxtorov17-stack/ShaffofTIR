@@ -101,9 +101,7 @@ function resetFilters() { searchQuery.value = ''; scoreFilter.value = 'ALL' }
       </div>
       <div v-if="showFilters" class="flex items-center gap-2">
         <button
-          v-for="f in ['ALL', 'HIGH', 'MID', 'LOW']"
-          :key="f"
-          @click="scoreFilter = f as any"
+          v-for="f in ['ALL', 'HIGH', 'MID', 'LOW']" :key="f"
           class="px-3 py-2 rounded-btn text-xs font-bold transition-all"
           :class="scoreFilter === f ? 'bg-brand-600 text-white shadow-brand' : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'"
         >

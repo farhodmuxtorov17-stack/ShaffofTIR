@@ -77,7 +77,7 @@ function handleApprove() {
         </button>
         <div>
           <h1 class="text-xl font-bold text-gray-900">
-            {{ isLocal ? `${t('detail.protocol')} ${protocol?.protocol_number}` : `${t('detail.protocol')}: Askar №${protocolId}` }}
+            {{ isLocal ? `${t('detail.protocol')} ${protocol?.protocol_number}` : `${t('detail.protocol')}: ${t('detail.soldier')} №${protocolId}` }}
           </h1>
           <p class="text-sm text-gray-500 mt-0.5">
             {{ isLocal ? protocol?.employee_name : t('detail.sessionInfo') }}
@@ -99,7 +99,7 @@ function handleApprove() {
         <div class="text-center mb-6 pb-4 border-b border-shell-border">
           <h2 class="text-lg font-bold text-gray-900">ShaffofTIR - {{ t('detail.protocolTitle') }}</h2>
           <p class="text-xs text-gray-400 mt-1">
-            {{ isLocal ? `Сессия: ${protocol?.session_id}` : `Сессия: ${sessionStore.currentSession?.id?.substring(0, 16) }...` }}
+            {{ isLocal ? `${t("detail.session")}: ${protocol?.session_id}` : `${t("detail.session")}: ${sessionStore.currentSession?.id?.substring(0, 16) }...` }}
           </p>
           <p class="text-xs text-gray-400">
             {{ isLocal && protocol ? new Date(protocol.created_at).toLocaleString('ru-RU') : (sessionStore.currentSession ? new Date(sessionStore.currentSession.created_at).toLocaleString() : '') }}
@@ -109,7 +109,7 @@ function handleApprove() {
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-6">
           <div>
             <p class="text-xs text-gray-400 uppercase mb-1">{{ t('detail.employee') }}</p>
-            <p class="font-medium text-gray-800">{{ isLocal ? protocol?.employee_name : `Боец №${protocolId}` }}</p>
+            <p class="font-medium text-gray-800">{{ isLocal ? protocol?.employee_name : `${t("detail.soldier")} №${protocolId}` }}</p>
           </div>
           <div v-if="isLocal && protocol">
             <p class="text-xs text-gray-400 uppercase mb-1">{{ t('detail.rank') }}</p>

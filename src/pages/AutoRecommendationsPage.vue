@@ -2,7 +2,7 @@
   <LoadingState v-if="loading" />
   <div v-if="!loading" class="fade-in p-6 space-y-6">
     <div>
-      <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "система tavsiyalar" : "автоматические рекомендации" }}</h1>
+      <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "Avtomatik tavsiyalar" : "автоматические рекомендации" }}</h1>
       <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Sun\x02BBiy intellekt tahlili va takliflari" : "Анализ и рекомендации от искусственного интеллекта" }}</p>
     </div>
 
