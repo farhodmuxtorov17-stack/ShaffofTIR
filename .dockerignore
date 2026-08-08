@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.git/
+.env
+*.md
+.netlify/
+dist-single/
+__pycache__/
+*.pyc
+venv/
+.venv/
