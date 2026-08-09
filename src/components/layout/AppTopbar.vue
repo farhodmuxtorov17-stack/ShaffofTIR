@@ -5,7 +5,10 @@ import { useAuthStore } from '@/stores/auth'
 import { useMasterStore } from '@/stores/master'
 import { useI18n } from '@/i18n'
 import { useRouter } from 'vue-router'
-import { Search, Bell, ChevronDown, Globe, User, LogOut, Check } from 'lucide-vue-next'
+import { Search, Bell, ChevronDown, Globe, User, LogOut, Check, Menu } from 'lucide-vue-next'
+
+defineProps<{ isMobile?: boolean }>()
+const emit = defineEmits<{ toggleSidebar: [] }>()
 
 const uiStore = useUiStore()
 const authStore = useAuthStore()
@@ -50,11 +53,11 @@ function markRead(id: string) {
 }
 
 function getNotifIcon(type: string) {
-  if (type === 'session') return '🎯'
-  if (type === 'review') return '📋'
-  if (type === 'training') return '🎓'
-  if (type === 'system') return '⚙️'
-  return '🔔'
+  if (type === 'session') return '\u{1F3AF}'
+  if (type === 'review') return '\u{1F4CB}'
+  if (type === 'training') return '\u{1F393}'
+  if (type === 'system') return '\u{2699}\u{FE0F}'
+  return '\u{1F514}'
 }
 
 function handleClickOutside(e: MouseEvent) {
@@ -80,8 +83,13 @@ onUnmounted(() => {
 
 <template>
   <header class="topbar-root">
-    <!-- Search -->
-    <div class="topbar-search-wrapper">
+    <!-- Hamburger (mobile only) -->
+    <button class="hamburger-btn lg:hidden" @click="emit('toggleSidebar')">
+      <Menu class="w-4 h-4" />
+    </button>
+
+    <!-- Search (desktop only) -->
+    <div class="topbar-search-wrapper hidden lg:block">
       <div class="topbar-search-icon">
         <Search class="w-3.5 h-3.5" />
       </div>
@@ -94,7 +102,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Right -->
-    <div class="flex items-center gap-1.5">
+    <div class="flex items-center gap-1.5 ml-auto">
       <!-- Language -->
       <button class="topbar-icon-btn" @click="toggleLocale">
         <Globe class="w-3.5 h-3.5" />
@@ -117,7 +125,7 @@ onUnmounted(() => {
           leave-active-class="transition duration-100 ease-in"
           leave-from-class="transform scale-100 opacity-100"
           leave-to-class="transform scale-95 opacity-0 -translate-y-1">
-          <div v-if="showNotifications" class="notif-panel absolute right-0 mt-1 w-80 rounded-2xl z-50 bg-white border border-gray-100 shadow-xl overflow-hidden">
+          <div v-if="showNotifications" class="notif-panel absolute right-0 mt-1 w-72 sm:w-80 rounded-2xl z-50 bg-white border border-gray-100 shadow-xl overflow-hidden">
             <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
               <p class="text-sm font-semibold text-gray-900">{{ locale === 'uz' ? 'Bildirishnomalar' : 'Уведомления' }}</p>
               <button v-if="unreadCount > 0" @click="markAllRead" class="text-[10px] text-brand-600 hover:text-brand-700 font-medium flex items-center gap-1">
@@ -154,11 +162,11 @@ onUnmounted(() => {
             :style="{ background: roleColors[authStore.user?.role || ''] || '#18181b' }">
             {{ userInitials }}
           </div>
-          <div class="text-left hidden md:block">
+          <div class="text-left hidden sm:block">
             <p class="text-[12px] font-medium text-gray-900 leading-none">{{ authStore.user?.full_name?.split(' ').slice(0,2).join(' ') || '-' }}</p>
             <p class="text-[10px] text-gray-500 mt-0.5">{{ authStore.user?.role ? (locale === 'uz' ? authStore.roleLabelsUz[authStore.user.role] : authStore.roleLabels[authStore.user.role]) : '' }}</p>
           </div>
-          <ChevronDown class="w-3 h-3 text-gray-400 transition" :class="{ 'rotate-180': isDropdownOpen }" />
+          <ChevronDown class="w-3 h-3 text-gray-400 transition hidden sm:block" :class="{ 'rotate-180': isDropdownOpen }" />
         </button>
 
         <Transition
@@ -186,7 +194,7 @@ onUnmounted(() => {
 <style scoped>
 .topbar-root {
   height: 52px;
-  padding: 0 20px;
+  padding: 0 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -196,6 +204,23 @@ onUnmounted(() => {
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid rgba(0,0,0,0.05);
 }
+@media (min-width: 1024px) {
+  .topbar-root { padding: 0 20px; }
+}
+.hamburger-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  color: #374151;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.hamburger-btn:hover { background: #f3f4f6; }
 .topbar-icon-btn {
   display: flex;
   align-items: center;

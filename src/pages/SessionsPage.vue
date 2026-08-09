@@ -19,11 +19,11 @@ const masterStore = useMasterStore()
 const { t, locale } = useI18n()
 const isUz = computed(() => locale.value === 'uz')
 
-// ── Tabs ──
+// --- Tabs 
 type Tab = 'list' | 'calendar' | 'requests'
 const activeTab = ref<Tab>('list')
 
-// ── Calendar state ──
+// --- Calendar state 
 const today = new Date()
 const currentMonth = ref(today.getMonth())
 const currentYear = ref(today.getFullYear())
@@ -34,7 +34,7 @@ const bookingTime = ref('')
 const bookingDuration = ref(60)
 const showBookingModal = ref(false)
 
-// ── Booking form ──
+// --- Booking form 
 const bookingForm = reactive({
   employeeId: '',
   employeeName: '',
@@ -46,7 +46,7 @@ const bookingForm = reactive({
   notes: '',
 })
 
-// ── Bookings (stored in memory for demo) ──
+// --- Bookings (stored in memory for demo) 
 interface Booking {
   id: string
   employeeId: string
@@ -69,14 +69,14 @@ const bookings = ref<Booking[]>([
   { id: 'b006', employeeId: 'e015', employeeName: 'Назаров Б.Х.', lane: 2, date: '2026-07-24', startTime: '15:00', endTime: '16:00', weapon: 'СВД', notes: 'Разведка', status: 'CONFIRMED' },
 ])
 
-// ── Time slots ──
+// --- Time slots 
 const timeSlots = [
   '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'
 ]
 
 const LANES = [1, 2, 3, 4, 5, 6]
 
-// ── Conflict detection ──
+// --- Conflict detection 
 function checkConflict(lane: number, date: string, startTime: string, duration: number): Booking | null {
   const startMin = parseInt(startTime.split(':')[0]) * 60 + parseInt(startTime.split(':')[1])
   const endMin = startMin + duration
@@ -88,7 +88,7 @@ function checkConflict(lane: number, date: string, startTime: string, duration: 
   }) || null
 }
 
-// ── Calendar grid ──
+// --- Calendar grid 
 const monthDays = computed(() => {
   const firstDay = new Date(currentYear.value, currentMonth.value, 1)
   const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0)
@@ -146,7 +146,7 @@ function nextMonth() {
   if (currentMonth.value === 11) { currentMonth.value = 0; currentYear.value++ } else currentMonth.value++
 }
 
-// ── Day bookings for selected date ──
+// --- Day bookings for selected date 
 const dayBookings = computed(() => {
   return bookings.value.filter(b => b.date === selectedDate.value).sort((a, b) => a.startTime.localeCompare(b.startTime))
 })
@@ -155,7 +155,7 @@ function laneBookingsForDay(lane: number, date: string) {
   return bookings.value.filter(b => b.lane === lane && b.date === date).sort((a, b) => a.startTime.localeCompare(b.startTime))
 }
 
-// ── Booking submit ──
+// --- Booking submit 
 const bookingError = ref('')
 
 function openBookingModal(date?: string, lane?: number, time?: string) {
@@ -185,7 +185,7 @@ function submitBooking() {
   const conflict = checkConflict(bookingForm.lane, bookingForm.date, bookingForm.startTime, bookingForm.duration)
   if (conflict) {
     bookingError.value = (isUz.value
-      ? `Konflikt! ${conflict.employeeName} ${conflict.startTime}-${conflict.endTime} yo'lak ${conflict.lane} band qilgan`
+      ? `Konflikt! ${conflict.employeeName} ${conflict.startTime}-${conflict.endTime} yoʻlak ${conflict.lane} band qilgan`
       : `Конфликт! ${conflict.employeeName} занял дорожку ${conflict.lane} с ${conflict.startTime} до ${conflict.endTime}`)
     return
   }
@@ -212,7 +212,7 @@ function cancelBooking(id: string) {
   bookings.value = bookings.value.filter(b => b.id !== id)
 }
 
-// ── Sessions list (existing) ──
+// --- Sessions list (existing) 
 const allSessions = computed(() => {
   const list = [...historyStore.sessions]
   if (sessionStore.currentSession && sessionStore.sessionStatus !== 'IDLE') {
@@ -253,7 +253,7 @@ function newSession() {
   router.push('/dashboard')
 }
 
-// ── Requests ──
+// --- Requests 
 function approveRequest(id: string) {
   reqStore.resolveRequest(id, 'APPROVED', 'u002', isUz.value ? 'Tasdiqlandi' : 'Одобрено')
 }
@@ -261,7 +261,7 @@ function rejectRequest(id: string) {
   reqStore.resolveRequest(id, 'REJECTED', 'u002', isUz.value ? 'Rad etildi' : 'Отклонено')
 }
 
-// ── Employee search with district/battalion ──
+// --- Employee search with district/battalion 
 const empSearchQuery = ref('')
 const filteredEmployees = computed(() => {
   if (!empSearchQuery.value) return masterStore.employees.slice(0, 8)
@@ -284,7 +284,7 @@ const filteredEmployees = computed(() => {
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-xl font-extrabold text-gray-900" style="letter-spacing: -0.02em;">{{ isUz ? "Mashg'ulotlar" : "Сессии" }}</h1>
-        <p class="text-sm text-gray-400 mt-1">{{ isUz ? "Sessiyalar, kalendar va so'rovlar" : "Сессии, календарь и запросы" }}</p>
+        <p class="text-sm text-gray-400 mt-1">{{ isUz ? "Sessiyalar, kalendar va soʻrovlar" : "Сессии, календарь и запросы" }}</p>
       </div>
       <button class="btn-primary flex items-center gap-2" @click="newSession">
         <Plus class="w-4 h-4" />
@@ -304,7 +304,7 @@ const filteredEmployees = computed(() => {
       </button>
       <button @click="activeTab = 'requests'" class="px-4 py-2 rounded-lg text-xs font-medium transition flex items-center gap-2 relative"
         :class="activeTab === 'requests' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
-        <Users class="w-3.5 h-3.5" /> {{ isUz ? "So'rovlar" : "Запросы" }}
+        <Users class="w-3.5 h-3.5" /> {{ isUz ? "Soʻrovlar" : "Запросы" }}
         <span v-if="reqStore.pendingCount > 0" class="ml-1 bg-red-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">{{ reqStore.pendingCount }}</span>
       </button>
     </div>
@@ -326,8 +326,8 @@ const filteredEmployees = computed(() => {
             <tr>
               <th>ID</th>
               <th>{{ isUz ? "Xodim" : "Сотрудник" }}</th>
-              <th>{{ isUz ? "Yo'lak" : "Дорожка" }}</th>
-              <th>{{ isUz ? "O'qlar" : "Выстрелы" }}</th>
+              <th>{{ isUz ? "Yoʻlak" : "Дорожка" }}</th>
+              <th>{{ isUz ? "Oʻqlar" : "Выстрелы" }}</th>
               <th>{{ isUz ? "Ball" : "Балл" }}</th>
               <th>{{ isUz ? "Sana" : "Дата" }}</th>
               <th>{{ isUz ? "Holat" : "Статус" }}</th>
@@ -351,7 +351,7 @@ const filteredEmployees = computed(() => {
               <td class="text-xs text-gray-400">{{ record.created_at ? new Date(record.created_at).toLocaleDateString('ru-RU') : '-' }}</td>
               <td>
                 <span class="badge" :class="record.status === 'COMPLETED' ? 'badge-success' : record.status === 'REVIEWED' ? 'badge-neutral' : 'badge-warning'">
-                  {{ record.status === 'COMPLETED' ? (isUz ? "Yakunlandi" : "Завершён") : record.status === 'REVIEWED' ? (isUz ? "Ko'rilgan" : "Проверен") : (isUz ? "Kutilmoqda" : "Ожидает") }}
+                  {{ record.status === 'COMPLETED' ? (isUz ? "Yakunlandi" : "Завершён") : record.status === 'REVIEWED' ? (isUz ? "Koʻrilgan" : "Проверен") : (isUz ? "Kutilmoqda" : "Ожидает") }}
                 </span>
               </td>
               <td><ChevronRight class="w-4 h-4 text-gray-300" /></td>
@@ -470,7 +470,7 @@ const filteredEmployees = computed(() => {
           </div>
         </div>
         <button @click="openBookingModal()" class="btn-primary mt-4 w-full">
-          <Plus class="w-4 h-4" /> {{ isUz ? "Yo'lakni band qilish" : 'Забронировать дорожку' }}
+          <Plus class="w-4 h-4" /> {{ isUz ? "Yoʻlakni band qilish" : 'Забронировать дорожку' }}
         </button>
       </div>
     </template>
@@ -496,7 +496,7 @@ const filteredEmployees = computed(() => {
             <p class="text-xs text-gray-500 mb-1">{{ req.message }}</p>
             <div class="flex items-center gap-2 text-[10px] text-gray-400">
               <span>{{ req.requested_by_name }} · {{ new Date(req.created_at).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) }}</span>
-              <span v-if="req.preferred_lane">· {{ isUz ? "Yo'lak" : 'Дорожка' }} {{ req.preferred_lane }}</span>
+              <span v-if="req.preferred_lane">· {{ isUz ? "Yoʻlak" : 'Дорожка' }} {{ req.preferred_lane }}</span>
               <span v-if="req.preferred_date">· {{ req.preferred_date }}</span>
             </div>
           </div>
@@ -526,7 +526,7 @@ const filteredEmployees = computed(() => {
           <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showBookingModal = false"></div>
           <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
             <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-              <h3 class="text-sm font-bold text-gray-900">{{ isUz ? "Yo'lakni band qilish" : 'Бронирование дорожки' }}</h3>
+              <h3 class="text-sm font-bold text-gray-900">{{ isUz ? "Yoʻlakni band qilish" : 'Бронирование дорожки' }}</h3>
               <button @click="showBookingModal = false" class="p-1.5 hover:bg-gray-100 rounded-lg transition">
                 <X class="w-4 h-4 text-gray-400" />
               </button>
@@ -536,9 +536,9 @@ const filteredEmployees = computed(() => {
               <!-- Lane & Date -->
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label class="text-[11px] font-medium text-gray-500 mb-1.5 block">{{ isUz ? "Yo'lak" : 'Дорожка' }}</label>
+                  <label class="text-[11px] font-medium text-gray-500 mb-1.5 block">{{ isUz ? "Yoʻlak" : 'Дорожка' }}</label>
                   <select v-model="bookingForm.lane" class="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-brand-400">
-                    <option v-for="l in LANES" :key="l" :value="l">{{ isUz ? "Yo'lak" : 'Дорожка' }} {{ l }}</option>
+                    <option v-for="l in LANES" :key="l" :value="l">{{ isUz ? "Yoʻlak" : 'Дорожка' }} {{ l }}</option>
                   </select>
                 </div>
                 <div>

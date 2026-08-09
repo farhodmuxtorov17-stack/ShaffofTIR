@@ -2,12 +2,14 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import AppShell from '@/components/layout/AppShell.vue'
+import MobileAppShell from '@/components/layout/MobileAppShell.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const authStore = useAuthStore()
 const loading = ref(true)
 const isPublicPage = computed(() => route.meta.public === true)
+const isMiniApp = computed(() => route.query.miniapp === '1')
 
 onMounted(() => {
   loading.value = false
@@ -19,5 +21,6 @@ onMounted(() => {
     <div class="text-gray-400 text-sm">Загрузка...</div>
   </div>
   <router-view v-else-if="isPublicPage" />
+  <MobileAppShell v-else-if="isMiniApp" />
   <AppShell v-else />
 </template>

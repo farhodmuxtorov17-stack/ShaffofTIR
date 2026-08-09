@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useSessionsHistoryStore } from '@/stores/sessionsHistory'
+import { useAuthStore } from '@/stores/auth'
 import { useI18n } from '@/i18n'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import { ScrollText, ArrowRight, FileText, Plus, Calendar, User } from 'lucide-vue-next'
@@ -11,8 +12,15 @@ import LoadingState from '@/components/ui/LoadingState.vue'
 const loading = ref(false)
 const router = useRouter()
 const historyStore = useSessionsHistoryStore()
+const authStore = useAuthStore()
 const { locale } = useI18n()
 const isUz = computed(() => locale.value === 'uz')
+
+// Only SUPER_ADMIN and INSTRUCTOR can create protocols
+const canCreate = computed(() => {
+  const role = authStore.user?.role || ''
+  return role === 'SUPER_ADMIN' || role === 'INSTRUCTOR'
+})
 
 // Get unique employees with sessions
 const employeesWithSessions = computed(() => {
@@ -33,7 +41,12 @@ const employeesWithSessions = computed(() => {
 })
 
 function createProtocol() {
+  if (!canCreate.value) return
   router.push('/protocols/create')
+}
+
+function viewProtocol(empId: string) {
+  router.push(`/protocols/${empId}`)
 }
 </script>
 
@@ -44,9 +57,9 @@ function createProtocol() {
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-xl font-extrabold text-gray-900" style="letter-spacing: -0.02em;">{{ isUz ? "Bayonnomalar" : "Протоколы" }}</h1>
-        <p class="text-sm text-gray-400 mt-0.5">{{ isUz ? "Xodim natijalari bo'yicha hujjatlar" : "Документы по результатам сотрудников" }}</p>
+        <p class="text-sm text-gray-400 mt-0.5">{{ isUz ? "Xodim natijalari bo\u02BByicha hujjatlar" : "Документы по результатам сотрудников" }}</p>
       </div>
-      <button class="btn-primary flex items-center gap-2" @click="createProtocol">
+      <button v-if="canCreate" class="btn-primary flex items-center gap-2" @click="createProtocol">
         <Plus class="w-4 h-4" /> {{ isUz ? "Bayonnoma yaratish" : "Создать протокол" }}
       </button>
     </div>
@@ -55,8 +68,8 @@ function createProtocol() {
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <KPICard :title="isUz ? 'Xodimlar' : 'Сотрудников'" :value="employeesWithSessions.length" :icon="User" accent="brand" />
       <KPICard :title="isUz ? 'Sessiyalar' : 'Сессий'" :value="historyStore.totalSessions" :icon="ScrollText" accent="blue" />
-      <KPICard :title="isUz ? 'O\'rtacha ball' : 'Ср. балл'" :value="historyStore.avgScore" :icon="FileText" accent="purple" />
-      <KPICard :title="isUz ? 'O\'tish foizi' : 'Сдача'" :value="historyStore.passRate + '%'" :icon="FileText" accent="amber" />
+      <KPICard :title="isUz ? 'O\u02BBrtacha ball' : 'Ср. балл'" :value="historyStore.avgScore" :icon="FileText" accent="purple" />
+      <KPICard :title="isUz ? 'O\u02BBtish foizi' : 'Сдача'" :value="historyStore.passRate + '%'" :icon="FileText" accent="amber" />
     </div>
 
     <!-- Employee list for protocol generation -->
@@ -67,13 +80,13 @@ function createProtocol() {
             <th>{{ isUz ? "Xodim" : "Сотрудник" }}</th>
             <th>{{ isUz ? "Zvanja" : "Звание" }}</th>
             <th>{{ isUz ? "Sessiya" : "Сессии" }}</th>
-            <th>{{ isUz ? "O'rtacha ball" : "Ср. балл" }}</th>
+            <th>{{ isUz ? "O\u02BBrtacha ball" : "Ср. балл" }}</th>
             <th>{{ isUz ? "Aniqlik" : "Точность" }}</th>
             <th></th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="emp in employeesWithSessions" :key="emp.id" @click="createProtocol" class="cursor-pointer">
+          <tr v-for="emp in employeesWithSessions" :key="emp.id" @click="canCreate ? createProtocol() : viewProtocol(emp.id)" class="cursor-pointer">
             <td>
               <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-white flex items-center justify-center text-xs font-bold shrink-0">
@@ -106,9 +119,9 @@ function createProtocol() {
       <div class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4">
         <ScrollText class="w-8 h-8 text-gray-300" />
       </div>
-      <p class="text-sm font-bold text-gray-400">{{ isUz ? "Bayonnomalar yo'q" : "Протоколов нет" }}</p>
-      <p class="text-xs text-gray-300 mt-1">{{ isUz ? "Avval sessiya o'tkazing" : "Сначала проведите сессии" }}</p>
-      <button class="btn-primary mt-4" @click="createProtocol">
+      <p class="text-sm font-bold text-gray-400">{{ isUz ? "Bayonnomalar yo\u02BBq" : "Протоколов нет" }}</p>
+      <p class="text-xs text-gray-300 mt-1">{{ isUz ? "Avval sessiya o\u02BBtkazing" : "Сначала проведите сессии" }}</p>
+      <button v-if="canCreate" class="btn-primary mt-4" @click="createProtocol">
         <Plus class="w-4 h-4" /> {{ isUz ? "Yaratish" : "Создать" }}
       </button>
     </div>

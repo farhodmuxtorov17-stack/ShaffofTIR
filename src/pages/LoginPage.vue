@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from '@/i18n'
 import { Eye, ArrowRight, Globe, Terminal, ShieldCheck, Lock, Smartphone } from 'lucide-vue-next'
 import MiniAppPreview from '@/components/miniapp/MiniAppPreview.vue'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const { locale, t, setLocale } = useI18n()
 
@@ -21,6 +22,35 @@ const techSpecMode = ref(false)
 const techSpecPin = reactive({ d1: '', d2: '', d3: '', d4: '' })
 const techSpecError = ref(false)
 const miniAppMode = ref(false)
+const isMiniAppIframe = ref(false)
+
+// Auto-login for Mini App iframe preview
+const miniAppRoles: Record<string, { email: string; password: string; redirect: string }> = {
+  SUPER_ADMIN: { email: 'admin@shaffoftir.uz', password: 'admin123', redirect: '/' },
+  MANAGER: { email: 'manager@shaffoftir.uz', password: 'manager123', redirect: '/' },
+  INSTRUCTOR: { email: 'instructor@shaffoftir.uz', password: 'instructor123', redirect: '/' },
+  TECHSPEC: { email: 'techspec@shaffoftir.uz', password: 'techspec123', redirect: '/techspec' },
+  EMPLOYEE: { email: 'soldier@shaffoftir.uz', password: 'soldier123', redirect: '/' },
+}
+
+onMounted(() => {
+  const miniapp = route.query.miniapp as string
+  const roleParam = route.query.role as string
+  if (miniapp === '1' && roleParam && miniAppRoles[roleParam]) {
+    isMiniAppIframe.value = true
+    const creds = miniAppRoles[roleParam]
+    form.email = creds.email
+    form.password = creds.password
+    loading.value = true
+    authStore.login(form).then(() => {
+      router.push({ path: creds.redirect, query: { miniapp: '1' } })
+    }).catch(() => {
+      loading.value = false
+    }).finally(() => {
+      loading.value = false
+    })
+  }
+})
 
 function nextStep() {
   if (!form.email) {
@@ -140,7 +170,7 @@ function handleKeydown(e: KeyboardEvent) {
     <!-- Language toggle -->
     <button class="lang-toggle" @click="setLocale(locale === 'ru' ? 'uz' : 'ru')">
       <Globe class="w-3.5 h-3.5" />
-      {{ locale === 'ru' ? "O'zbekcha" : 'Русский' }}
+      {{ locale === 'ru' ? "Oʻzbekcha" : 'Русский' }}
     </button>
 
     <!-- Login card -->
@@ -164,7 +194,7 @@ function handleKeydown(e: KeyboardEvent) {
             </svg>
           </div>
           <h1 class="app-title">ShaffofTIR</h1>
-          <p class="app-subtitle">{{ locale === 'uz' ? "O'q otish tayyorgarligini boshqarish tizimi" : 'Система управления огневой подготовкой' }}</p>
+          <p class="app-subtitle">{{ locale === 'uz' ? "Oʻq otish tayyorgarligini boshqarish tizimi" : 'Система управления огневой подготовкой' }}</p>
         </div>
 
         <!-- Step 1: Email -->
@@ -247,14 +277,14 @@ function handleKeydown(e: KeyboardEvent) {
         </div>
       </div>
 
-      <!-- Telegram Mini App button -->
-      <button class="tg-miniapp-btn" @click="miniAppMode = true">
+      <!-- Telegram Mini App button (hidden in mini app iframe) -->
+      <button v-if="!isMiniAppIframe" class="tg-miniapp-btn" @click="miniAppMode = true">
         <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.87 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.94z"/></svg>
         <span>Telegram Mini App</span>
         <Smartphone class="w-3 h-3 opacity-50" />
       </button>
 
-      <!-- TechSpec access button - visible -->
+      <!-- TechSpec access button (hidden in mini app iframe) -->
       <button class="techspec-link" @click="openTechSpec">
         <Lock class="w-3.5 h-3.5" />
         <span>{{ locale === 'uz' ? 'Texnik mutaxassis kirishi' : 'Вход для тех. специалиста' }}</span>
@@ -832,5 +862,36 @@ function handleKeydown(e: KeyboardEvent) {
 }
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
+}
+</style>
+
+<!-- Mobile responsive styles for login -->
+<style scoped>
+@media (max-width: 500px) {
+  .login-card {
+    width: 100% !important;
+    max-width: 340px !important;
+    padding: 24px 20px !important;
+    border-radius: 16px !important;
+  }
+  .login-card-wrapper {
+    padding: 0 12px;
+    width: 100%;
+  }
+  .logo-section { margin-bottom: 20px !important; }
+  .logo-badge { width: 44px !important; height: 44px !important; margin-bottom: 10px !important; }
+  .app-title { font-size: 18px !important; }
+  .app-subtitle { font-size: 11px !important; }
+  .form-section { gap: 12px !important; }
+  .form-actions { flex-direction: column; gap: 10px; }
+  .form-actions .forgot-link { text-align: center; }
+  .form-actions .btn-aurora { width: 100%; justify-content: center; }
+  .tg-miniapp-btn, .techspec-link {
+    width: 100% !important;
+    justify-content: center;
+    font-size: 11px !important;
+    padding: 10px 16px !important;
+  }
+  .version-text { font-size: 9px !important; }
 }
 </style>

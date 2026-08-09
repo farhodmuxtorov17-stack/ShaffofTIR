@@ -38,10 +38,10 @@ const typeColors: Record<string, string> = {
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-xl font-bold text-gray-900">{{ isUz ? 'Bildirishnomalar' : 'Уведомления' }}</h1>
-        <p class="text-sm text-gray-500 mt-1">{{ unreadCount }} {{ isUz ? "o'qilmagan" : 'непрочитанных' }}</p>
+        <p class="text-sm text-gray-500 mt-1">{{ unreadCount }} {{ isUz ? "oʻqilmagan" : 'непрочитанных' }}</p>
       </div>
       <button class="btn-secondary text-xs" @click="masterStore.markAllNotificationsRead()">
-        <CheckCheck class="w-3.5 h-3.5" /> {{ isUz ? "Barchasini o'qish" : 'Прочитать все' }}
+        <CheckCheck class="w-3.5 h-3.5" /> {{ isUz ? "Barchasini oʻqish" : 'Прочитать все' }}
       </button>
     </div>
 

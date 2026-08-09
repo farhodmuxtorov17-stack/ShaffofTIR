@@ -3,7 +3,7 @@
   <div v-if="!loading" class="fade-in p-6 space-y-6">
     <div>
       <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "KPI mukarriri" : "Редактор KPI" }}</h1>
-      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "KPI ko'rsatkichlarini tahrirlash" : "Редактирование показателей KPI" }}</p>
+      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "KPI koʻrsatkichlarini tahrirlash" : "Редактирование показателей KPI" }}</p>
     </div>
     <div class="card p-6 max-w-2xl space-y-4">
       <div>

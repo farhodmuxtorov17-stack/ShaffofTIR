@@ -20,7 +20,7 @@ const { locale, t } = useI18n()
 
 const isUz = computed(() => locale.value === 'uz')
 
-// ── State ──
+// --- State 
 const loading = ref(true)
 const rangeStatus = ref<"OPEN" | "CLOSED">("OPEN")
 const searchQuery = ref('')
@@ -50,7 +50,7 @@ onMounted(() => {
   setTimeout(() => { loading.value = false }, 400)
 })
 
-// ── Lanes ──
+// --- Lanes 
 const lanes = computed(() => masterStore.lanes)
 
 const availableLanes = computed(() =>
@@ -65,7 +65,7 @@ const maintenanceLanes = computed(() =>
   lanes.value.filter(l => l.status === 'MAINTENANCE')
 )
 
-// ── Employees (only ACTIVE, TB passed, shooting qualified) ──
+// --- Employees (only ACTIVE, TB passed, shooting qualified) 
 const eligibleEmployees = computed(() =>
   masterStore.employees.filter(e =>
     e.status === 'ACTIVE' &&
@@ -97,7 +97,7 @@ const searchResults = computed(() => {
     .slice(0, 8)
 })
 
-// ── Identify employee ──
+// --- Identify employee 
 function identifyEmployee(emp: any) {
   identifiedEmployee.value = emp
   searchQuery.value = ''
@@ -108,7 +108,7 @@ function clearIdentification() {
   identifiedEmployee.value = null
 }
 
-// ── Queue management ──
+// --- Queue management 
 function addToQueue() {
   if (!identifiedEmployee.value) return
 
@@ -125,7 +125,7 @@ function removeFromQueue(idx: number) {
   assignmentQueue.value.splice(idx, 1)
 }
 
-// ── Auto-assign logic: sequential by queue order ──
+// --- Auto-assign logic: sequential by queue order 
 function autoAssignNext() {
   const unassigned = assignmentQueue.value.filter(q => !q.assignedLane)
   if (unassigned.length === 0) return
@@ -221,7 +221,7 @@ function releaseLane(laneId: string) {
   lane.current_soldier_seq = undefined
 }
 
-// ── QR/Face ID simulation ──
+// --- QR/Face ID simulation 
 function simulateScan() {
   searchMode.value = 'qr'
   isSearching.value = true
@@ -287,7 +287,7 @@ async function simulateFaceId() {
   }
 }
 
-// ── Helpers ──
+// --- Helpers 
 function getLaneColor(status: string) {
   switch (status) {
     case 'AVAILABLE': return 'bg-green-50 border-green-200 text-green-700'
@@ -323,7 +323,7 @@ function minsAgo(dateStr: string | null | undefined) {
           {{ isUz ? 'Instruktor plansheti' : 'Планшет инструктора' }}
         </h1>
         <p class="text-sm text-gray-500 mt-0.5">
-          {{ isUz ? "Xodimlarni aniqlash va yo'lkalar bo'yicha taqsimlash" : 'Идентификация сотрудников и распределение по дорожкам' }}
+          {{ isUz ? "Xodimlarni aniqlash va yoʻlkalar boʻyicha taqsimlash" : 'Идентификация сотрудников и распределение по дорожкам' }}
         </p>
       </div>
       <!-- Range Status Toggle -->
@@ -338,7 +338,7 @@ function minsAgo(dateStr: string | null | undefined) {
       <div class="flex items-center gap-3">
         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 border border-green-200">
           <div class="w-2 h-2 rounded-full bg-green-500"></div>
-          <span class="text-xs font-medium text-green-700">{{ availableLanes.length }} {{ isUz ? "bo'sh" : 'свободно' }}</span>
+          <span class="text-xs font-medium text-green-700">{{ availableLanes.length }} {{ isUz ? "boʻsh" : 'свободно' }}</span>
         </div>
         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 border border-blue-200">
           <div class="w-2 h-2 rounded-full bg-blue-500"></div>
@@ -367,7 +367,7 @@ function minsAgo(dateStr: string | null | undefined) {
         </p>
       </div>
       <div class="text-right">
-        <p class="text-xs text-white/70">{{ isUz ? "Yo'naltirildi" : 'Направлен' }}</p>
+        <p class="text-xs text-white/70">{{ isUz ? "Yoʻnaltirildi" : 'Направлен' }}</p>
         <p class="text-2xl font-bold">{{ assignmentFlash.lane.lane_number }}</p>
       </div>
     </div>
@@ -505,8 +505,8 @@ function minsAgo(dateStr: string | null | undefined) {
               <Shield class="w-4 h-4" :class="identifiedEmployee.tb_test_passed ? 'text-green-600' : 'text-red-600'" />
               <span class="text-xs font-medium" :class="identifiedEmployee.tb_test_passed ? 'text-green-700' : 'text-red-700'">
                 {{ identifiedEmployee.tb_test_passed
-                  ? (isUz ? "TB testidan o'tgan ✓" : 'ТБ-тест сдан ✓')
-                  : (isUz ? "TB testidan o'tmagan ✗" : 'ТБ-тест не сдан ✗')
+                  ? (isUz ? "TB testidan oʻtgan ✓" : 'ТБ-тест сдан ✓')
+                  : (isUz ? "TB testidan oʻtmagan ✗" : 'ТБ-тест не сдан ✗')
                 }}
               </span>
               <span v-if="identifiedEmployee.tb_test_score" class="ml-auto text-xs text-gray-400">
@@ -518,7 +518,7 @@ function minsAgo(dateStr: string | null | undefined) {
             <div class="flex items-center gap-2 p-2 rounded-lg bg-blue-50">
               <Zap class="w-4 h-4 text-blue-600" />
               <span class="text-xs font-medium text-blue-700">
-                {{ identifiedEmployee.qualification_level || (isUz ? "O'rtacha" : 'Средний') }}
+                {{ identifiedEmployee.qualification_level || (isUz ? "Oʻrtacha" : 'Средний') }}
               </span>
               <span class="ml-auto text-xs text-gray-400">
                 {{ identifiedEmployee.total_sessions }} {{ isUz ? 'sessiya' : 'сессий' }}
@@ -532,11 +532,11 @@ function minsAgo(dateStr: string | null | undefined) {
               @click="addToQueue"
             >
               <Users class="w-4 h-4" />
-              {{ isUz ? "Navbatga qo'shish" : 'В очередь' }}
+              {{ isUz ? "Navbatga qoʻshish" : 'В очередь' }}
             </button>
             <div v-else class="p-2 rounded-lg bg-red-50 text-center">
               <p class="text-xs font-medium text-red-700">
-                {{ isUz ? "TB testisiz poligonga ruxsat yo'q" : 'Без ТБ-теста доступ на полигон запрещён' }}
+                {{ isUz ? "TB testisiz poligonga ruxsat yoʻq" : 'Без ТБ-теста доступ на полигон запрещён' }}
               </p>
             </div>
           </div>
@@ -566,7 +566,7 @@ function minsAgo(dateStr: string | null | undefined) {
 
           <div v-if="assignmentQueue.length === 0" class="text-center py-4">
             <p class="text-xs text-gray-400">
-              {{ isUz ? "Navbat bo'sh" : 'Очередь пуста' }}
+              {{ isUz ? "Navbat boʻsh" : 'Очередь пуста' }}
             </p>
           </div>
 
@@ -611,7 +611,7 @@ function minsAgo(dateStr: string | null | undefined) {
           </button>
           <div v-else-if="assignmentQueue.length > 0 && availableLanes.length === 0" class="p-2 rounded-lg bg-amber-50 text-center">
             <p class="text-xs text-amber-700">
-              {{ isUz ? "Barcha yo'lkalar band" : 'Все дорожки заняты' }}
+              {{ isUz ? "Barcha yoʻlkalar band" : 'Все дорожки заняты' }}
             </p>
           </div>
         </div>
@@ -672,13 +672,13 @@ function minsAgo(dateStr: string | null | undefined) {
                   class="w-full mt-1.5 text-[10px] py-1 rounded-md bg-white/60 hover:bg-white text-gray-600 font-medium transition"
                   @click="releaseLane(lane.id)"
                 >
-                  {{ isUz ? "Bo'shatish" : 'Освободить' }}
+                  {{ isUz ? "Boʻshatish" : 'Освободить' }}
                 </button>
               </div>
 
               <!-- Available -->
               <div v-else-if="lane.status === 'AVAILABLE'" class="text-center py-2">
-                <p class="text-xs font-medium opacity-80">{{ isUz ? "Bo'sh" : 'Свободна' }}</p>
+                <p class="text-xs font-medium opacity-80">{{ isUz ? "Boʻsh" : 'Свободна' }}</p>
                 <div v-if="lane.camera_status === 'ONLINE'" class="flex items-center justify-center gap-1 mt-1">
                   <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
                   <span class="text-[10px] opacity-60">{{ isUz ? 'Kamera on' : 'Камера вкл' }}</span>
@@ -700,7 +700,7 @@ function minsAgo(dateStr: string | null | undefined) {
                 <p class="text-xs text-gray-600">
                   <b>{{ isUz ? "Avto-taqsimlash tartibi:" : 'Порядок авто-распределения:' }}</b>
                   {{ isUz
-                    ? "Birinchi kelgan → 1-yo'lqa, ikkinchi → 2-yo'lqa va h.k. Bo'sh yo'lqalar ketma-ket to'ldiriladi."
+                    ? "Birinchi kelgan → 1-yo'lqa, ikkinchi → 2-yo'lqa va h.k. Boʻsh yo'lqalar ketma-ket to'ldiriladi."
                     : 'Первый в очереди → дорожка 1, второй → дорожка 2 и т.д. Свободные дорожки заполняются последовательно.'
                   }}
                 </p>

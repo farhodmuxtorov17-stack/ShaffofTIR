@@ -35,7 +35,7 @@ const stats = computed(() => ({
   avgScore: filteredSessions.value.length > 0 ? Math.round(filteredSessions.value.reduce((sum, s) => sum + s.total_score, 0) / filteredSessions.value.length) : 0,
 }))
 
-// ── Protocols ──
+// --- Protocols 
 const protocols = computed(() => historyStore.sessions.filter(s => s.status === 'COMPLETED' || s.status === 'REVIEWED').slice(0, 30))
 
 function printReport() { window.print() }
@@ -113,8 +113,8 @@ function exportData() {
             <tr>
               <th>ID</th>
               <th>{{ isUz ? "Xodim" : "Сотрудник" }}</th>
-              <th>{{ isUz ? "Yo'lak" : "Дорожка" }}</th>
-              <th>{{ isUz ? "O'qlar" : "Выстрелы" }}</th>
+              <th>{{ isUz ? "Yoʻlak" : "Дорожка" }}</th>
+              <th>{{ isUz ? "Oʻqlar" : "Выстрелы" }}</th>
               <th>{{ isUz ? "Aniqlik" : "Точность" }}</th>
               <th>{{ isUz ? "Ball" : "Балл" }}</th>
               <th>{{ isUz ? "Sana" : "Дата" }}</th>
@@ -140,7 +140,7 @@ function exportData() {
               <td class="text-xs text-gray-400">{{ s.created_at ? new Date(s.created_at).toLocaleDateString('ru-RU') : '-' }}</td>
               <td>
                 <span class="badge" :class="s.status === 'COMPLETED' ? 'badge-success' : s.status === 'REVIEWED' ? 'badge-neutral' : 'badge-warning'">
-                  {{ s.status === 'COMPLETED' ? (isUz ? "Yakunlandi" : "Завершён") : s.status === 'REVIEWED' ? (isUz ? "Ko'rilgan" : "Проверен") : (isUz ? "Kutilmoqda" : "Ожидает") }}
+                  {{ s.status === 'COMPLETED' ? (isUz ? "Yakunlandi" : "Завершён") : s.status === 'REVIEWED' ? (isUz ? "Koʻrilgan" : "Проверен") : (isUz ? "Kutilmoqda" : "Ожидает") }}
                 </span>
               </td>
               <td><ChevronRight class="w-4 h-4 text-gray-300" /></td>
@@ -158,8 +158,8 @@ function exportData() {
             <tr>
               <th>{{ isUz ? 'Protokol №' : 'Протокол №' }}</th>
               <th>{{ isUz ? 'Xodim' : 'Сотрудник' }}</th>
-              <th>{{ isUz ? "Yo'lak" : 'Дорожка' }}</th>
-              <th>{{ isUz ? "O'qlar" : 'Выстрелы' }}</th>
+              <th>{{ isUz ? "Yoʻlak" : 'Дорожка' }}</th>
+              <th>{{ isUz ? "Oʻqlar" : 'Выстрелы' }}</th>
               <th>{{ isUz ? 'Aniqlik' : 'Точность' }}</th>
               <th>{{ isUz ? 'Ball' : 'Балл' }}</th>
               <th>{{ isUz ? 'Sana' : 'Дата' }}</th>

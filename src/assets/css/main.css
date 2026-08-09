@@ -101,3 +101,459 @@
 ::-webkit-scrollbar-track { background: transparent; }
 html { scroll-behavior: smooth; }
 ::selection { background: rgba(22,163,74,0.15); }
+
+/* ========================================
+   RESPONSIVE / MOBILE ADAPTATIONS
+   ======================================== */
+
+/* ── Global: smaller text, tighter spacing on mobile ── */
+@media (max-width: 768px) {
+  html { font-size: 14px; }
+  body { -webkit-tap-highlight-color: transparent; }
+
+  /* Main content padding already handled in AppShell, but add more */
+  main { padding: 12px !important; }
+
+  /* Cards: full width, less padding */
+  .card { border-radius: 12px !important; padding: 12px !important; }
+  .rounded-card { border-radius: 12px !important; }
+  .rounded-2xl { border-radius: 12px !important; }
+  .rounded-3xl { border-radius: 16px !important; }
+
+  /* Grids: force single column on narrow screens */
+  .grid { gap: 8px !important; }
+  .grid-cols-2 { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  .grid-cols-3 { grid-template-columns: 1fr !important; }
+  .grid-cols-4 { grid-template-columns: 1fr 1fr !important; }
+  .grid-cols-5 { grid-template-columns: 1fr 1fr !important; }
+  .grid-cols-6 { grid-template-columns: 1fr 1fr !important; }
+  .grid-cols-7 { grid-template-columns: 1fr 1fr 1fr !important; gap: 4px !important; }
+  .grid-cols-12 { grid-template-columns: 1fr !important; }
+
+  /* Override lg: and md: prefixes on mobile — force stacks */
+  .lg\:grid-cols-2, .lg\:grid-cols-3, .lg\:grid-cols-4,
+  .md\:grid-cols-2, .md\:grid-cols-3, .md\:grid-cols-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Force 2-col grids to 1-col on very narrow */
+  @media (max-width: 400px) {
+    .grid-cols-2 { grid-template-columns: 1fr !important; }
+    .grid-cols-4 { grid-template-columns: 1fr !important; }
+  }
+
+  /* Headings: smaller on mobile */
+  h1 { font-size: 1.25rem !important; }
+  h2 { font-size: 1.1rem !important; }
+  h3 { font-size: 1rem !important; }
+
+  /* Flex rows that should stack on mobile */
+  .flex-wrap { flex-wrap: wrap; gap: 6px !important; }
+  .flex.items-center.justify-between { flex-wrap: wrap; gap: 6px; }
+  .flex.items-start.justify-between { flex-wrap: wrap; gap: 6px; }
+
+  /* Tables: horizontal scroll wrapper */
+  table { font-size: 11px !important; }
+  .overflow-x-auto { -webkit-overflow-scrolling: touch; }
+
+  /* Buttons: full width on mobile forms */
+  button.btn-aurora, button[type="submit"] {
+    width: auto;
+  }
+
+  /* Badges and chips: smaller */
+  .text-xs { font-size: 10px !important; }
+  .text-sm { font-size: 12px !important; }
+  .text-[10px] { font-size: 9px !important; }
+  .text-[11px] { font-size: 10px !important; }
+  .text-[12px] { font-size: 11px !important; }
+
+  /* Padding reductions */
+  .p-4 { padding: 10px !important; }
+  .p-5 { padding: 12px !important; }
+  .p-6 { padding: 12px !important; }
+  .p-8 { padding: 14px !important; }
+  .px-4 { padding-left: 10px !important; padding-right: 10px !important; }
+  .px-6 { padding-left: 12px !important; padding-right: 12px !important; }
+  .py-4 { padding-top: 10px !important; padding-bottom: 10px !important; }
+  .py-6 { padding-top: 12px !important; padding-bottom: 12px !important; }
+  .gap-4 { gap: 8px !important; }
+  .gap-6 { gap: 10px !important; }
+  .gap-8 { gap: 12px !important; }
+  .mb-4 { margin-bottom: 8px !important; }
+  .mb-6 { margin-bottom: 12px !important; }
+  .mb-8 { margin-bottom: 14px !important; }
+
+  /* Stat numbers: smaller */
+  .text-2xl { font-size: 1.1rem !important; }
+  .text-3xl { font-size: 1.3rem !important; }
+  .text-4xl { font-size: 1.5rem !important; }
+  .text-5xl { font-size: 1.75rem !important; }
+  .stat-3d { font-size: 1.1rem !important; }
+
+  /* Modals: full screen on mobile */
+  .fixed.inset-0 .rounded-2xl,
+  .fixed.inset-0 .rounded-3xl {
+    border-radius: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Hide search bar on mobile (already done in topbar) */
+  .topbar-search-wrapper { display: none !important; }
+
+  /* Notification panel: wider on mobile */
+  .notif-panel { width: calc(100vw - 24px) !important; max-width: 320px !important; }
+
+  /* Dropdowns: full width on mobile */
+  .user-dropdown { width: calc(100vw - 48px) !important; max-width: 240px !important; }
+
+  /* Avatars and icons: smaller */
+  .w-8 { width: 24px !important; height: 24px !important; }
+  .w-10 { width: 32px !important; height: 32px !important; }
+  .h-8 { height: 24px !important; }
+  .h-10 { height: 32px !important; }
+
+  /* Space between sections */
+  .space-y-4 > * + * { margin-top: 8px !important; }
+  .space-y-6 > * + * { margin-top: 12px !important; }
+  .space-y-8 > * + * { margin-top: 14px !important; }
+
+  /* Min-width constraints: remove on mobile */
+  .min-w-\[200px\] { min-width: auto !important; }
+  .min-w-\[300px\] { min-width: auto !important; }
+  .min-w-\[400px\] { min-width: auto !important; }
+  .min-w-\[600px\] { min-width: auto !important; }
+  .min-w-\[900px\] { min-width: auto !important; }
+
+  /* Max-width: remove constraints on mobile */
+  .max-w-md { max-width: 100% !important; }
+  .max-w-lg { max-width: 100% !important; }
+  .max-w-2xl { max-width: 100% !important; }
+  .max-w-4xl { max-width: 100% !important; }
+
+  /* Sticky headers: less sticky offset */
+  .sticky { top: 0 !important; }
+
+  /* Overflow hidden: allow scroll on mobile */
+  .overflow-hidden { overflow: auto !important; }
+}
+
+/* ── Tablet specific (768px - 1023px) ── */
+@media (min-width: 769px) and (max-width: 1023px) {
+  .grid-cols-3 { grid-template-columns: 1fr 1fr !important; }
+  .grid-cols-4 { grid-template-columns: 1fr 1fr !important; }
+  .grid-cols-6 { grid-template-columns: 1fr 1fr 1fr !important; }
+
+  .lg\:grid-cols-3, .lg\:grid-cols-4 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+
+/* ── Very narrow phones (< 380px) ── */
+@media (max-width: 379px) {
+  .grid-cols-2 { grid-template-columns: 1fr !important; }
+  .grid-cols-4 { grid-template-columns: 1fr !important; }
+  .grid-cols-7 { grid-template-columns: 1fr 1fr !important; }
+
+  /* Stack flex rows completely */
+  .flex.items-center.justify-between,
+  .flex.items-start.justify-between {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ── Mini App iframe: force mobile rendering ── */
+@media (max-width: 500px) {
+  /* Ensure the app knows it's on a small screen */
+  .sidebar-root { width: 220px; }
+
+  /* Stack horizontal navbars */
+  .flex.gap-2.items-center { flex-wrap: wrap; }
+
+  /* Tabs: horizontal scroll */
+  .flex.border-b { overflow-x: auto; flex-wrap: nowrap !important; -webkit-overflow-scrolling: touch; }
+  .flex.border-b > * { flex-shrink: 0; }
+
+  /* Forms: full width inputs */
+  input, select, textarea {
+    max-width: 100% !important;
+    font-size: 14px !important; /* prevents iOS zoom */
+  }
+
+  /* Charts: reduce height */
+  canvas { max-height: 240px !important; }
+  svg { max-width: 100% !important; }
+}
+
+/* ── Command Center mobile ── */
+@media (max-width: 768px) {
+  /* Split layouts: stack vertically */
+  .lg\:w-\[55\%\], .lg\:w-\[45\%\], .lg\:w-\[38\%\], .lg\:w-\[62\%\] {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid #e8edec;
+  }
+
+  /* Command center height: auto on mobile */
+  .h-\[calc\(100vh-120px\)\] {
+    height: auto !important;
+    min-height: 400px;
+  }
+
+  /* Command center header: stack breadcrumb and pills */
+  .flex.items-center.justify-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* Region rows: compact on mobile */
+  .flex.items-center.gap-4 {
+    gap: 8px !important;
+    padding: 10px 12px !important;
+  }
+
+  /* Tables in command center: horizontal scroll */
+  table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* KPI blocks: 2 cols on mobile */
+  .grid.grid-cols-2.gap-3 {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Summary strip: keep 3 cols but compact */
+  .grid.grid-cols-3 {
+    grid-template-columns: 1fr 1fr 1fr !important;
+  }
+  .grid.grid-cols-3 .text-2xl {
+    font-size: 1.1rem !important;
+  }
+
+  /* District KPI strip */
+  .grid.grid-cols-2.md\:grid-cols-4 {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Command center padding */
+  .px-5 { padding-left: 10px !important; padding-right: 10px !important; }
+  .px-6 { padding-left: 12px !important; padding-right: 12px !important; }
+  .py-4 { padding-top: 10px !important; padding-bottom: 10px !important; }
+
+  /* Mini bar: narrower on mobile */
+  .w-20 { width: 40px !important; }
+
+  /* Scrollable lists: max height on mobile */
+  .overflow-y-auto {
+    max-height: 350px;
+  }
+}
+
+/* ── SessionsPage week view: allow scroll ── */
+@media (max-width: 768px) {
+  .min-w-\[900px\] {
+    min-width: 600px !important;
+  }
+}
+
+/* ── Instructor tablet: full width on mobile ── */
+@media (max-width: 768px) {
+  .max-w-\[1400px\] {
+    max-width: 100% !important;
+  }
+}
+
+/* ── Calendar grid: smaller cells on mobile ── */
+@media (max-width: 768px) {
+  .grid.grid-cols-7 {
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 0 !important;
+  }
+  .grid.grid-cols-7 > * {
+    min-height: 50px !important;
+    padding: 2px !important;
+    font-size: 9px !important;
+  }
+  .grid.grid-cols-7 > * .text-\[11px\] {
+    font-size: 9px !important;
+  }
+  .grid.grid-cols-7 > * .text-\[8px\] {
+    font-size: 7px !important;
+  }
+}
+
+/* ── Tabs: horizontal scroll on mobile ── */
+@media (max-width: 768px) {
+  .flex.border-b {
+    overflow-x: auto;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .flex.border-b > * {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+/* ── Filter dropdowns: stack on mobile ── */
+@media (max-width: 768px) {
+  .flex.items-center.gap-2 > select,
+  .flex.items-center.gap-3 > select,
+  .flex.items-center.gap-2 > .relative {
+    width: 100%;
+    max-width: 100% !important;
+  }
+}
+
+/* ── Flex rows with filters: wrap on mobile ── */
+@media (max-width: 768px) {
+  .flex.items-center.gap-2.flex-wrap,
+  .flex.items-center.gap-3.flex-wrap {
+    flex-wrap: wrap;
+  }
+  .flex.items-center.gap-2:not(.flex-nowrap):not(.border-b) {
+    flex-wrap: wrap;
+  }
+}
+
+/* ── Protocol page mobile ── */
+@media (max-width: 768px) {
+  .flex.items-center.gap-3 {
+    flex-wrap: wrap;
+    gap: 6px !important;
+  }
+  .flex.items-center.gap-2 {
+    flex-wrap: wrap;
+    gap: 6px !important;
+  }
+  .flex.items-center.justify-center.gap-2 {
+    flex-wrap: nowrap;
+  }
+
+  /* Charts: reduce height on mobile */
+  .h-48 { height: 160px !important; }
+  .h-64 { height: 200px !important; }
+  .h-80 { height: 240px !important; }
+
+  /* Top employees list: compact */
+  .flex.items-center.gap-3.p-3 {
+    padding: 8px !important;
+    gap: 8px !important;
+  }
+
+  /* Progress bars: full width on mobile */
+  .max-w-\[100px\] { max-width: 80px !important; }
+  .max-w-\[42px\] { max-width: 32px !important; }
+
+  /* Buttons row: stack */
+  .flex.gap-3:not(.flex-nowrap) {
+    flex-wrap: wrap;
+    gap: 6px !important;
+  }
+
+  /* Form grids: single column */
+  .grid.grid-cols-2.gap-3,
+  .grid.grid-cols-2.gap-4 {
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Text sizes for protocol */
+  .text-base { font-size: 13px !important; }
+  .text-lg { font-size: 15px !important; }
+  .text-xl { font-size: 17px !important; }
+
+  /* Protocol create: score grid */
+  .grid.grid-cols-2.gap-6 {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Report creation: single col */
+  .grid.grid-cols-2.gap-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Analytics grid: 2 cols on mobile */
+  .grid.grid-cols-2.md\:grid-cols-4 {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Soldier analytics: same */
+  .grid.grid-cols-2.md\:grid-cols-4 {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  /* lg:grid-cols-2: stack on mobile */
+  .lg\:grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Tab buttons: smaller */
+  .flex.border-b > button {
+    padding: 8px 12px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* ── Very small phones: force single column grids ── */
+@media (max-width: 380px) {
+  .grid.grid-cols-2,
+  .grid.grid-cols-2.gap-3,
+  .grid.grid-cols-2.gap-4,
+  .grid.grid-cols-2.gap-6,
+  .grid.grid-cols-2.md\:grid-cols-4 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Ensure inputs don't overflow on mobile ── */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    font-size: 14px !important;
+  }
+}
+
+/* ── Avatar / user info in topbar: hide name on mobile ── */
+@media (max-width: 500px) {
+  .topbar-user-info { display: none !important; }
+}
+
+/* ── Notification badge: smaller on mobile ── */
+@media (max-width: 500px) {
+  .topbar-notification-badge {
+    transform: scale(0.85);
+  }
+}
+
+/* ── KPI cards: compact on mobile ── */
+@media (max-width: 768px) {
+  .bg-white.rounded-2xl.border.border-gray-100.p-5 {
+    padding: 12px !important;
+    border-radius: 12px !important;
+  }
+  .bg-white.rounded-2xl.border.border-gray-100.p-5 .text-3xl {
+    font-size: 1.2rem !important;
+  }
+  .bg-white.rounded-2xl.border.border-gray-100.p-5 .text-\[11px\] {
+    font-size: 9px !important;
+  }
+}

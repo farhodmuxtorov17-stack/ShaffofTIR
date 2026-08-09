@@ -23,7 +23,7 @@ const showNewSession = ref(false)
 const isUz = computed(() => locale.value === 'uz')
 const isEmployee = computed(() => authStore.user?.role === 'EMPLOYEE')
 
-// ── Filters ──
+// --- Filters 
 const regionFilter = ref('')
 const districtFilter = ref('')
 const battalionFilter = ref('')
@@ -90,7 +90,7 @@ const stats = computed(() => {
   }
 })
 
-// ── Regional breakdown ──
+// --- Regional breakdown 
 const regionalStats = computed(() => {
   const byRegion = new Map<string, { count: number; sessions: number; avgAccuracy: number; qualified: number }>()
   masterStore.employees.forEach(e => {
@@ -191,7 +191,7 @@ onMounted(() => {
         <p class="text-4xl font-bold text-white mb-3">{{ stats.totalSessions }}</p>
         <div class="flex items-center gap-1 text-emerald-300 text-xs">
           <ArrowUpRight class="w-3.5 h-3.5" />
-          <span>{{ isUz ? "O'tgan oydan +12%" : "+12% к прошлому месяцу" }}</span>
+          <span>{{ isUz ? "Oʻtgan oydan +12%" : "+12% к прошлому месяцу" }}</span>
         </div>
       </div>
 
@@ -227,7 +227,7 @@ onMounted(() => {
         <p class="text-4xl font-bold text-gray-900 mb-3">{{ stats.pendingRequests }}</p>
         <div class="flex items-center gap-1 text-amber-500 text-xs">
           <Bell class="w-3.5 h-3.5" />
-          <span>{{ isUz ? "Ko'rib chiqilmoqda" : "На рассмотрении" }}</span>
+          <span>{{ isUz ? "Koʻrib chiqilmoqda" : "На рассмотрении" }}</span>
         </div>
       </div>
     </div>
@@ -237,7 +237,7 @@ onMounted(() => {
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-2">
           <MapPin class="w-4 h-4 text-[#1a5c3a]" />
-          <h2 class="font-semibold text-gray-900 text-sm">{{ isUz ? "Respublika bo'yicha holat" : "Состояние по Республике" }}</h2>
+          <h2 class="font-semibold text-gray-900 text-sm">{{ isUz ? "Respublika boʻyicha holat" : "Состояние по Республике" }}</h2>
         </div>
         <button @click="router.push('/command-center')" class="text-xs text-[#1a5c3a] hover:underline font-medium">
           {{ isUz ? "Batafsil →" : "Подробнее →" }}
@@ -274,7 +274,7 @@ onMounted(() => {
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
         <div class="flex items-center gap-2 mb-4">
           <MapPin class="w-4 h-4 text-gray-400" />
-          <h2 class="font-semibold text-gray-900 text-sm">{{ isUz ? "Viloyatlar bo'yicha" : "По регионам" }}</h2>
+          <h2 class="font-semibold text-gray-900 text-sm">{{ isUz ? "Viloyatlar boʻyicha" : "По регионам" }}</h2>
         </div>
         <div class="space-y-2.5">
           <div v-for="r in regionalStats" :key="r.region" class="flex items-center gap-3">
@@ -304,7 +304,7 @@ onMounted(() => {
         </div>
         <div>
           <p class="text-2xl font-bold text-gray-900">{{ stats.accuracy }}%</p>
-          <p class="text-[10px] text-gray-400">{{ isUz ? "O'rtacha aniqlik" : "Средняя точность" }}</p>
+          <p class="text-[10px] text-gray-400">{{ isUz ? "Oʻrtacha aniqlik" : "Средняя точность" }}</p>
         </div>
       </div>
       <div class="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3">
@@ -313,7 +313,7 @@ onMounted(() => {
         </div>
         <div>
           <p class="text-2xl font-bold text-gray-900">{{ stats.totalShots }}</p>
-          <p class="text-[10px] text-gray-400">{{ isUz ? "Jami o'q otish" : "Всего выстрелов" }}</p>
+          <p class="text-[10px] text-gray-400">{{ isUz ? "Jami oʻq otish" : "Всего выстрелов" }}</p>
         </div>
       </div>
       <div class="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3">
@@ -322,7 +322,7 @@ onMounted(() => {
         </div>
         <div>
           <p class="text-2xl font-bold text-gray-900">{{ stats.passRate }}%</p>
-          <p class="text-[10px] text-gray-400">{{ isUz ? "O'tish foizi" : "Процент сдачи" }}</p>
+          <p class="text-[10px] text-gray-400">{{ isUz ? "Oʻtish foizi" : "Процент сдачи" }}</p>
         </div>
       </div>
       <div class="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3">
@@ -359,7 +359,7 @@ onMounted(() => {
 
       <!-- Recent sessions -->
       <div class="bg-white rounded-2xl p-5 border border-gray-100">
-        <h2 class="font-semibold text-gray-900 text-sm mb-4">{{ isUz ? "So'nggi sessiyalar" : "Недавние сессии" }}</h2>
+        <h2 class="font-semibold text-gray-900 text-sm mb-4">{{ isUz ? "Soʻnggi sessiyalar" : "Недавние сессии" }}</h2>
         <div class="space-y-2">
           <div v-for="s in recentSessions" :key="s.id" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition cursor-pointer" @click="router.push(`/sessions/${s.id}`)">
             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-white flex items-center justify-center text-xs font-bold shrink-0">

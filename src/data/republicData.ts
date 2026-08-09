@@ -246,7 +246,7 @@ export function getPerformanceLevel(avgScore: number): 'green' | 'yellow' | 'red
 
 export function getPerformanceLabel(level: 'green' | 'yellow' | 'red', isUz: boolean): string {
   if (isUz) {
-    return level === 'green' ? 'Yaxshi' : level === 'yellow' ? "O'rtacha" : 'Past'
+    return level === 'green' ? 'Yaxshi' : level === 'yellow' ? "Oʻrtacha" : 'Past'
   }
   return level === 'green' ? 'Хорошо' : level === 'yellow' ? 'Средне' : 'Низкий'
 }

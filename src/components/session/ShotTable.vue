@@ -156,7 +156,7 @@ const getScoreBadgeClass = (score: number) => {
           </tr>
           <tr v-if="shots.length === 0">
             <td colspan="5" class="px-6 py-10 text-center text-gray-400">
-              Ushbu urinish uchun o'qlar mavjud emas
+              Ushbu urinish uchun oʻqlar mavjud emas
             </td>
           </tr>
         </tbody>
@@ -169,7 +169,7 @@ const getScoreBadgeClass = (score: number) => {
       class="flex items-center justify-between border-t border-shell-border px-6 py-4 bg-gray-50/30 select-none"
     >
       <span class="text-xs text-gray-500">
-        Jami: <strong>{{ shots.length }}</strong> ta o'q. Sahifa: <strong>{{ currentPage }}</strong> / {{ totalPages }}
+        Jami: <strong>{{ shots.length }}</strong> ta oʻq. Sahifa: <strong>{{ currentPage }}</strong> / {{ totalPages }}
       </span>
 
       <div class="flex items-center gap-2">

@@ -63,7 +63,7 @@ export interface ProtocolRecord {
 
 const STORAGE_KEY = 'shaffoftir_session_history_v2';
 
-// ── 24 Employees (same as master store) ──
+// --- 24 Employees (same as master store) 
 const EMPLOYEES = [
   { id: 'e001', name: 'Алиев Б.У.', rank: 'Капитан', qual: 'ADVANCED' as const, dept: '1-я рота' },
   { id: 'e002', name: 'Рахимов Ж.Т.', rank: 'Лейтенант', qual: 'INTERMEDIATE' as const, dept: '1-я рота' },
@@ -112,7 +112,7 @@ const INSTRUCTORS = [
   { id: 'u018', name: 'Камилов С.Р.' },
 ];
 
-// ── Deterministic PRNG for reproducible data ──
+// --- Deterministic PRNG for reproducible data 
 function seededRandom(seed: number) {
   const x = Math.sin(seed) * 10000;
   return x - Math.floor(x);
@@ -122,7 +122,7 @@ function pick<T>(arr: T[], seed: number): T {
   return arr[Math.floor(seededRandom(seed) * arr.length)];
 }
 
-// ── Generate 55 realistic interconnected sessions ──
+// --- Generate 55 realistic interconnected sessions 
 function generateHistoricalSessions(): SessionRecord[] {
   const sessions: SessionRecord[] = [];
 
@@ -230,7 +230,7 @@ function generateHistoricalSessions(): SessionRecord[] {
   return sessions;
 }
 
-// ── Generate protocols from sessions ──
+// --- Generate protocols from sessions 
 function generateProtocols(sessions: SessionRecord[]): ProtocolRecord[] {
   return sessions
     .filter(s => s.protocol_id)
@@ -276,7 +276,7 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
   const sessions = ref<SessionRecord[]>(stored?.sessions || generateHistoricalSessions());
   const protocols = ref<ProtocolRecord[]>(stored?.protocols || generateProtocols(sessions.value));
 
-  // ── Computed stats ──
+  // --- Computed stats 
   const totalSessions = computed(() => sessions.value.length);
   const completedSessions = computed(() => sessions.value.filter(s => s.status === 'COMPLETED' || s.status === 'REVIEWED').length);
   const pendingSessions = computed(() => sessions.value.filter(s => s.status === 'PENDING').length);
@@ -292,7 +292,7 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
     return totalSessions.value > 0 ? Math.round((passed / totalSessions.value) * 100) : 0;
   });
 
-  // ── Monthly trends ──
+  // --- Monthly trends 
   const monthlyTrends = computed(() => {
     const months: Record<string, { count: number; totalAcc: number; totalScore: number }> = {};
     sessions.value.forEach(s => {
@@ -314,7 +314,7 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
       }));
   });
 
-  // ── Sessions by employee ──
+  // --- Sessions by employee 
   const sessionsByEmployee = computed(() => {
     const map: Record<string, SessionRecord[]> = {};
     sessions.value.forEach(s => {
@@ -324,7 +324,7 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
     return map;
   });
 
-  // ── Employee stats ──
+  // --- Employee stats 
   const employeeStats = computed(() => {
     return EMPLOYEES.map(emp => {
       const empSessions = sessionsByEmployee.value[emp.id] || [];
@@ -344,10 +344,10 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
     }).sort((a, b) => b.total_score - a.total_score);
   });
 
-  // ── Top performers ──
+  // --- Top performers 
   const topPerformers = computed(() => employeeStats.value.slice(0, 5));
 
-  // ── Weekly sessions ──
+  // --- Weekly sessions 
   const weeklySessions = computed(() => {
     const days: Record<number, number> = { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
     const now = new Date();
@@ -363,7 +363,7 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
     return dayLabelsRu.map((label, i) => ({ label, labelUz: dayLabelsUz[i], value: days[i] }));
   });
 
-  // ── Weapon usage distribution ──
+  // --- Weapon usage distribution 
   const weaponDistribution = computed(() => {
     const dist: Record<string, number> = {};
     sessions.value.forEach(s => {
@@ -372,7 +372,7 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
     return Object.entries(dist).map(([label, value]) => ({ label, value }));
   });
 
-  // ── Protocol methods ──
+  // --- Protocol methods 
   const totalProtocols = computed(() => protocols.value.length);
   const signedProtocols = computed(() => protocols.value.filter(p => p.status === 'SIGNED' || p.status === 'APPROVED').length);
   const draftProtocols = computed(() => protocols.value.filter(p => p.status === 'DRAFT').length);
@@ -406,7 +406,7 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
     }
   }
 
-  // ── Add new session from completed workflow ──
+  // --- Add new session from completed workflow 
   function addSession(record: Omit<SessionRecord, 'id' | 'created_at' | 'completed_at' | 'status'> & { id?: string }): SessionRecord {
     const now = new Date();
     const newRecord: SessionRecord = {
@@ -421,7 +421,7 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
     return newRecord;
   }
 
-  // ── Update session status ──
+  // --- Update session status 
   function updateStatus(sessionId: string, status: SessionRecord['status']) {
     const s = sessions.value.find(x => x.id === sessionId);
     if (s) {
@@ -460,12 +460,12 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
     }
   }
 
-  // ── Get single session ──
+  // --- Get single session 
   function getSession(sessionId: string): SessionRecord | undefined {
     return sessions.value.find(s => s.id === sessionId);
   }
 
-  // ── Filter sessions ──
+  // --- Filter sessions 
   function filterSessions(filters: {
     employeeId?: string;
     employeeName?: string;
@@ -487,7 +487,7 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
     });
   }
 
-  // ── Get sessions by employee ──
+  // --- Get sessions by employee 
   function getSessionsByEmployee(empId: string): SessionRecord[] {
     return sessions.value.filter(s => s.employee_id === empId);
   }

@@ -44,7 +44,7 @@
         <!-- LEFT: Map panel -->
         <div class="lg:w-[55%] bg-white border-r border-gray-200 p-6 flex flex-col">
           <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-4">
-            {{ isUz ? "Xarita - KPI bo'yicha" : "Карта - по KPI" }}
+            {{ isUz ? "Xarita - KPI boʻyicha" : "Карта - по KPI" }}
           </h2>
           <div class="flex-1">
             <UzbekistanMap :selectedId="hoveredRegion" @select="goToRegion(getRegionById($event)!)" />
@@ -61,7 +61,7 @@
             </div>
             <div class="px-5 py-4 border-r border-gray-100 text-center">
               <p class="text-2xl font-black" :class="levelText(republicLevel)">{{ republicTotals.avgScore }}</p>
-              <p class="text-[10px] uppercase tracking-wider text-gray-400 mt-0.5">{{ isUz ? "O'rt. KPI" : "Ср. KPI" }}</p>
+              <p class="text-[10px] uppercase tracking-wider text-gray-400 mt-0.5">{{ isUz ? "Oʻrt. KPI" : "Ср. KPI" }}</p>
             </div>
             <div class="px-5 py-4 text-center">
               <p class="text-2xl font-black text-gray-900">{{ qualifiedPercent }}%</p>
@@ -124,7 +124,7 @@
               <div class="w-3 h-3 rounded-full" :class="levelDot(getPerformanceLevel(selectedRegion.avgScore))"></div>
               <h2 class="text-xl font-black text-gray-900">{{ isUz ? selectedRegion.name_uz : selectedRegion.name_ru }}</h2>
             </div>
-            <p class="text-xs text-gray-400">{{ isUz ? "Viloyat ko'rsatkichlari" : "Показатели области" }}</p>
+            <p class="text-xs text-gray-400">{{ isUz ? "Viloyat koʻrsatkichlari" : "Показатели области" }}</p>
           </div>
 
           <!-- KPI blocks -->

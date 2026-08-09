@@ -330,7 +330,7 @@ export interface CameraStream {
   last_motion_detected?: string | null;
 }
 
-// ── Create DTOs (matching FastAPI backend) ──
+// --- Create DTOs (matching FastAPI backend) 
 export interface HREmployeeCreate {
   full_name: string;
   rank: string;
@@ -367,7 +367,7 @@ export interface TrainingPlanCreate {
   passing_score: number;
 }
 
-// ── Protocol Types ──
+// --- Protocol Types 
 export interface Protocol {
   id: string;
   session_id: string;
@@ -428,7 +428,7 @@ export interface ReviewReasonCreate {
   reason: string;
 }
 
-// ── TechSpec Module: Range/Polygon Management ──
+// --- TechSpec Module: Range/Polygon Management 
 export interface ShootingRange {
   id: string;
   name: string;
@@ -495,7 +495,7 @@ export interface RangeCameraCreate {
   weapon_type?: WeaponCategory;
 }
 
-// ── Command Dashboard (Situational Center) ──
+// --- Command Dashboard (Situational Center) 
 export interface RegionStats {
   region_code: string;
   region_name: string;
@@ -531,7 +531,7 @@ export interface UnitStats {
   status: 'HIGH' | 'AVERAGE' | 'LOW';
 }
 
-// ── FaceID Queue (Instructor Tablet) ──
+// --- FaceID Queue (Instructor Tablet) 
 export interface FaceIDQueueItem {
   id: string;
   employee_id: string;
@@ -545,7 +545,7 @@ export interface FaceIDQueueItem {
   scoring_mode: ScoringMode;
 }
 
-// ── Heavy Equipment (Tank/BTR) Session ──
+// --- Heavy Equipment (Tank/BTR) Session 
 export interface HeavyEquipmentSession {
   id: string;
   vehicle_type: 'TANK' | 'BTR' | 'BMP' | 'OTHER';

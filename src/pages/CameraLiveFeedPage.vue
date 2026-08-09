@@ -148,7 +148,7 @@ const avgScore = computed(() => shots.value.length > 0 ? (totalScore.value / sho
             </div>
             <div class="text-center">
               <p class="text-xl font-bold text-gray-800">{{ avgScore }}</p>
-              <p class="text-[9px] text-gray-400">o'rtacha ball</p>
+              <p class="text-[9px] text-gray-400">oʻrtacha ball</p>
             </div>
           </div>
         </div>
@@ -185,7 +185,7 @@ const avgScore = computed(() => shots.value.length > 0 ? (totalScore.value / sho
             <h3 class="text-sm font-bold">{{ isUz ? 'Jami natija' : 'Общий результат' }}</h3>
           </div>
           <p class="text-4xl font-bold">{{ totalScore }}</p>
-          <p class="text-xs opacity-80 mt-1">{{ shots.length }} oq · o'rtacha {{ avgScore }}</p>
+          <p class="text-xs opacity-80 mt-1">{{ shots.length }} oq · oʻrtacha {{ avgScore }}</p>
         </div>
 
         <!-- Warning if no employee -->

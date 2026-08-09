@@ -124,7 +124,7 @@ const stats = computed(() => ({
             </span>
           </div>
           <div>
-            <span class="text-gray-400">{{ isUz ? "O'qlar:" : 'Выстрелов:' }}</span>
+            <span class="text-gray-400">{{ isUz ? "Oʻqlar:" : 'Выстрелов:' }}</span>
             <span class="text-gray-700">{{ wpn.total_shots_fired }}</span>
           </div>
         </div>

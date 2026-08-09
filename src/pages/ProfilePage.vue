@@ -95,7 +95,7 @@ function regionLabel(value: string) {
     tashkent_city: { uz: 'Toshkent sh.', ru: 'г. Ташкент' },
     tashkent_region: { uz: 'Toshkent vil.', ru: 'Ташкентская обл.' },
     samarkand: { uz: 'Samarqand', ru: 'Самарканд' },
-    fergana: { uz: "Farg'ona", ru: 'Фергана' },
+    fergana: { uz: "Fargʻona", ru: 'Фергана' },
     bukhara: { uz: 'Buxoro', ru: 'Бухара' },
     andijan: { uz: 'Andijon', ru: 'Андижан' },
   }

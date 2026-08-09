@@ -152,7 +152,7 @@ const steps = computed(() => [
   { icon: Target, label: locale.value === 'uz' ? 'Baholash' : 'Оценка' },
   { icon: Users, label: locale.value === 'uz' ? 'Xodim' : 'Сотрудник' },
   { icon: Crosshair, label: locale.value === 'uz' ? 'Qurol' : 'Оружие' },
-  { icon: Radio, label: locale.value === 'uz' ? "Yo'lak" : 'Дорожка' },
+  { icon: Radio, label: locale.value === 'uz' ? "Yo02BBlak" : 'Дорожка' },
   { icon: Check, label: locale.value === 'uz' ? 'Tasdiq' : 'Подтвердить' },
 ])
 </script>
@@ -306,7 +306,7 @@ const steps = computed(() => [
                   class="p-4 rounded-xl border-2 transition-all hover:shadow-md text-center"
                   :class="selectedLane === l.id ? 'border-brand-500 bg-brand-50' : 'border-gray-200 hover:border-brand-300'">
                   <Radio class="w-6 h-6 mx-auto mb-2" :class="selectedLane === l.id ? 'text-brand-600' : 'text-gray-400'" />
-                  <p class="text-sm font-bold text-gray-800">{{ locale === 'uz' ? "Yo'lak" : 'Дорожка' }} {{ l.lane_number }}</p>
+                  <p class="text-sm font-bold text-gray-800">{{ locale === 'uz' ? "Yo02BBlak" : 'Дорожка' }} {{ l.lane_number }}</p>
                   <p class="text-[10px] text-gray-400 mt-1">{{ l.distance_m }}{{ locale === 'uz' ? 'm masofa' : 'м дистанция' }}</p>
                   <p class="text-[10px] mt-0.5" :class="l.camera_status === 'ONLINE' ? 'text-green-500' : 'text-gray-300'">
                     {{ l.camera_status === 'ONLINE' ? (locale === 'uz' ? 'Kamera ON' : 'Камера ON') : (locale === 'uz' ? 'Kamera OFF' : 'Камера OFF') }}
@@ -334,7 +334,7 @@ const steps = computed(() => [
                       <span class="font-semibold text-gray-800">{{ selectedWeaponData?.name }}</span>
                     </div>
                     <div class="flex items-center justify-between">
-                      <span class="text-gray-400">{{ locale === 'uz' ? "Yo'lak" : 'Дорожка' }}</span>
+                      <span class="text-gray-400">{{ locale === 'uz' ? "Yo02BBlak" : 'Дорожка' }}</span>
                       <span class="font-semibold text-gray-800">№{{ selectedLaneData?.lane_number }}</span>
                     </div>
                     <div class="pt-2 border-t border-gray-100">

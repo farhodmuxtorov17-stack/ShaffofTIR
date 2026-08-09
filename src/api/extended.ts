@@ -12,7 +12,7 @@ import type {
   RangeSchedule,
 } from '@/types/extended';
 
-// ── Auth ──
+// --- Auth 
 export const authApi = {
   login: (data: LoginRequest) =>
     http.post<LoginResponse>('/api/v1/auth/login/', data),
@@ -22,7 +22,7 @@ export const authApi = {
     Promise.resolve({ message: 'Logged out' }),
 };
 
-// ── HR ──
+// --- HR 
 export const hrApi = {
   listEmployees: (params?: { search?: string; department?: string; status?: string; limit?: number; offset?: number }) => {
     const query = new URLSearchParams();
@@ -42,7 +42,7 @@ export const hrApi = {
   getDepartment: (id: string) => http.get<HRDepartment>(`/api/v1/departments/${id}/`),
 };
 
-// ── Weapons ──
+// --- Weapons 
 export const weaponsApi = {
   list: (params?: { category?: string; status?: string; search?: string }) => {
     const query = new URLSearchParams();
@@ -59,7 +59,7 @@ export const weaponsApi = {
   listAssignments: () => http.get<WeaponAssignment[]>('/api/v1/weapon-assignments/'),
 };
 
-// ── Training ──
+// --- Training 
 export const trainingApi = {
   listPlans: (params?: { difficulty?: string }) => {
     const query = new URLSearchParams();
@@ -80,7 +80,7 @@ export const trainingApi = {
   },
 };
 
-// ── Protocols ──
+// --- Protocols 
 export const protocolsApi = {
   list: (params?: { status?: string; employee_id?: string; session_id?: string }) => {
     const query = new URLSearchParams();
@@ -102,13 +102,13 @@ export const protocolsApi = {
   createReason: (data: ReviewReasonCreate) => http.post<ReviewReason>('/api/v1/review-reasons/', data),
 };
 
-// ── Analytics ──
+// --- Analytics 
 export const analyticsApi = {
   getSummary: () => http.get<AnalyticsSummary>('/api/v1/analytics/summary/'),
   getTrends: (days?: number) => http.get<PerformanceTrend[]>(`/api/v1/analytics/trends${days ? '?days=' + days : ''}`),
 };
 
-// ── Notifications ──
+// --- Notifications 
 export const notificationsApi = {
   list: (unreadOnly?: boolean) =>
     http.get<AppNotification[]>(`/api/v1/notifications/${unreadOnly ? '?unread_only=true' : ''}`),
@@ -117,7 +117,7 @@ export const notificationsApi = {
   delete: (id: string) => http.delete<{ message: string }>(`/api/v1/notifications/${id}/`),
 };
 
-// ── Schedule ──
+// --- Schedule 
 export const scheduleApi = {
   list: (params?: { date?: string; status?: string }) => {
     const query = new URLSearchParams();

@@ -143,7 +143,7 @@ function handleReject() {
       <Archive class="w-5 h-5 text-amber-600 shrink-0" />
       <div>
         <p class="text-sm font-medium text-amber-800">
-          {{ locale === 'uz' ? "Natijalar qulflangan - o'zgartirish mumkin emas" : 'Результаты заблокированы - изменения невозможны' }}
+          {{ locale === 'uz' ? "Natijalar qulflangan - oʻzgartirish mumkin emas" : 'Результаты заблокированы - изменения невозможны' }}
         </p>
         <p class="text-xs text-amber-600 mt-0.5">
           {{ locale === 'uz'

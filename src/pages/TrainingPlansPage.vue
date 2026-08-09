@@ -23,7 +23,7 @@ const stats = computed(() => ({
   completed: assignments.value.filter(a => a.status === 'COMPLETED').length,
 }))
 
-// ── Visual lesson data ──
+// --- Visual lesson data 
 const lessons = [
   { id: 'l1', title: isUz.value ? 'Asosiy tutish' : 'Базовый хват', desc: isUz.value ? 'To\'g\'ri tutish va nishon olish' : 'Правильный хват и прицеливание', icon: Target, color: '#3b82f6', hasVideo: true, duration: '15 мин', steps: 5 },
   { id: 'l2', title: isUz.value ? 'Nafas nazorati' : 'Контроль дыхания', desc: isUz.value ? 'Otilish vaqtida nafasni to\'xtatish' : 'Задержка дыхания при выстреле', icon: Activity, color: '#10b981', hasVideo: true, duration: '10 мин', steps: 3 },
@@ -34,7 +34,7 @@ const lessons = [
 ]
 
 
-// ── Active training employees ──
+// --- Active training employees 
 const activeTrainees = computed(() => {
   return assignments.value.filter(a => a.status === 'IN_PROGRESS').slice(0, 5)
 })
@@ -46,7 +46,7 @@ const activeTrainees = computed(() => {
     <!-- Header -->
     <div class="flex items-center justify-between">
       <div>
-        <h1 class="text-xl font-extrabold text-gray-900">{{ isUz ? "O'quv rejalar" : "Учебные планы" }}</h1>
+        <h1 class="text-xl font-extrabold text-gray-900">{{ isUz ? "Oʻquv rejalar" : "Учебные планы" }}</h1>
         <p class="text-sm text-gray-400 mt-1">{{ isUz ? "Vizual darslar va mashg'ulotlar" : "Визуальные уроки и тренировки" }}</p>
       </div>
     </div>
@@ -147,7 +147,7 @@ const activeTrainees = computed(() => {
 
     <!-- Training plans list -->
     <div>
-      <h2 class="text-sm font-bold text-gray-700 mb-3">{{ isUz ? "O'quv rejalari" : "Планы тренировок" }}</h2>
+      <h2 class="text-sm font-bold text-gray-700 mb-3">{{ isUz ? "Oʻquv rejalari" : "Планы тренировок" }}</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="plan in plans" :key="plan.id"
           class="card cursor-pointer group hover:shadow-lg transition"

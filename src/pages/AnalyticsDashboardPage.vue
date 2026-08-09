@@ -32,7 +32,7 @@ const qualificationDist = computed(() => {
   })
   return [
     { label: isUz.value ? 'Boshlovchi' : 'Начальный', value: levels.BEGINNER, color: '#94a3b8' },
-    { label: isUz.value ? "O'rta" : 'Средний', value: levels.INTERMEDIATE, color: '#3b82f6' },
+    { label: isUz.value ? "Oʻrta" : 'Средний', value: levels.INTERMEDIATE, color: '#3b82f6' },
     { label: isUz.value ? 'Yuqori' : 'Продвинутый', value: levels.ADVANCED, color: '#8b5cf6' },
     { label: isUz.value ? 'Ekspert' : 'Эксперт', value: levels.EXPERT, color: '#16a34a' },
   ]

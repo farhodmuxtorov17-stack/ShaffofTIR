@@ -121,7 +121,7 @@ onMounted(() => {
             {{ isLocalSession ? localSession?.employee_name : `Sessiya: ${sessionId.substring(0, 12) }...` }}
           </h1>
           <p class="text-sm text-gray-500 mt-0.5">
-            {{ isLocalSession ? `${localSession?.lane_number ? 'L' + localSession.lane_number + ' · ' : '' }${localSession?.total_shots || 0 } o'q · ${localSession?.accuracy || 0 }%` : 'Batafsil ma\'lumot' }}
+            {{ isLocalSession ? `${localSession?.lane_number ? 'L' + localSession.lane_number + ' · ' : '' }${localSession?.total_shots || 0 } oʻq · ${localSession?.accuracy || 0 }%` : 'Batafsil ma\'lumot' }}
           </p>
         </div>
       </div>
@@ -152,11 +152,11 @@ onMounted(() => {
         <h2 class="text-sm font-bold text-gray-700 mb-4">{{ t('detail.shots') }}</h2>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
-            <h3 class="text-xs font-medium text-gray-500 mb-2">Test o'qlari ({{ localSession.test_shots.length }})</h3>
+            <h3 class="text-xs font-medium text-gray-500 mb-2">Test oʻqlari ({{ localSession.test_shots.length }})</h3>
             <ShotTable :shots="localSession.test_shots.map((s, i) => ({ id: i + 1, soldier_id: 0, shot_number: i + 1, is_hit: s.score > 0, shot_type: s.shot_type, x: s.x, y: s.y, score: s.score }))" :show-pagination="false" />
           </div>
           <div>
-            <h3 class="text-xs font-medium text-gray-500 mb-2">Asosiy o'qlar ({{ localSession.main_shots.length }})</h3>
+            <h3 class="text-xs font-medium text-gray-500 mb-2">Asosiy oʻqlar ({{ localSession.main_shots.length }})</h3>
             <ShotTable :shots="localSession.main_shots.map((s, i) => ({ id: i + 1, soldier_id: 0, shot_number: i + 1, is_hit: s.score > 0, shot_type: s.shot_type, x: s.x, y: s.y, score: s.score }))" :show-pagination="true" :page-size="10" />
           </div>
         </div>

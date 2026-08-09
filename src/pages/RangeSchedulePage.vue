@@ -20,7 +20,7 @@ const schedules = computed(() => masterStore.schedules)
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-xl font-bold text-gray-900">{{ isUz ? 'Tir jadvali' : 'Расписание тира' }}</h1>
-        <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Yo'laklar va vaqt band qilish" : 'Бронирование дорожек и времени' }}</p>
+        <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Yoʻlaklar va vaqt band qilish" : 'Бронирование дорожек и времени' }}</p>
       </div>
       <button class="btn-primary text-xs">
         <Plus class="w-3.5 h-3.5" /> {{ isUz ? 'Slot qo\u02bb shish' : 'Добавить слот' }}
@@ -59,7 +59,7 @@ const schedules = computed(() => masterStore.schedules)
                 <span class="text-gray-700">{{ sched.instructor_name }}</span>
               </div>
               <div>
-                <span class="text-gray-400">{{ isUz ? "Yo'laklar:" : 'Дорожки:' }}</span>
+                <span class="text-gray-400">{{ isUz ? "Yoʻlaklar:" : 'Дорожки:' }}</span>
                 <span class="text-gray-700">{{ sched.lane_numbers.join(', ') }}</span>
               </div>
               <div>

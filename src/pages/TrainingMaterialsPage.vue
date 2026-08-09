@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useMasterStore } from '@/stores/master'
 import LoadingState from '@/components/ui/LoadingState.vue'
 import { useI18n } from '@/i18n'
 import { Shield, BookOpen, AlertTriangle, CheckCircle2, XCircle, Lock, ChevronRight, ChevronLeft, Award, RefreshCw, Eye, Target, Crosshair, Radio, Zap, HardHat } from 'lucide-vue-next'
 
 const auth = useAuthStore()
+const masterStore = useMasterStore()
 const { locale } = useI18n()
 const loading = ref(true)
 const isUz = computed(() => locale.value === 'uz')
@@ -39,6 +41,13 @@ const saveProgress = (passed = false) => {
       completedSections: completedSections.value,
       passed,
     }))
+    // Update employee record in master store
+    if (passed && auth.user?.full_name) {
+      const emp = masterStore.employees.find(e => e.full_name === auth.user?.full_name)
+      if (emp && !emp.tb_test_passed) {
+        masterStore.updateEmployee(emp.id, { tb_test_passed: true })
+      }
+    }
   } catch { /* ignore */ }
 }
 
@@ -465,7 +474,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
               </h3>
             </div>
             <div class="space-y-2 ml-10">
-              <button v-for="(opt, oi) in (isUz ? q.options_uz : q.options_ru)" :key="oi"
+              <button v-for="(opt, oi) in (isUz ? q.options_uz : q.options_ru)" :key="oi" @click="selectAnswer(q.id, oi)"
                       class="w-full text-left px-4 py-2.5 rounded-xl text-sm transition-all border"
                       :class="testAnswers[q.id] === oi
                         ? 'border-green-500 bg-green-50 text-green-900'

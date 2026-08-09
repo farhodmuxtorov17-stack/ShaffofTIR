@@ -1,6 +1,6 @@
 import { defineStore } from './pinia-shim';
 import { ref, computed } from 'vue';
-import type { Weapon, HRDepartment, ShootingLane, Weapon, ShootingRange, RangeRubeg, ShootingSessionFlow, TrainingPlan, TrainingAssignment, AppNotification, RangeSchedule, AnalyticsSummary } from '@/types/extended';
+import type { Weapon, HRDepartment, HREmployee, ShootingLane, ShootingRange, RangeRubeg, ShootingSessionFlow, TrainingPlan, TrainingAssignment, AppNotification, RangeSchedule, AnalyticsSummary } from '@/types/extended';
 
 // ============================================================
 // Master Store - Realistic interconnected data
@@ -8,7 +8,7 @@ import type { Weapon, HRDepartment, ShootingLane, Weapon, ShootingRange, RangeRu
 // ============================================================
 
 export const useMasterStore = defineStore('master', () => {
-  // ── 24 Employees across 6 departments ──
+  // --- 24 Employees across 6 departments 
   const employees = ref<HREmployee[]>([
     // 1-я рота
     { id: 'e001', full_name: 'Алиев Бахтиёр Убайдуллаевич', rank: 'Капитан', position: 'Командир взвода', department: '1-я рота', unit: 'Батальон "Ширин"', region: 'Ташкентская область', district: 'Юкоркорганский район', battalion: '1-я рота', personal_number: 'AZ-2024-001', birth_date: '1990-05-15', phone: '+998901112233', email: 'aliev@mil.uz', face_id_registered: true, face_id_image_url: null, status: 'ACTIVE', hire_date: '2015-06-01', shooting_qualified: true, tb_test_passed: true, qualification_level: 'ADVANCED', total_sessions: 24, total_score: 1850, avg_accuracy: 78, last_shooting_date: '2026-07-22', created_at: '2024-01-01T00:00:00Z' },
@@ -44,7 +44,7 @@ export const useMasterStore = defineStore('master', () => {
     { id: 'e024', full_name: 'Хайдаров Жавлон Бахтиёрович', rank: 'Сержант', position: 'Стрелок-снайпер', department: '2-я рота', unit: 'Батальон "Ширин"', region: 'Ташкентская область', district: 'Кибрайский район', battalion: '2-я рота', personal_number: 'AZ-2024-024', birth_date: '1995-05-17', phone: '+998907071819', email: null, face_id_registered: true, face_id_image_url: null, status: 'ACTIVE', hire_date: '2019-04-01', shooting_qualified: true, tb_test_passed: true, qualification_level: 'ADVANCED', total_sessions: 20, total_score: 1480, avg_accuracy: 74, last_shooting_date: '2026-07-18', created_at: '2024-01-01T00:00:00Z' },
   ]);
 
-  // ── 6 Departments ──
+  // --- 6 Departments 
   const departments = ref<HRDepartment[]>([
     { id: 'd001', name: '1-я рота', code: 'R1', head: 'Алиев Б.У.', employee_count: 6, description: 'Первая стрелковая рота', created_at: '2024-01-01T00:00:00Z' },
     { id: 'd002', name: '2-я рота', code: 'R2', head: 'Юлдашев Д.А.', employee_count: 6, description: 'Вторая стрелковая рота', created_at: '2024-01-01T00:00:00Z' },
@@ -54,7 +54,7 @@ export const useMasterStore = defineStore('master', () => {
     { id: 'd006', name: 'Штаб', code: 'ST', head: 'Тешабаев Ж.А.', employee_count: 2, description: 'Штабной отдел', created_at: '2024-01-01T00:00:00Z' },
   ]);
 
-  // ── 12 Weapons ──
+  // --- 12 Weapons 
   const weapons = ref<Weapon[]>([
     { id: 'w001', name: 'AK-74', category: 'RIFLE', serial_number: 'AK74-2024-001', caliber: '5.45×39mm', manufacturer: 'Ижмаш', status: 'AVAILABLE', condition: 'EXCELLENT', assigned_to: null, last_maintenance: '2026-06-15', total_shots_fired: 1500, image_url: null, max_range_m: 500, ammo_type: '5.45mm', created_at: '2024-01-01T00:00:00Z' },
     { id: 'w002', name: 'AK-74', category: 'RIFLE', serial_number: 'AK74-2024-002', caliber: '5.45×39mm', manufacturer: 'Ижмаш', status: 'IN_USE', condition: 'GOOD', assigned_to: 'e001', last_maintenance: '2026-05-20', total_shots_fired: 3200, image_url: null, max_range_m: 500, ammo_type: '5.45mm', created_at: '2024-01-01T00:00:00Z' },
@@ -70,14 +70,14 @@ export const useMasterStore = defineStore('master', () => {
     { id: 'w012', name: 'СВД (Драгунов)', category: 'SNIPER', serial_number: 'SVD-2024-002', caliber: '7.62×54mmR', manufacturer: 'Ижмаш', status: 'AVAILABLE', condition: 'EXCELLENT', assigned_to: null, last_maintenance: '2026-07-05', total_shots_fired: 450, image_url: null, max_range_m: 1300, ammo_type: '7.62x54mmR', created_at: '2024-01-01T00:00:00Z' },
   ]);
 
-  // ── Shooting Ranges (Open + Closed) ──
+  // --- Shooting Ranges (Open + Closed) 
   const ranges = ref<ShootingRange[]>([
     { id: 'rg001', name: 'Тир №1 (Открытый)', code: 'RNG-001', region: 'tashkent_city', ip_prefix: '88.1.92', range_type: 'OPEN', status: 'ACTIVE', total_rubegs: 3, total_lanes: 18, lanes_per_rubeg: 6, cameras_online: 17, cameras_total: 18, created_at: '2024-01-01T00:00:00Z', updated_at: null },
     { id: 'rg002', name: 'Тир №2 (Закрытый)', code: 'RNG-002', region: 'tashkent_region', ip_prefix: '88.1.93', range_type: 'CLOSED', status: 'ACTIVE', total_rubegs: 4, total_lanes: 24, lanes_per_rubeg: 6, cameras_online: 24, cameras_total: 24, created_at: '2024-01-01T00:00:00Z', updated_at: null },
     { id: 'rg003', name: 'Тир №3 (Открытый)', code: 'RNG-003', region: 'samarkand', ip_prefix: '88.1.94', range_type: 'OPEN', status: 'ACTIVE', total_rubegs: 2, total_lanes: 12, lanes_per_rubeg: 6, cameras_online: 11, cameras_total: 12, created_at: '2024-01-01T00:00:00Z', updated_at: null },
   ]);
 
-  // ── Rubegs (firing lines) per range ──
+  // --- Rubegs (firing lines) per range 
   const rubegs = ref<RangeRubeg[]>([
     // Range 1 (Open) - 3 rubegs
     { id: 'rb001', range_id: 'rg001', range_name: 'Тир №1', rubeg_number: 1, name: 'Рубеж 1 (100м)', weapon_type: 'PISTOL', distance_m: 100, lane_count: 6, cameras: [] },
@@ -92,7 +92,7 @@ export const useMasterStore = defineStore('master', () => {
     { id: 'rb008', range_id: 'rg003', range_name: 'Тир №3', rubeg_number: 1, name: 'Рубеж 1 (100м)', weapon_type: 'RIFLE', distance_m: 100, lane_count: 6, cameras: [] },
     { id: 'rb009', range_id: 'rg003', range_name: 'Тир №3', rubeg_number: 2, name: 'Рубеж 2 (300м)', weapon_type: 'SNIPER', distance_m: 300, lane_count: 6, cameras: [] },
   ]);
-  // ── 6 Shooting Lanes ──
+  // --- 6 Shooting Lanes 
   const now = new Date()
   const minsAgo = (m: number) => new Date(now.getTime() - m * 60000).toISOString()
 
@@ -105,7 +105,7 @@ export const useMasterStore = defineStore('master', () => {
     { id: 'l006', lane_number: 6, name: 'Дорожка 6', status: 'MAINTENANCE', current_employee_id: null, current_employee_name: null, camera_ip: '192.168.1.69', camera_status: 'OFFLINE', target_type: 'CIRCLE', distance_m: 50, has_3d_preview: false, weapon_assigned: null, session_start_time: null, current_soldier_seq: undefined, current_shots_fired: 0, current_score: 0 },
   ]);
 
-  // ── Active Session Flows (interconnected with employees + weapons + lanes) ──
+  // --- Active Session Flows (interconnected with employees + weapons + lanes) 
   const sessionFlows = ref<ShootingSessionFlow[]>([
     {
       id: 'sf001', session_id: 's-2026-046', lane_id: 'l001', lane_number: 1,
@@ -173,7 +173,7 @@ export const useMasterStore = defineStore('master', () => {
     },
   ]);
 
-  // ── Training Plans (linked to weapons) ──
+  // --- Training Plans (linked to weapons) 
   const trainingPlans = ref<TrainingPlan[]>([
     { id: 'tp001', name: 'Базовая стрельба из АК-74', description: 'Начальный курс стрельбы из автомата. 3 серии по 5 выстрелов.', difficulty: 'BASIC', duration_minutes: 30, required_shots: 15, target_distance_m: 100, weapon_categories: ['RIFLE'], passing_score: 60, assigned_count: 8, completed_count: 5, created_at: '2024-01-15T00:00:00Z' },
     { id: 'tp002', name: 'Снайперская подготовка', description: 'Точная стрельба на дальние дистанции. 5 выстрелов с 300м.', difficulty: 'ADVANCED', duration_minutes: 45, required_shots: 5, target_distance_m: 300, weapon_categories: ['SNIPER'], passing_score: 80, assigned_count: 4, completed_count: 2, created_at: '2024-02-01T00:00:00Z' },
@@ -183,7 +183,7 @@ export const useMasterStore = defineStore('master', () => {
     { id: 'tp006', name: 'Ночная стрельба', description: 'Стрельба в условиях ограниченной видимости. 10 выстрелов.', difficulty: 'ELITE', duration_minutes: 35, required_shots: 10, target_distance_m: 100, weapon_categories: ['RIFLE'], passing_score: 75, assigned_count: 5, completed_count: 1, created_at: '2024-04-01T00:00:00Z' },
   ]);
 
-  // ── Training Assignments (linked to employees + plans) ──
+  // --- Training Assignments (linked to employees + plans) 
   const trainingAssignments = ref<TrainingAssignment[]>([
     { id: 'ta001', plan_id: 'tp001', plan_name: 'Базовая стрельба из АК-74', employee_id: 'e004', employee_name: 'Хасанов О.Р.', status: 'IN_PROGRESS', assigned_at: '2026-07-01T00:00:00Z', due_date: '2026-07-30T00:00:00Z', completed_at: null, score: null, instructor_id: 'u002', instructor_name: 'Каримов Б.Р.' },
     { id: 'ta002', plan_id: 'tp001', plan_name: 'Базовая стрельба из АК-74', employee_id: 'e021', employee_name: 'Шерматов У.Б.', status: 'ASSIGNED', assigned_at: '2026-07-10T00:00:00Z', due_date: '2026-08-10T00:00:00Z', completed_at: null, score: null, instructor_id: 'u002', instructor_name: 'Каримов Б.Р.' },
@@ -197,7 +197,7 @@ export const useMasterStore = defineStore('master', () => {
     { id: 'ta010', plan_id: 'tp004', plan_name: 'Тактическая стрельба', employee_id: 'e014', employee_name: 'Фазилов Д.Р.', status: 'COMPLETED', assigned_at: '2026-05-01T00:00:00Z', due_date: '2026-06-01T00:00:00Z', completed_at: '2026-05-28T00:00:00Z', score: 78, instructor_id: 'u002', instructor_name: 'Каримов Б.Р.' },
   ]);
 
-  // ── Range Schedule ──
+  // --- Range Schedule 
   const rangeSchedule = ref<RangeSchedule[]>([
     { id: 'rs001', date: '2026-07-23', time_slot: '09:00-12:00', lane_numbers: [1, 2, 3], department: '1-я рота', instructor_name: 'Каримов Б.Р.', employee_count: 6, status: 'SCHEDULED', weapon_categories: ['RIFLE'], notes: 'Базовая подготовка' },
     { id: 'rs002', date: '2026-07-23', time_slot: '14:00-17:00', lane_numbers: [1, 2], department: 'Разведвзвод', instructor_name: 'Турсунов А.К.', employee_count: 2, status: 'SCHEDULED', weapon_categories: ['SNIPER'], notes: 'Снайперская подготовка' },
@@ -207,7 +207,7 @@ export const useMasterStore = defineStore('master', () => {
     { id: 'rs006', date: '2026-07-21', time_slot: '14:00-17:00', lane_numbers: [1, 2, 3], department: 'Огневая подготовка', instructor_name: 'Тошматов Ф.Ш.', employee_count: 2, status: 'COMPLETED', weapon_categories: ['PISTOL'], notes: 'Инструкторский зачёт' },
   ]);
 
-  // ── Notifications ──
+  // --- Notifications 
   const notifications = ref<AppNotification[]>([
     { id: 'n001', type: 'SUCCESS', title: 'Сессия завершена', message: 'Юлдашев Д.А. завершил стрельбу: 87 баллов из 100', is_read: false, created_at: minsAgo(12), action_url: '/sessions/s-2026-047' },
     { id: 'n002', type: 'WARNING', title: 'Камера офлайн', message: 'Дорожка 4: камера 192.168.1.67 недоступна', is_read: false, created_at: minsAgo(30), action_url: '/cameras' },
@@ -217,7 +217,7 @@ export const useMasterStore = defineStore('master', () => {
     { id: 'n006', type: 'ERROR', title: 'FaceID не зарегистрирован', message: 'Хасанов О.Р. - FaceID не настроен. Требуется регистрация.', is_read: false, created_at: minsAgo(360), action_url: '/hr/employees/e004' },
   ]);
 
-  // ── Computed: Dashboard stats ──
+  // --- Computed: Dashboard stats 
   const activeLanes = computed(() => lanes.value.filter(l => l.status === 'OCCUPIED').length);
   const totalLanes = computed(() => lanes.value.length);
   const activeEmployees = computed(() => employees.value.filter(e => e.status === 'ACTIVE').length);
@@ -235,7 +235,7 @@ export const useMasterStore = defineStore('master', () => {
       total_shots: totalShots,
       avg_accuracy: Math.round(avgAcc),
       avg_score: Math.round(avgScore),
-      top_scorer: topEmp ? { name: topEmp.name, score: topEmp.total_score } : null,
+      top_scorer: topEmp ? { name: topEmp.full_name, score: topEmp.total_score } : null,
       improvement_rate: 12.5,
       total_employees_trained: allEmps.length,
       total_rounds_fired: totalShots,
@@ -284,7 +284,7 @@ export const useMasterStore = defineStore('master', () => {
     rubegs.value = rubegs.value.filter(r => r.range_id !== id)
   }
 
-  // ── CRUD: Rubegs (Firing Lines) ──
+  // --- CRUD: Rubegs (Firing Lines) 
   const createRubeg = (data: { range_id: string; name: string; weapon_type: string; distance_m: number; lane_count: number }) => {
     const range = ranges.value.find(r => r.id === data.range_id)
     if (!range) return null
@@ -325,7 +325,7 @@ export const useMasterStore = defineStore('master', () => {
     rubegs.value = rubegs.value.filter(r => r.id !== id)
   }
 
-  // ── CRUD: Weapons ──
+  // --- CRUD: Weapons 
   const createWeapon = (data: { name: string; category: string; serial_number: string; caliber: string; manufacturer: string }) => {
     const id = 'w' + String(weapons.value.length + 1).padStart(3, '0')
     weapons.value.push({
@@ -358,7 +358,7 @@ export const useMasterStore = defineStore('master', () => {
 
 
 
-  // ── Employee Shooting History ──
+  // --- Employee Shooting History 
   interface ShootingHistoryRecord {
     id: string;
     employee_id: string;
@@ -394,7 +394,7 @@ export const useMasterStore = defineStore('master', () => {
     { id: 'sh016', employee_id: 'e010', date: '2026-07-14', range_name: 'Полигон Чирчик', weapon: 'АК-12', scoring_mode: 'HITMISS', total_rounds: 6, hit_count: 3, score: 0, max_score: 0, accuracy: 50, result: 'FAIL', instructor_name: 'Тошматов Ф.Ш.' },
   ]);
 
-  // ── Audit Log (for SUPER_ADMIN) ──
+  // --- Audit Log (for SUPER_ADMIN) 
   interface AuditLogEntry {
     id: string;
     timestamp: string;
@@ -427,7 +427,7 @@ export const useMasterStore = defineStore('master', () => {
 
 
 
-  // ── Helpers ──
+  // --- Helpers 
   const getEmployeeById = (id: string) => {
     return employees.value.find(e => e.id === id);
   }
@@ -460,7 +460,7 @@ export const useMasterStore = defineStore('master', () => {
     return notifications.value.filter(n => !n.is_read);
   }
 
-  // ── Additional helpers ──
+  // --- Additional helpers 
   const liveActivity = computed(() => {
     const colors = ['bg-brand-500', 'bg-blue-500', 'bg-amber-500', 'bg-green-500', 'bg-red-500'];
     const messages: Record<string, string> = {
@@ -499,6 +499,15 @@ export const useMasterStore = defineStore('master', () => {
     }
   }
 
+  const updateEmployee = (employeeId: string, data: Partial<HREmployee>) => {
+    const emp = employees.value.find(e => e.id === employeeId);
+    if (emp) {
+      Object.assign(emp, data);
+      return true;
+    }
+    return false;
+  }
+
   const registerFaceID = (employeeId: string) => {
     const emp = employees.value.find(e => e.id === employeeId);
     if (emp) {
@@ -530,7 +539,7 @@ export const useMasterStore = defineStore('master', () => {
     getWeaponById, getWeaponByEmployeeId,
     getLaneByNumber, getActiveSessionFlows,
     getTrainingAssignmentsByEmployee, getNotificationsUnread,
-    updateLaneStatus, assignWeaponToLane, registerFaceID,
+    updateLaneStatus, assignWeaponToLane, registerFaceID, updateEmployee,
     markNotificationRead, markAllNotificationsRead,
     shootingHistory, auditLog,
     getShootingHistoryByEmployee, getAuditLog,

@@ -52,7 +52,7 @@ function saveSettings() {
         <h2 class="text-sm font-bold text-gray-700">{{ isUz ? "Standart parametrlar" : 'Параметры по умолчанию' }}</h2>
       </div>
       <div>
-        <label class="text-xs text-gray-500 mb-1 block">{{ isUz ? "O'qlar soni" : 'Количество выстрелов' }}</label>
+        <label class="text-xs text-gray-500 mb-1 block">{{ isUz ? "Oʻqlar soni" : 'Количество выстрелов' }}</label>
         <input v-model.number="defaultShots" type="number" min="1" max="50" class="input" />
       </div>
     </div>
@@ -71,7 +71,7 @@ function saveSettings() {
     <div class="card space-y-4">
       <div class="flex items-center gap-2">
         <Radio class="w-4 h-4 text-gray-500" />
-        <h2 class="text-sm font-bold text-gray-700">{{ isUz ? "Yo'laklar konfiguratsiyasi" : 'Конфигурация дорожек' }}</h2>
+        <h2 class="text-sm font-bold text-gray-700">{{ isUz ? "Yoʻlaklar konfiguratsiyasi" : 'Конфигурация дорожек' }}</h2>
       </div>
       <div class="space-y-2">
         <div v-for="lane in laneConfigs" :key="lane.id" class="grid grid-cols-4 gap-2 items-end p-2.5 rounded-lg bg-gray-50/50">

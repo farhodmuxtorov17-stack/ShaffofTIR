@@ -23,7 +23,7 @@ const stats = computed(() => ({
 
 // All areas with cameras
 const cameraAreas = computed(() => [
-  { id: 'lane', label: isUz.value ? "Yo'lak kameralari" : 'Камеры дорожек', icon: Crosshair, count: lanes.value.length, online: stats.value.online },
+  { id: 'lane', label: isUz.value ? "Yoʻlak kameralari" : 'Камеры дорожек', icon: Crosshair, count: lanes.value.length, online: stats.value.online },
   { id: 'entrance', label: isUz.value ? "Kirish" : 'Вход', icon: Camera, count: 2, online: 2 },
   { id: 'parking', label: isUz.value ? "Avtoturargoh" : 'Парковка', icon: Camera, count: 1, online: 1 },
   { id: 'corridor', label: isUz.value ? "Koridor" : 'Коридор', icon: Camera, count: 3, online: 2 },
@@ -40,7 +40,7 @@ const totalOnline = computed(() => cameraAreas.value.reduce((sum, a) => sum + a.
     <!-- Header -->
     <div>
       <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ isUz ? "Kameralar" : "Камеры" }}</h1>
-      <p class="text-sm text-gray-400 mt-0.5">{{ isUz ? "Barcha zonalar bo'yicha jonli kuzatuv" : "Живое наблюдение всех зон" }}</p>
+      <p class="text-sm text-gray-400 mt-0.5">{{ isUz ? "Barcha zonalar boʻyicha jonli kuzatuv" : "Живое наблюдение всех зон" }}</p>
     </div>
 
     <!-- KPI -->
@@ -79,7 +79,7 @@ const totalOnline = computed(() => cameraAreas.value.reduce((sum, a) => sum + a.
 
     <!-- Lane cameras grid -->
     <div>
-      <h2 class="text-sm font-bold text-gray-700 mb-3">{{ isUz ? "Yo'lak kameralari" : "Камеры дорожек" }}</h2>
+      <h2 class="text-sm font-bold text-gray-700 mb-3">{{ isUz ? "Yoʻlak kameralari" : "Камеры дорожек" }}</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div v-for="lane in lanes" :key="lane.id"
           class="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition group">
@@ -105,7 +105,7 @@ const totalOnline = computed(() => cameraAreas.value.reduce((sum, a) => sum + a.
           <!-- Info bar -->
           <div class="p-3 flex items-center justify-between border-t border-gray-50">
             <div class="min-w-0">
-              <p class="text-sm font-bold text-gray-800">{{ isUz ? "Yo'lak" : "Дорожка" }} {{ lane.lane_number }}</p>
+              <p class="text-sm font-bold text-gray-800">{{ isUz ? "Yoʻlak" : "Дорожка" }} {{ lane.lane_number }}</p>
               <p class="text-[10px] text-gray-400 truncate">
                 {{ lane.distance_m }}м · {{ lane.target_type }}
                 <span v-if="lane.current_employee_name">· {{ lane.current_employee_name }}</span>

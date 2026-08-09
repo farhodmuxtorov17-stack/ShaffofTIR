@@ -14,7 +14,7 @@ const emit = defineEmits<{
   (e: 'select', regionId: string): void
 }>()
 
-// ── 3 Palettes ──
+// --- 3 Palettes 
 const paletteType = ref<'traffic' | 'blue' | 'heat'>('traffic')
 
 const palettes = {

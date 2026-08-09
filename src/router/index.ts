@@ -5,13 +5,15 @@ const routes = [
   { path: '/login', name: 'Login', component: () => import('@/pages/LoginPage.vue'), meta: { public: true } },
   { path: '/profile', name: 'Profile', component: () => import('@/pages/ProfilePage.vue') },
 
-  { path: '/', redirect: () => {
+  { path: '/', redirect: (to: any) => {
     const auth = useAuthStore()
     const role = auth.user?.role
-    if (role === 'SUPER_ADMIN') return '/admin'
-    if (role === 'TECHSPEC') return '/techspec'
-    if (role === 'EMPLOYEE') return '/results'
-    return '/dashboard'
+    const q = to.query.miniapp ? { miniapp: to.query.miniapp } : {}
+    let p = '/dashboard'
+    if (role === 'SUPER_ADMIN') p = '/admin'
+    else if (role === 'TECHSPEC') p = '/techspec'
+    else if (role === 'EMPLOYEE') p = '/results'
+    return { path: p, query: q }
   }},
 
   { path: '/dashboard', name: 'Dashboard', component: () => import('@/pages/DashboardPage.vue') },
@@ -162,6 +164,12 @@ function getRouteRoles(path: string): string[] | null {
 
 router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore()
+
+  // Preserve miniapp query param
+  if (to.query.miniapp !== '1' && _from.query.miniapp === '1') {
+    next({ ...to, query: { ...to.query, miniapp: '1' } })
+    return
+  }
 
   if (to.meta.public) {
     next()

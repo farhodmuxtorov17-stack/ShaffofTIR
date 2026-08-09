@@ -201,7 +201,7 @@ function closePreview() {
           <h1 class="text-xl font-extrabold text-gray-900" style="letter-spacing: -0.02em;">
             {{ isUz ? "Bayonnoma yaratish" : "Создание байонномы" }}
           </h1>
-          <p class="text-sm text-gray-400 mt-0.5">{{ isUz ? "Xodim natijalari bo'yicha hujjat" : "Документ по результатам сотрудника" }}</p>
+          <p class="text-sm text-gray-400 mt-0.5">{{ isUz ? "Xodim natijalari boʻyicha hujjat" : "Документ по результатам сотрудника" }}</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -299,7 +299,7 @@ function closePreview() {
             <div class="flex items-center gap-2">
               <Shield class="w-4 h-4 text-gray-400" />
               <div>
-                <p class="text-[10px] text-gray-400 uppercase">{{ isUz ? "Bo'lim" : 'Подразделение' }}</p>
+                <p class="text-[10px] text-gray-400 uppercase">{{ isUz ? "Boʻlim" : 'Подразделение' }}</p>
                 <p class="text-sm font-bold text-gray-900">{{ selectedEmployee?.department }}</p>
               </div>
             </div>
@@ -332,7 +332,7 @@ function closePreview() {
             <p class="text-lg font-extrabold text-gray-900">{{ protocolStats.total }}</p>
           </div>
           <div class="text-center p-3 rounded-xl bg-gray-50">
-            <p class="text-[9px] text-gray-400 uppercase">{{ isUz ? "O'qlar" : 'Выстрелы' }}</p>
+            <p class="text-[9px] text-gray-400 uppercase">{{ isUz ? "Oʻqlar" : 'Выстрелы' }}</p>
             <p class="text-lg font-extrabold text-gray-900">{{ protocolStats.totalShots }}</p>
           </div>
           <div class="text-center p-3 rounded-xl bg-gray-50">
@@ -340,7 +340,7 @@ function closePreview() {
             <p class="text-lg font-extrabold text-emerald-600">{{ protocolStats.totalHits }}</p>
           </div>
           <div class="text-center p-3 rounded-xl bg-gray-50">
-            <p class="text-[9px] text-gray-400 uppercase">{{ isUz ? "O'rtacha ball" : 'Ср. балл' }}</p>
+            <p class="text-[9px] text-gray-400 uppercase">{{ isUz ? "Oʻrtacha ball" : 'Ср. балл' }}</p>
             <p class="text-lg font-extrabold text-brand-600">{{ protocolStats.avgScore }}</p>
           </div>
           <div class="text-center p-3 rounded-xl bg-gray-50">
@@ -348,7 +348,7 @@ function closePreview() {
             <p class="text-lg font-extrabold text-blue-600">{{ protocolStats.avgAccuracy }}%</p>
           </div>
           <div class="text-center p-3 rounded-xl bg-gray-50">
-            <p class="text-[9px] text-gray-400 uppercase">{{ isUz ? "O'tish" : 'Сдача' }}</p>
+            <p class="text-[9px] text-gray-400 uppercase">{{ isUz ? "Oʻtish" : 'Сдача' }}</p>
             <p class="text-lg font-extrabold text-violet-600">{{ protocolStats.passRate }}%</p>
           </div>
         </div>
@@ -362,7 +362,7 @@ function closePreview() {
                 <th class="text-left py-2 px-2 font-bold text-gray-500">#</th>
                 <th class="text-left py-2 px-2 font-bold text-gray-500">{{ isUz ? 'Sana' : 'Дата' }}</th>
                 <th class="text-left py-2 px-2 font-bold text-gray-500">{{ isUz ? 'Qurol' : 'Оружие' }}</th>
-                <th class="text-center py-2 px-2 font-bold text-gray-500">{{ isUz ? "O'qlar" : 'Выстр.' }}</th>
+                <th class="text-center py-2 px-2 font-bold text-gray-500">{{ isUz ? "Oʻqlar" : 'Выстр.' }}</th>
                 <th class="text-center py-2 px-2 font-bold text-gray-500">{{ isUz ? 'Aniqlik' : 'Точн.' }}</th>
                 <th class="text-right py-2 px-2 font-bold text-gray-500">{{ isUz ? 'Ball' : 'Балл' }}</th>
               </tr>
@@ -392,10 +392,10 @@ function closePreview() {
           <p class="text-xs font-bold text-gray-600 uppercase mb-1">{{ isUz ? "Xulosa" : 'Заключение' }}</p>
           <p class="text-sm text-gray-700">
             {{ selectedEmployee?.full_name }} {{ isUz ? "davrida" : 'за период' }} {{ protocolStats.total }} {{ isUz ? "sessiyada" : 'сессий' }}
-            {{ protocolStats.totalShots }} {{ isUz ? "marotaba o't ochdi" : 'выстрелов произвёл' }},
+            {{ protocolStats.totalShots }} {{ isUz ? "marotaba oʻt ochdi" : 'выстрелов произвёл' }},
             {{ protocolStats.totalHits }} {{ isUz ? "aniqlangan" : 'попаданий' }} ({{ protocolStats.avgAccuracy }}%).
-            {{ isUz ? "O'rtacha ball" : 'Средний балл' }} - {{ protocolStats.avgScore }}.
-            {{ protocolStats.passRate >= 80 ? (isUz ? "Standartga to'g'ri keladi." : 'Соответствует стандарту.') : (isUz ? "Qo'shimcha mashg'ulot kerak." : 'Требуется доп. подготовка.') }}
+            {{ isUz ? "Oʻrtacha ball" : 'Средний балл' }} - {{ protocolStats.avgScore }}.
+            {{ protocolStats.passRate >= 80 ? (isUz ? "Standartga toʻg'ri keladi." : 'Соответствует стандарту.') : (isUz ? "Qoʻshimcha mashg'ulot kerak." : 'Требуется доп. подготовка.') }}
           </p>
         </div>
 
@@ -486,7 +486,7 @@ function closePreview() {
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h3 class="text-sm font-bold text-gray-800 flex items-center gap-2">
             <FileText class="w-4 h-4 text-brand-600" />
-            PDF {{ isUz ? "ko'rinishi" : 'превью' }} - {{ protocolId }}
+            PDF {{ isUz ? "koʻrinishi" : 'превью' }} - {{ protocolId }}
           </h3>
           <div class="flex items-center gap-2">
             <button @click="downloadPDF" :disabled="generatingPdf"

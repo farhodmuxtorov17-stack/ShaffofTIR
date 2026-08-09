@@ -3,7 +3,7 @@
   <div v-if="!loading" class="fade-in p-6 space-y-6">
     <div>
       <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "KPI katalogi" : "Каталог KPI" }}</h1>
-      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Samaradorlik ko'rsatkichlarini boshqarish" : "Управление показателями эффективности" }}</p>
+      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Samaradorlik koʻrsatkichlarini boshqarish" : "Управление показателями эффективности" }}</p>
     </div>
 
     <!-- KPI Cards Grid -->

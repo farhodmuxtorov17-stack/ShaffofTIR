@@ -270,7 +270,7 @@ export const useSessionStore = defineStore('session', () => {
     }
   }
 
-  // ── Finalize session: push to history, update employee stats, notify ──
+  // --- Finalize session: push to history, update employee stats, notify 
   function finalizeSession() {
     if (!currentSession.value || sessionStatus.value !== 'MAIN_COMPLETED') return;
 

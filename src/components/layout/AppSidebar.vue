@@ -17,6 +17,7 @@ import { useI18n } from '@/i18n'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
+const emit = defineEmits<{ navigate: [] }>()
 const authStore = useAuthStore()
 const masterStore = useMasterStore()
 const router = useRouter()
@@ -38,248 +39,153 @@ interface NavGroup {
   items: NavItem[]
 }
 
-// ── Manager (Раҳбар): analytics, reports, KPI - NO operational shooting management ──
 const managerNavGroups: NavGroup[] = [
-  {
-    labelKey: 'nav.main',
-    items: [
-      { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['MANAGER'] },
-      { labelKey: 'nav.commandCenter', path: '/command-center', icon: Monitor, roles: ['MANAGER'] },
-      { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['MANAGER'] },
-      { labelKey: 'nav.compare', path: '/compare/0', icon: GitCompare, roles: ['MANAGER'] },
-    ],
-  },
-  {
-    labelKey: 'nav.kpi',
-    items: [
-      { labelKey: 'nav.orgStructure', path: '/org-structure', icon: Building2, roles: ['MANAGER'] },
-      { labelKey: 'nav.kpiCatalog', path: '/kpi/catalog', icon: Target, roles: ['MANAGER'] },
-      { labelKey: 'nav.kpiPeriods', path: '/kpi/periods', icon: Calendar, roles: ['MANAGER'] },
-    ],
-  },
-  {
-    labelKey: 'nav.workflow',
-    items: [
-      { labelKey: 'nav.objections', path: '/objections', icon: MessageSquareWarning, roles: ['MANAGER'] },
-      { labelKey: 'nav.approvalTasks', path: '/approval-tasks', icon: CheckCircle, roles: ['MANAGER'] },
-    ],
-  },
-  {
-    labelKey: 'nav.recommendations',
-    items: [
-      { labelKey: 'nav.recommendationsItems', path: '/recommendations', icon: Sparkles, roles: ['MANAGER'] },
-      { labelKey: 'nav.actionPlans', path: '/action-plans', icon: ClipboardList, roles: ['MANAGER'] },
-    ],
-  },
-  {
-    labelKey: 'nav.training',
-    items: [
-      { labelKey: 'nav.trainingMaterials', path: '/training/materials', icon: GraduationCap, roles: ['MANAGER'] },
-    ],
-  },
-  {
-    labelKey: 'nav.reports',
-    items: [
-      { labelKey: 'nav.reports', path: '/reports', icon: FileText, roles: ['MANAGER'] },
-      { labelKey: 'nav.protocols', path: '/protocols', icon: FileText, roles: ['MANAGER'] },
-    ],
-  },
-  {
-    labelKey: 'nav.analytics',
-    items: [
-      { labelKey: 'nav.analytics', path: '/analytics', icon: Eye, roles: ['MANAGER'] },
-      { labelKey: 'nav.dataQuality', path: '/data-quality', icon: ShieldCheck, roles: ['MANAGER'] },
-      { labelKey: 'nav.integrationMonitoring', path: '/integration-monitoring', icon: Network, roles: ['MANAGER'] },
-    ],
-  },
-  {
-    labelKey: 'nav.system',
-    items: [
-      { labelKey: 'nav.notifications', path: '/notifications', icon: Bell, roles: ['MANAGER'], badge: () => unreadCount.value },
-      { labelKey: 'nav.settings', path: '/settings', icon: Settings, roles: ['MANAGER'] },
-      { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['MANAGER'] },
-    ],
-  },
+  { labelKey: 'nav.main', items: [
+    { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['MANAGER'] },
+    { labelKey: 'nav.commandCenter', path: '/command-center', icon: Monitor, roles: ['MANAGER'] },
+    { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['MANAGER'] },
+    { labelKey: 'nav.compare', path: '/compare/0', icon: GitCompare, roles: ['MANAGER'] },
+  ]},
+  { labelKey: 'nav.kpi', items: [
+    { labelKey: 'nav.orgStructure', path: '/org-structure', icon: Building2, roles: ['MANAGER'] },
+    { labelKey: 'nav.kpiCatalog', path: '/kpi/catalog', icon: Target, roles: ['MANAGER'] },
+    { labelKey: 'nav.kpiPeriods', path: '/kpi/periods', icon: Calendar, roles: ['MANAGER'] },
+  ]},
+  { labelKey: 'nav.workflow', items: [
+    { labelKey: 'nav.objections', path: '/objections', icon: MessageSquareWarning, roles: ['MANAGER'] },
+    { labelKey: 'nav.approvalTasks', path: '/approval-tasks', icon: CheckCircle, roles: ['MANAGER'] },
+  ]},
+  { labelKey: 'nav.recommendations', items: [
+    { labelKey: 'nav.recommendationsItems', path: '/recommendations', icon: Sparkles, roles: ['MANAGER'] },
+    { labelKey: 'nav.actionPlans', path: '/action-plans', icon: ClipboardList, roles: ['MANAGER'] },
+  ]},
+  { labelKey: 'nav.training', items: [
+    { labelKey: 'nav.trainingMaterials', path: '/training/materials', icon: GraduationCap, roles: ['MANAGER'] },
+  ]},
+  { labelKey: 'nav.reports', items: [
+    { labelKey: 'nav.reports', path: '/reports', icon: FileText, roles: ['MANAGER'] },
+    { labelKey: 'nav.protocols', path: '/protocols', icon: FileText, roles: ['MANAGER'] },
+  ]},
+  { labelKey: 'nav.analytics', items: [
+    { labelKey: 'nav.analytics', path: '/analytics', icon: Eye, roles: ['MANAGER'] },
+    { labelKey: 'nav.dataQuality', path: '/data-quality', icon: ShieldCheck, roles: ['MANAGER'] },
+    { labelKey: 'nav.integrationMonitoring', path: '/integration-monitoring', icon: Network, roles: ['MANAGER'] },
+  ]},
+  { labelKey: 'nav.system', items: [
+    { labelKey: 'nav.notifications', path: '/notifications', icon: Bell, roles: ['MANAGER'], badge: () => unreadCount.value },
+    { labelKey: 'nav.settings', path: '/settings', icon: Settings, roles: ['MANAGER'] },
+    { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['MANAGER'] },
+  ]},
 ]
 
-// ── Instructor: operational - sessions, range, weapons, cameras ──
 const instructorNavGroups: NavGroup[] = [
-  {
-    labelKey: 'nav.main',
-    items: [
-      { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['INSTRUCTOR'] },
-      { labelKey: 'nav.tablet', path: '/range/instructor-tablet', icon: Zap, roles: ['INSTRUCTOR'] },
-      { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['INSTRUCTOR'] },
-      { labelKey: 'nav.range', path: '/range/dashboard', icon: Radio, roles: ['INSTRUCTOR'] },
-      { labelKey: 'nav.sessions', path: '/sessions', icon: Users, roles: ['INSTRUCTOR'] },
-      { labelKey: 'nav.schedule', path: '/range/schedule', icon: Calendar, roles: ['INSTRUCTOR'] },
-    ],
-  },
-  {
-    labelKey: 'nav.equipment',
-    items: [
-      { labelKey: 'nav.arsenal', path: '/weapons', icon: Crosshair, roles: ['INSTRUCTOR'] },
-      { labelKey: 'nav.cameras', path: '/cameras/dashboard', icon: Camera, roles: ['INSTRUCTOR'] },
-    ],
-  },
-  {
-    labelKey: 'nav.training',
-    items: [
-      { labelKey: 'nav.plans', path: '/training', icon: Award, roles: ['INSTRUCTOR'] },
-      { labelKey: 'nav.history', path: '/training/history', icon: History, roles: ['INSTRUCTOR'] },
-      { labelKey: 'nav.trainingMaterials', path: '/training/materials', icon: GraduationCap, roles: ['INSTRUCTOR'] },
-    ],
-  },
-  {
-    labelKey: 'nav.reports',
-    items: [
-      { labelKey: 'nav.reports', path: '/reports', icon: FileText, roles: ['INSTRUCTOR'] },
-      { labelKey: 'nav.protocols', path: '/protocols', icon: FileText, roles: ['INSTRUCTOR'] },
-    ],
-  },
-  {
-    labelKey: 'nav.system',
-    items: [
-      { labelKey: 'nav.notifications', path: '/notifications', icon: Bell, roles: ['INSTRUCTOR'], badge: () => unreadCount.value },
-      { labelKey: 'nav.settings', path: '/settings', icon: Settings, roles: ['INSTRUCTOR'] },
-      { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['INSTRUCTOR'] },
-    ],
-  },
+  { labelKey: 'nav.main', items: [
+    { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.tablet', path: '/range/instructor-tablet', icon: Zap, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.range', path: '/range/dashboard', icon: Radio, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.sessions', path: '/sessions', icon: Users, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.schedule', path: '/range/schedule', icon: Calendar, roles: ['INSTRUCTOR'] },
+  ]},
+  { labelKey: 'nav.equipment', items: [
+    { labelKey: 'nav.arsenal', path: '/weapons', icon: Crosshair, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.cameras', path: '/cameras/dashboard', icon: Camera, roles: ['INSTRUCTOR'] },
+  ]},
+  { labelKey: 'nav.training', items: [
+    { labelKey: 'nav.plans', path: '/training', icon: Award, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.history', path: '/training/history', icon: History, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.trainingMaterials', path: '/training/materials', icon: GraduationCap, roles: ['INSTRUCTOR'] },
+  ]},
+  { labelKey: 'nav.reports', items: [
+    { labelKey: 'nav.reports', path: '/reports', icon: FileText, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.protocols', path: '/protocols', icon: FileText, roles: ['INSTRUCTOR'] },
+  ]},
+  { labelKey: 'nav.system', items: [
+    { labelKey: 'nav.notifications', path: '/notifications', icon: Bell, roles: ['INSTRUCTOR'], badge: () => unreadCount.value },
+    { labelKey: 'nav.settings', path: '/settings', icon: Settings, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['INSTRUCTOR'] },
+  ]},
 ]
 
-// ── Employee: minimal, own data only ──
 const employeeNavGroups: NavGroup[] = [
-  {
-    labelKey: 'nav.main',
-    items: [
-      { labelKey: 'nav.myResults', path: '/results', icon: Target, roles: ['EMPLOYEE'] },
-      { labelKey: 'nav.schedule', path: '/range/schedule', icon: Calendar, roles: ['EMPLOYEE'] },
-      { labelKey: 'nav.myHistory', path: '/training/history', icon: History, roles: ['EMPLOYEE'] },
-      { labelKey: 'nav.trainingMaterials', path: '/training/materials', icon: GraduationCap, roles: ['EMPLOYEE'] },
-    ],
-  },
-  {
-    labelKey: 'nav.reports',
-    items: [
-      { labelKey: 'nav.protocols', path: '/protocols', icon: FileText, roles: ['EMPLOYEE'] },
-    ],
-  },
-  {
-    labelKey: 'nav.system',
-    items: [
-      { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['EMPLOYEE'] },
-    ],
-  },
+  { labelKey: 'nav.main', items: [
+    { labelKey: 'nav.myResults', path: '/results', icon: Target, roles: ['EMPLOYEE'] },
+    { labelKey: 'nav.schedule', path: '/range/schedule', icon: Calendar, roles: ['EMPLOYEE'] },
+    { labelKey: 'nav.myHistory', path: '/training/history', icon: History, roles: ['EMPLOYEE'] },
+    { labelKey: 'nav.trainingMaterials', path: '/training/materials', icon: GraduationCap, roles: ['EMPLOYEE'] },
+  ]},
+  { labelKey: 'nav.reports', items: [
+    { labelKey: 'nav.protocols', path: '/protocols', icon: FileText, roles: ['EMPLOYEE'] },
+  ]},
+  { labelKey: 'nav.system', items: [
+    { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['EMPLOYEE'] },
+  ]},
 ]
 
-// ── TechSpec: isolated - only polygon/camera infrastructure ──
 const techSpecNavGroups: NavGroup[] = [
-  {
-    labelKey: 'nav.main',
-    items: [
-      { labelKey: 'nav.techspec', path: '/techspec', icon: Wrench, roles: ['TECHSPEC'] },
-    ],
-  },
-  {
-    labelKey: 'nav.equipment',
-    items: [
-      { labelKey: 'nav.cameras', path: '/cameras/dashboard', icon: Camera, roles: ['TECHSPEC'] },
-    ],
-  },
-  {
-    labelKey: 'nav.system',
-    items: [
-      { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['TECHSPEC'] },
-    ],
-  },
+  { labelKey: 'nav.main', items: [
+    { labelKey: 'nav.techspec', path: '/techspec', icon: Wrench, roles: ['TECHSPEC'] },
+  ]},
+  { labelKey: 'nav.equipment', items: [
+    { labelKey: 'nav.cameras', path: '/cameras/dashboard', icon: Camera, roles: ['TECHSPEC'] },
+  ]},
+  { labelKey: 'nav.system', items: [
+    { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['TECHSPEC'] },
+  ]},
 ]
 
-// ── Super Admin: full access to everything ──
 const superAdminNavGroups: NavGroup[] = [
-  {
-    labelKey: 'nav.main',
-    items: [
-      { labelKey: 'nav.adminPanel', path: '/admin', icon: Shield, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.commandCenter', path: '/command-center', icon: Monitor, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.sessions', path: '/sessions', icon: Users, roles: ['SUPER_ADMIN'] },
-    ],
-  },
-  {
-    labelKey: 'nav.hr',
-    items: [
-      { labelKey: 'nav.employees', path: '/hr/employees', icon: Users, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.orgStructure', path: '/org-structure', icon: Building2, roles: ['SUPER_ADMIN'] },
-    ],
-  },
-  {
-    labelKey: 'nav.kpi',
-    items: [
-      { labelKey: 'nav.kpiCatalog', path: '/kpi/catalog', icon: Target, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.kpiPeriods', path: '/kpi/periods', icon: Calendar, roles: ['SUPER_ADMIN'] },
-    ],
-  },
-  {
-    labelKey: 'nav.workflow',
-    items: [
-      { labelKey: 'nav.objections', path: '/objections', icon: MessageSquareWarning, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.approvalTasks', path: '/approval-tasks', icon: CheckCircle, roles: ['SUPER_ADMIN'] },
-    ],
-  },
-  {
-    labelKey: 'nav.recommendations',
-    items: [
-      { labelKey: 'nav.recommendationsItems', path: '/recommendations', icon: Sparkles, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.actionPlans', path: '/action-plans', icon: ClipboardList, roles: ['SUPER_ADMIN'] },
-    ],
-  },
-  {
-    labelKey: 'nav.equipment',
-    items: [
-      { labelKey: 'nav.techspec', path: '/techspec', icon: Wrench, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.cameras', path: '/cameras/dashboard', icon: Camera, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.arsenal', path: '/weapons', icon: Crosshair, roles: ['SUPER_ADMIN'] },
-    ],
-  },
-  {
-    labelKey: 'nav.analytics',
-    items: [
-      { labelKey: 'nav.analytics', path: '/analytics', icon: Eye, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.compare', path: '/compare/0', icon: GitCompare, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.dataQuality', path: '/data-quality', icon: ShieldCheck, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.integrationMonitoring', path: '/integration-monitoring', icon: Network, roles: ['SUPER_ADMIN'] },
-    ],
-  },
-  {
-    labelKey: 'nav.training',
-    items: [
-      { labelKey: 'nav.trainingMaterials', path: '/training/materials', icon: GraduationCap, roles: ['SUPER_ADMIN'] },
-    ],
-  },
-  {
-    labelKey: 'nav.reports',
-    items: [
-      { labelKey: 'nav.reports', path: '/reports', icon: FileText, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.protocols', path: '/protocols', icon: FileText, roles: ['SUPER_ADMIN'] },
-    ],
-  },
-  {
-    labelKey: 'nav.administration',
-    items: [
-      { labelKey: 'nav.usersRoles', path: '/admin/users', icon: UsersRound, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.auditJournal', path: '/admin/audit', icon: ScrollText, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.systemHealth', path: '/system-health', icon: Activity, roles: ['SUPER_ADMIN'] },
-    ],
-  },
-  {
-    labelKey: 'nav.system',
-    items: [
-      { labelKey: 'nav.notifications', path: '/notifications', icon: Bell, roles: ['SUPER_ADMIN'], badge: () => unreadCount.value },
-      { labelKey: 'nav.settings', path: '/settings', icon: Settings, roles: ['SUPER_ADMIN'] },
-      { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['SUPER_ADMIN'] },
-    ],
-  },
+  { labelKey: 'nav.main', items: [
+    { labelKey: 'nav.adminPanel', path: '/admin', icon: Shield, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.commandCenter', path: '/command-center', icon: Monitor, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.sessions', path: '/sessions', icon: Users, roles: ['SUPER_ADMIN'] },
+  ]},
+  { labelKey: 'nav.hr', items: [
+    { labelKey: 'nav.employees', path: '/hr/employees', icon: Users, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.orgStructure', path: '/org-structure', icon: Building2, roles: ['SUPER_ADMIN'] },
+  ]},
+  { labelKey: 'nav.kpi', items: [
+    { labelKey: 'nav.kpiCatalog', path: '/kpi/catalog', icon: Target, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.kpiPeriods', path: '/kpi/periods', icon: Calendar, roles: ['SUPER_ADMIN'] },
+  ]},
+  { labelKey: 'nav.workflow', items: [
+    { labelKey: 'nav.objections', path: '/objections', icon: MessageSquareWarning, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.approvalTasks', path: '/approval-tasks', icon: CheckCircle, roles: ['SUPER_ADMIN'] },
+  ]},
+  { labelKey: 'nav.recommendations', items: [
+    { labelKey: 'nav.recommendationsItems', path: '/recommendations', icon: Sparkles, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.actionPlans', path: '/action-plans', icon: ClipboardList, roles: ['SUPER_ADMIN'] },
+  ]},
+  { labelKey: 'nav.equipment', items: [
+    { labelKey: 'nav.techspec', path: '/techspec', icon: Wrench, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.cameras', path: '/cameras/dashboard', icon: Camera, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.arsenal', path: '/weapons', icon: Crosshair, roles: ['SUPER_ADMIN'] },
+  ]},
+  { labelKey: 'nav.analytics', items: [
+    { labelKey: 'nav.analytics', path: '/analytics', icon: Eye, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.compare', path: '/compare/0', icon: GitCompare, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.dataQuality', path: '/data-quality', icon: ShieldCheck, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.integrationMonitoring', path: '/integration-monitoring', icon: Network, roles: ['SUPER_ADMIN'] },
+  ]},
+  { labelKey: 'nav.training', items: [
+    { labelKey: 'nav.trainingMaterials', path: '/training/materials', icon: GraduationCap, roles: ['SUPER_ADMIN'] },
+  ]},
+  { labelKey: 'nav.reports', items: [
+    { labelKey: 'nav.reports', path: '/reports', icon: FileText, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.protocols', path: '/protocols', icon: FileText, roles: ['SUPER_ADMIN'] },
+  ]},
+  { labelKey: 'nav.administration', items: [
+    { labelKey: 'nav.usersRoles', path: '/admin/users', icon: UsersRound, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.auditJournal', path: '/admin/audit', icon: ScrollText, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.systemHealth', path: '/system-health', icon: Activity, roles: ['SUPER_ADMIN'] },
+  ]},
+  { labelKey: 'nav.system', items: [
+    { labelKey: 'nav.notifications', path: '/notifications', icon: Bell, roles: ['SUPER_ADMIN'], badge: () => unreadCount.value },
+    { labelKey: 'nav.settings', path: '/settings', icon: Settings, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['SUPER_ADMIN'] },
+  ]},
 ]
 
 const navGroups = computed<NavGroup[]>(() => {
@@ -298,6 +204,10 @@ function handleLogout() {
 
 function toggleLocale() {
   setLocale(locale.value === 'ru' ? 'uz' : 'ru')
+}
+
+function handleNavigate() {
+  emit('navigate')
 }
 </script>
 
@@ -335,6 +245,7 @@ function toggleLocale() {
             :to="item.path"
             class="sidebar-item relative"
             active-class="sidebar-item-active"
+            @click="handleNavigate"
           >
             <component :is="item.icon" class="w-3.5 h-3.5 shrink-0" />
             <span class="truncate">{{ t(item.labelKey) }}</span>
@@ -347,7 +258,7 @@ function toggleLocale() {
     </div>
 
     <div class="p-3 border-t border-white/[0.04] shrink-0">
-      <button class="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-white/[0.03] transition" @click="router.push('/profile')">
+      <button class="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-white/[0.03] transition" @click="router.push('/profile'); handleNavigate()">
         <div class="w-7 h-7 rounded-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
           {{ authStore.user?.full_name?.[0] || 'A' }}
         </div>

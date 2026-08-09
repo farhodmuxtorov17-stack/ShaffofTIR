@@ -10,8 +10,8 @@ const helpTopics = computed(() => isUz.value ? [
   { title: "Sessiya qanday yaratiladi?", desc: "Sessiyalar → Yangi, jangchilar va kameralar sonini tanlang", icon: Book },
   { title: "Tahlil uchun rasm yuklash?", desc: "Yuklash → otish turini tanlang → rasmni tortib oling", icon: Book },
   { title: "Qurolni qanday tayinlash?", desc: "Qurollar → Tayinlash → qurol va xodimni tanlang", icon: Book },
-  { title: "FaceID ro'yxatdan o'tish", desc: "HR → FaceID → xodimni tanlang → skanerlash", icon: Book },
-  { title: "Live kameralarni ko'rish", desc: "Kameralar → ko'rish uchun yo'lakni tanlang", icon: Book },
+  { title: "FaceID ro'yxatdan oʻtish", desc: "HR → FaceID → xodimni tanlang → skanerlash", icon: Book },
+  { title: "Live kameralarni koʻrish", desc: "Kameralar → koʻrish uchun yoʻlakni tanlang", icon: Book },
   { title: "Protokollarni eksport qilish", desc: "Protokollar → protokolni oching → Chop etish", icon: Book },
 ] : [
   { title: 'Как создать сессию?', desc: 'Перейдите в Сессии → Новая, выберите количество бойцов и камеры', icon: Book },
@@ -37,7 +37,7 @@ const links = computed(() => isUz.value ? [
   <div class="space-y-6 max-w-3xl">
     <div>
       <h1 class="text-xl font-bold text-gray-900">{{ isUz ? 'Yordam' : 'Помощь' }}</h1>
-      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Yo'riqnomalar va hujjatlar" : 'Инструкции и документация' }}</p>
+      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Yoʻriqnomalar va hujjatlar" : 'Инструкции и документация' }}</p>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <div v-for="topic in helpTopics" :key="topic.title" class="card cursor-pointer hover:shadow-lg transition">

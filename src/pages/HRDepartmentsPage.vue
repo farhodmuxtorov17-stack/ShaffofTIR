@@ -52,7 +52,7 @@ const labels = computed(() => ({
   qualified: locale.value === 'uz' ? "Malakali" : 'Квалифицированы',
   head: locale.value === 'uz' ? "Boshliq" : 'Начальник',
   people: locale.value === 'uz' ? 'kishi' : 'чел.',
-  avgAccuracy: locale.value === 'uz' ? "O'rtacha aniqlik" : 'Средняя точность',
+  avgAccuracy: locale.value === 'uz' ? "Oʻrtacha aniqlik" : 'Средняя точность',
   employeesInDept: locale.value === 'uz' ? "Xodimlar" : 'Сотрудники',
   activeShort: locale.value === 'uz' ? "Faol" : 'Активн.',
   qualifiedShort: locale.value === 'uz' ? "Malakali" : 'Квал.',

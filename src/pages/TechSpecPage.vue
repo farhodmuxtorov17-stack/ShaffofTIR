@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { WeaponCategory, Weapon } from '@/types/extended'
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import LoadingState from '@/components/ui/LoadingState.vue'
 import { useMasterStore } from '@/stores/master'
@@ -94,7 +95,7 @@ const regions: { value: string; label_uz: string; label_ru: string }[] = [
   { value: 'tashkent_city', label_uz: 'Toshkent sh.', label_ru: 'г. Ташкент' },
   { value: 'tashkent_region', label_uz: 'Toshkent vil.', label_ru: 'Ташкентская обл.' },
   { value: 'samarkand', label_uz: 'Samarqand', label_ru: 'Самарканд' },
-  { value: 'fergana', label_uz: "Farg'ona", label_ru: 'Фергана' },
+  { value: 'fergana', label_uz: "Fargʻona", label_ru: 'Фергана' },
   { value: 'bukhara', label_uz: 'Buxoro', label_ru: 'Бухара' },
   { value: 'andijan', label_uz: 'Andijon', label_ru: 'Андижан' },
 ]
@@ -125,8 +126,8 @@ const deleteType = ref<'range' | 'rubeg' | 'weapon'>('range')
 const rangeForm = ref({
   name: '', code: '', region: 'tashkent_city', ip_prefix: '', range_type: 'OPEN' as 'OPEN' | 'CLOSED', lanes_per_rubeg: 6,
 })
-const rubegForm = ref({ range_id: '', name: '', weapon_type: 'RIFLE', distance_m: 100, lane_count: 6 })
-const weaponForm = ref({ name: '', category: 'RIFLE', serial_number: '', caliber: '', manufacturer: '' })
+const rubegForm = ref<{ range_id: string; name: string; weapon_type: WeaponCategory; distance_m: number; lane_count: number }>({ range_id: '', name: '', weapon_type: 'RIFLE', distance_m: 100, lane_count: 6 })
+const weaponForm = ref<{ name: string; category: WeaponCategory; serial_number: string; caliber: string; manufacturer: string }>({ name: '', category: 'RIFLE', serial_number: '', caliber: '', manufacturer: '' })
 
 function openCreateRange() {
   editingRange.value = null
@@ -232,7 +233,7 @@ function weaponStatusColor(status: string) {
 function conditionLabel(c: string) {
   const labels: Record<string, { uz: string; ru: string }> = {
     EXCELLENT: { uz: 'Aloqi', ru: 'Отличное' }, GOOD: { uz: 'Yaxshi', ru: 'Хорошее' },
-    FAIR: { uz: "O'rtacha", ru: 'Удовлетвор.' }, POOR: { uz: 'Yomon', ru: 'Плохое' },
+    FAIR: { uz: "Oʻrtacha", ru: 'Удовлетвор.' }, POOR: { uz: 'Yomon', ru: 'Плохое' },
   }
   return labels[c] ? (isUz.value ? labels[c].uz : labels[c].ru) : c
 }
@@ -421,7 +422,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
                 <button @click="openEditRange(range)" class="p-2 rounded-lg hover:bg-gray-100 transition" :title="isUz ? 'Tahrirlash' : 'Редактировать'">
                   <Edit2 class="w-4 h-4 text-gray-400" />
                 </button>
-                <button @click="confirmDelete('range', range.id)" class="p-2 rounded-lg hover:bg-red-50 transition" :title="isUz ? &quot;O'chirish&quot; : &quot;Удалить&quot;">
+                <button @click="confirmDelete('range', range.id)" class="p-2 rounded-lg hover:bg-red-50 transition" :title="isUz ? 'Oʼchirish' : 'Удалить'">
                   <Trash2 class="w-4 h-4 text-red-400" />
                 </button>
               </div>
