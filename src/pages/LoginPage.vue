@@ -3,7 +3,8 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useI18n } from '@/i18n'
-import { Eye, ArrowRight, Globe, Terminal, ShieldCheck, Lock } from 'lucide-vue-next'
+import { Eye, ArrowRight, Globe, Terminal, ShieldCheck, Lock, Smartphone } from 'lucide-vue-next'
+import MiniAppPreview from '@/components/miniapp/MiniAppPreview.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -19,6 +20,7 @@ const step = ref<'email' | 'password'>('email')
 const techSpecMode = ref(false)
 const techSpecPin = reactive({ d1: '', d2: '', d3: '', d4: '' })
 const techSpecError = ref(false)
+const miniAppMode = ref(false)
 
 function nextStep() {
   if (!form.email) {
@@ -245,6 +247,13 @@ function handleKeydown(e: KeyboardEvent) {
         </div>
       </div>
 
+      <!-- Telegram Mini App button -->
+      <button class="tg-miniapp-btn" @click="miniAppMode = true">
+        <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.87 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.94z"/></svg>
+        <span>Telegram Mini App</span>
+        <Smartphone class="w-3 h-3 opacity-50" />
+      </button>
+
       <!-- TechSpec access button - visible -->
       <button class="techspec-link" @click="openTechSpec">
         <Lock class="w-3.5 h-3.5" />
@@ -327,6 +336,10 @@ function handleKeydown(e: KeyboardEvent) {
           </div>
         </div>
       </div>
+    </transition>
+    <!-- Telegram Mini App Preview -->
+    <transition name="fade">
+      <MiniAppPreview v-if="miniAppMode" @close="miniAppMode = false" />
     </transition>
   </div>
 </template>
@@ -661,6 +674,29 @@ function handleKeydown(e: KeyboardEvent) {
   background: rgba(6,182,212,0.12);
   border-color: rgba(6,182,212,0.3);
   color: rgba(6,182,212,0.9);
+}
+
+/* Telegram Mini App button */
+.tg-miniapp-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  background: linear-gradient(135deg, rgba(42,171,238,0.12), rgba(34,158,229,0.08));
+  border: 1px solid rgba(42,171,238,0.25);
+  color: rgba(42,171,238,0.85);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+.tg-miniapp-btn:hover {
+  background: linear-gradient(135deg, rgba(42,171,238,0.2), rgba(34,158,229,0.15));
+  border-color: rgba(42,171,238,0.5);
+  color: rgba(42,171,238,1);
+  transform: translateY(-1px);
 }
 
 /* Version */
