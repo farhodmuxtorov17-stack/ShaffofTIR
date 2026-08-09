@@ -2,17 +2,17 @@
   <LoadingState v-if="loading" />
   <div v-if="!loading" class="fade-in p-6 space-y-6">
     <div>
-      <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "E\x02BBtirozlar" : "Возражения" }}</h1>
-      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Natijalarga qo\x02BByilgan e\x02BBtirozlar" : "Возражения по результатам стрельб" }}</p>
+      <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "E\u02BBtirozlar" : "Возражения" }}</h1>
+      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Natijalarga qo\u02BByilgan e\u02BBtirozlar" : "Возражения по результатам стрельб" }}</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <div class="card p-4">
-        <div class="text-xs text-gray-500">{{ isUz ? "Jami e\x02BBtirozlar" : "Всего возражений" }}</div>
+        <div class="text-xs text-gray-500">{{ isUz ? "Jami e\u02BBtirozlar" : "Всего возражений" }}</div>
         <div class="text-2xl font-bold text-gray-900">{{ objections.length }}</div>
       </div>
       <div class="card p-4">
-        <div class="text-xs text-gray-500">{{ isUz ? "Ko\x02BBrib chiqilmoqda" : "На рассмотрении" }}</div>
+        <div class="text-xs text-gray-500">{{ isUz ? "Ko\u02BBrib chiqilmoqda" : "На рассмотрении" }}</div>
         <div class="text-2xl font-bold text-yellow-600">{{ pendingCount }}</div>
       </div>
       <div class="card p-4">
@@ -50,9 +50,9 @@ const loading = ref(true)
 
 const objections = ref([
   { id: 'OB-008', employee_name: 'Каримов А.У.', session_id: 'S-2026-052', date: '28.07.2026', status: 'PENDING', reason_ru: 'Несогласие с результатом 3-го выстрела - счётчик показал попадание, но результат не засчитан', reason_uz: '3-otish natijasiga rozilik - hisoblagich tasodifni qayd etgan, lekin natija hisoblanmagan' },
-  { id: 'OB-007', employee_name: 'Алиев Б.У.', session_id: 'S-2026-049', date: '27.07.2026', status: 'RESOLVED', reason_ru: 'Камера 4 не зафиксировала выстрел, результат восстановлен по резервной камере', reason_uz: '4-kamera otishni qayd etmadi, natija zaxira kamera bo\x02BByicha tiklandi' },
-  { id: 'OB-006', employee_name: 'Хасанов О.Р.', session_id: 'S-2026-045', date: '25.07.2026', status: 'PENDING', reason_ru: 'ТБ-тест пройден, но автоматика не допустила к полигону', reason_uz: 'TB testidan o\x02BBtgan, lekin tizim poligonga kirmadi' },
-  { id: 'OB-005', employee_name: 'Юлдашев Д.А.', session_id: 'S-2026-040', date: '23.07.2026', status: 'RESOLVED', reason_ru: 'Оружие дало осечку, прошу пересмотр результатов', reason_uz: 'Qurol o\x02BBt olmadi, natijalarni qayta ko\x02BBrib chiqishni so\x02BBrayman' },
+  { id: 'OB-007', employee_name: 'Алиев Б.У.', session_id: 'S-2026-049', date: '27.07.2026', status: 'RESOLVED', reason_ru: 'Камера 4 не зафиксировала выстрел, результат восстановлен по резервной камере', reason_uz: '4-kamera otishni qayd etmadi, natija zaxira kamera bo\u02BByicha tiklandi' },
+  { id: 'OB-006', employee_name: 'Хасанов О.Р.', session_id: 'S-2026-045', date: '25.07.2026', status: 'PENDING', reason_ru: 'ТБ-тест пройден, но автоматика не допустила к полигону', reason_uz: 'TB testidan o\u02BBtgan, lekin tizim poligonga kirmadi' },
+  { id: 'OB-005', employee_name: 'Юлдашев Д.А.', session_id: 'S-2026-040', date: '23.07.2026', status: 'RESOLVED', reason_ru: 'Оружие дало осечку, прошу пересмотр результатов', reason_uz: 'Qurol o\u02BBt olmadi, natijalarni qayta ko\u02BBrib chiqishni so\u02BBrayman' },
 ])
 
 const pendingCount = computed(() => objections.value.filter(o => o.status === 'PENDING').length)

@@ -2,8 +2,8 @@
   <LoadingState v-if="loading" />
   <div v-if="!loading" class="fade-in p-6 space-y-6">
     <div>
-      <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "Ma\x02BBlumot sifati" : "Качество данных" }}</h1>
-      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Tizim ma\x02BBlumotlari yaxlitligi" : "Целостность данных системы" }}</p>
+      <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "Ma\u02BBlumot sifati" : "Качество данных" }}</h1>
+      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Tizim ma\u02BBlumotlari yaxlitligi" : "Целостность данных системы" }}</p>
     </div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="card p-4">
@@ -11,7 +11,7 @@
         <div class="text-2xl font-bold text-green-600">98.5%</div>
       </div>
       <div class="card p-4">
-        <div class="text-xs text-gray-500 mb-1">{{ isUz ? "To\x02BBliqlik" : "Полнота" }}</div>
+        <div class="text-xs text-gray-500 mb-1">{{ isUz ? "To\u02BBliqlik" : "Полнота" }}</div>
         <div class="text-2xl font-bold text-green-600">96.2%</div>
       </div>
       <div class="card p-4">
@@ -45,9 +45,9 @@ const isUz = computed(() => auth.user?.locale === 'uz')
 const loading = ref(true)
 
 const issues = ref([
-  { id: 1, severity: 'HIGH', desc_ru: '3 сотрудника без FaceID регистрации', desc_uz: '3 xodim FaceID ro\x02BByxatisiz' },
+  { id: 1, severity: 'HIGH', desc_ru: '3 сотрудника без FaceID регистрации', desc_uz: '3 xodim FaceID ro\u02BByxatisiz' },
   { id: 2, severity: 'MEDIUM', desc_ru: '2 протокола без подписи инструктора', desc_uz: '2 protokol instruktor imzosiz' },
-  { id: 3, severity: 'LOW', desc_ru: 'Устаревшие данные по 1 сотруднику (перемещён)', desc_uz: '1 xodim uchun eski ma\x02BBlumot (ko\x02BBchirilgan)' },
+  { id: 3, severity: 'LOW', desc_ru: 'Устаревшие данные по 1 сотруднику (перемещён)', desc_uz: '1 xodim uchun eski ma\u02BBlumot (ko\u02BBchirilgan)' },
 ])
 onMounted(() => { setTimeout(() => { loading.value = false }, 400) })
 </script>

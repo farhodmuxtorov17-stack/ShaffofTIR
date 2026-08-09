@@ -2,8 +2,8 @@
   <LoadingState v-if="loading" />
   <div v-if="!loading" class="fade-in p-6 space-y-6">
     <div>
-      <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "Ma\x02BBlumotlar bazasi" : "Справочники" }}</h1>
-      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Tizim ma\x02BBlumotlari" : "Справочные данные системы" }}</p>
+      <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "Ma\u02BBlumotlar bazasi" : "Справочники" }}</h1>
+      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Tizim ma\u02BBlumotlari" : "Справочные данные системы" }}</p>
     </div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div v-for="ref in references" :key="ref.id" class="card p-4 text-center cursor-pointer hover:shadow-md transition-shadow">
@@ -27,7 +27,7 @@ const references = ref([
   { id: 4, name_ru: 'Упражнения', name_uz: 'Mashqlar', count: 12 },
   { id: 5, name_ru: 'Регионы', name_uz: 'Viloyatlar', count: 14 },
   { id: 6, name_ru: 'Районы', name_uz: 'Tumanlar', count: 180 },
-  { id: 7, name_ru: 'Подразделения', name_uz: 'Bo\x02BBlinmalar', count: 45 },
+  { id: 7, name_ru: 'Подразделения', name_uz: 'Bo\u02BBlinmalar', count: 45 },
   { id: 8, name_ru: 'Должности', name_uz: 'Lavozimlar', count: 15 },
 ])
 onMounted(() => { setTimeout(() => { loading.value = false }, 400) })

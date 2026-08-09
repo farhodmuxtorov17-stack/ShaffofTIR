@@ -12,7 +12,7 @@
           <span class="w-2.5 h-2.5 rounded-full" :class="integ.status === 'OK' ? 'bg-green-500' : 'bg-red-500'"></span>
         </div>
         <div class="text-xs text-gray-500">{{ integ.endpoint }}</div>
-        <div class="text-xs mt-1" :class="integ.status === 'OK' ? 'text-green-600' : 'text-red-600'">{{ isUz ? "So\x02BBnggi so\x02BBrov" : "Последний запрос" }}: {{ integ.lastCheck }}</div>
+        <div class="text-xs mt-1" :class="integ.status === 'OK' ? 'text-green-600' : 'text-red-600'">{{ isUz ? "So\u02BBnggi so\u02BBrov" : "Последний запрос" }}: {{ integ.lastCheck }}</div>
       </div>
     </div>
   </div>

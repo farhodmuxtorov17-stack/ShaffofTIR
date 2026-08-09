@@ -67,11 +67,11 @@ const sections = computed(() => [
       'Каждый участник обязан находиться в защитной экипировке: шлем, бронежилет, наушники, защитные очки.',
     ],
     content_uz: [
-      'O\x02BBq otish tayyorgarligi faqat maxsus jihozlangan poligonda instruktor rahbarligida o\x02BBtkaziladi.',
-      'Otishga tibbiy ko\x02BBrikdan o\x02BBtgan va texnika xavfsizligi bo\x02BByicha testdan o\x02BBtgan (kamida 100%) shaxslar ruxsat etiladi.',
-      'Poligon hududida otish paytida mobil telefon va boshqa chalg\x02BBituvchi qurilmalarni ishlatish ta\x02BBqiqlanadi.',
-      'Otchi instruktorning barcha buyruqlarini darhol va e\x02BBtirozsiz bajarishi shart.',
-      'Har bir ishtirokchi himoya jihozlarida bo\x02BBlishi shart: dubulg\x02BBa, bronekamulet, quloqchin, himoya ko\x02BBzoynak.',
+      'O\u02BBq otish tayyorgarligi faqat maxsus jihozlangan poligonda instruktor rahbarligida o\u02BBtkaziladi.',
+      'Otishga tibbiy ko\u02BBrikdan o\u02BBtgan va texnika xavfsizligi bo\u02BByicha testdan o\u02BBtgan (kamida 100%) shaxslar ruxsat etiladi.',
+      'Poligon hududida otish paytida mobil telefon va boshqa chalg\u02BBituvchi qurilmalarni ishlatish ta\u02BBqiqlanadi.',
+      'Otchi instruktorning barcha buyruqlarini darhol va e\u02BBtirozsiz bajarishi shart.',
+      'Har bir ishtirokchi himoya jihozlarida bo\u02BBlishi shart: dubulg\u02BBa, bronekamulet, quloqchin, himoya ko\u02BBzoynak.',
     ],
   },
   {
@@ -88,18 +88,18 @@ const sections = computed(() => [
       'Запрещается заряжать оружие вне огневого рубежа.',
     ],
     content_uz: [
-      'Qurol doimo xavfsiz yo\x02BBnalishda - nishonlar tomon yoki instruktoring buyrug\x02BBi bo\x02BByicha yuqoriga qaratilgan bo\x02BBlishi kerak.',
-      'Instruktorga ruxsatisiz qurol olish ta\x02BBqiqlanadi.',
-      'Barmoq tetikchada faqat "Olov" buyrug\x02BBidan keyin bo\x02BBlishi kerak. Boshqa paytda - sug\x02BBuruvchida.',
-      'Boshqa shaxsga qurol topshirishdan oldin do\x02BBkonni olib tashlash va patronxona tekshiriladi.',
-      'O\x02BBq otish chizig\x02BBidan tashqarida qurolni o\x02BBqlash ta\x02BBqiqlanadi.',
+      'Qurol doimo xavfsiz yo\u02BBnalishda - nishonlar tomon yoki instruktoring buyrug\u02BBi bo\u02BByicha yuqoriga qaratilgan bo\u02BBlishi kerak.',
+      'Instruktorga ruxsatisiz qurol olish ta\u02BBqiqlanadi.',
+      'Barmoq tetikchada faqat "Olov" buyrug\u02BBidan keyin bo\u02BBlishi kerak. Boshqa paytda - sug\u02BBuruvchida.',
+      'Boshqa shaxsga qurol topshirishdan oldin do\u02BBkonni olib tashlash va patronxona tekshiriladi.',
+      'O\u02BBq otish chizig\u02BBidan tashqarida qurolni o\u02BBqlash ta\u02BBqiqlanadi.',
     ],
   },
   {
     id: 2,
     icon: Zap,
     title_ru: 'Правила на огневом рубеже',
-    title_uz: 'O\x02BBq otish chizig\x02BBidagi qoidalar',
+    title_uz: 'O\u02BBq otish chizig\u02BBidagi qoidalar',
     color: '#3b82f6',
     content_ru: [
       'На огневой рубеж выходить только по команде инструктора «К огневому рубежу, шагом марш».',
@@ -109,11 +109,11 @@ const sections = computed(() => [
       'При осечке не открывать затвор немедленно - выдержать 10 секунд, затем доложить инструктору.',
     ],
     content_uz: [
-      'O\x02BBq otish chizig\x02BBiga faqat instruktoring "O\x02BBq otish chizig\x02BBiga, qadam yo\x02BBl" buyrug\x02BBi bo\x02BByicha chiqiladi.',
-      'O\x02BBq otish chizig\x02BBini "Jangga" yoki "Olov" buyrug\x02BBisiz kesib o\x02BBtish ta\x02BBqiqlanadi.',
-      'Otish to\x02BBxtatilganda qurol sug\x02BBuruvchiga qo\x02BByiladi va nishonlar tomon stvol bilan stolga qo\x02BByiladi.',
-      '"To\x02BBxta, o\x02BBq otishni to\x02BBxtating" buyrug\x02BBini otchi darhol bajarmoqda, o\x02BBq-dorilar qolganiidan qat\x02BBi nazar.',
-      'O\x02BBqslashda zotvor darhol ochilmaydi - 10 soniya kutib, instruktorga xabar beriladi.',
+      'O\u02BBq otish chizig\u02BBiga faqat instruktoring "O\u02BBq otish chizig\u02BBiga, qadam yo\u02BBl" buyrug\u02BBi bo\u02BByicha chiqiladi.',
+      'O\u02BBq otish chizig\u02BBini "Jangga" yoki "Olov" buyrug\u02BBisiz kesib o\u02BBtish ta\u02BBqiqlanadi.',
+      'Otish to\u02BBxtatilganda qurol sug\u02BBuruvchiga qo\u02BByiladi va nishonlar tomon stvol bilan stolga qo\u02BByiladi.',
+      '"To\u02BBxta, o\u02BBq otishni to\u02BBxtating" buyrug\u02BBini otchi darhol bajarmoqda, o\u02BBq-dorilar qolganiidan qat\u02BBi nazar.',
+      'O\u02BBqslashda zotvor darhol ochilmaydi - 10 soniya kutib, instruktorga xabar beriladi.',
     ],
   },
   {
@@ -130,11 +130,11 @@ const sections = computed(() => [
       'Каждый стрелок должен знать расположение аптечки, огнетушителя и эвакуационного маршрута.',
     ],
     content_uz: [
-      'Portlamagan o\x02BBq-dorini topganda darhol instruktorga xabar berish, zonani belgilash va odamlarni evakuatsiya qilish.',
-      'Jarohatlanganda darhol "Stop" signalini berish va tibbiyot xodimlari kelgunicha birinchi yordam ko\x02BBrsatish.',
-      'Poligonda yong\x02BBin bo\x02BBlganda otishni to\x02BBxtatish, uskunalarni o\x02BBchirish, o\x02BBt o\x02BBchirgichdan foydalanish.',
-      'Qurol nosozliklarini mustaqil ravishda tuzatish ta\x02BBqiqlanadi - instruktorga xabar berish.',
-      'Har bir otchi dori-darmon qutisi, o\x02BBt o\x02BBchirgich va evakuatsiya marshruti joylashishini bilishi shart.',
+      'Portlamagan o\u02BBq-dorini topganda darhol instruktorga xabar berish, zonani belgilash va odamlarni evakuatsiya qilish.',
+      'Jarohatlanganda darhol "Stop" signalini berish va tibbiyot xodimlari kelgunicha birinchi yordam ko\u02BBrsatish.',
+      'Poligonda yong\u02BBin bo\u02BBlganda otishni to\u02BBxtatish, uskunalarni o\u02BBchirish, o\u02BBt o\u02BBchirgichdan foydalanish.',
+      'Qurol nosozliklarini mustaqil ravishda tuzatish ta\u02BBqiqlanadi - instruktorga xabar berish.',
+      'Har bir otchi dori-darmon qutisi, o\u02BBt o\u02BBchirgich va evakuatsiya marshruti joylashishini bilishi shart.',
     ],
   },
 ])
@@ -144,23 +144,23 @@ const testQuestions = computed(() => [
   {
     id: 0,
     question_ru: 'Кто допускается к стрельбе на полигоне?',
-    question_uz: 'Poligonda o\x02BBq otishga kim ruxsat etiladi?',
+    question_uz: 'Poligonda o\u02BBq otishga kim ruxsat etiladi?',
     options_ru: ['Любой сотрудник', 'Прошедший медосмотр и сдавший ТБ-тест на 100%', 'Только офицеры', 'Имеющий личное оружие'],
-    options_uz: ['Har qanday xodim', 'Tibbiy ko\x02BBrikdan o\x02BBtgan va TB testidan 100% o\x02BBtgan', 'Faqat ofitserlar', 'Shaxsiy qurolga ega'],
+    options_uz: ['Har qanday xodim', 'Tibbiy ko\u02BBrikdan o\u02BBtgan va TB testidan 100% o\u02BBtgan', 'Faqat ofitserlar', 'Shaxsiy qurolga ega'],
     correct: 1,
   },
   {
     id: 1,
     question_ru: 'Когда можно класть палец на спусковой крючок?',
-    question_uz: 'Barmoqni tetikchaga qachon qo\x02BByish mumkin?',
+    question_uz: 'Barmoqni tetikchaga qachon qo\u02BByish mumkin?',
     options_ru: ['В любой момент', 'После команды «Огонь»', 'Только при заряжании', 'На огневом рубеже'],
-    options_uz: ['Har qanday paytda', '"Olov" buyrug\x02BBidan keyin', 'Faqat o\x02BBqolashda', 'O\x02BBq otish chizig\x02BBida'],
+    options_uz: ['Har qanday paytda', '"Olov" buyrug\u02BBidan keyin', 'Faqat o\u02BBqolashda', 'O\u02BBq otish chizig\u02BBida'],
     correct: 1,
   },
   {
     id: 2,
     question_ru: 'Что делать при осечке?',
-    question_uz: 'O\x02BBqlashda nima qilish kerak?',
+    question_uz: 'O\u02BBqlashda nima qilish kerak?',
     options_ru: ['Открыть затвор сразу', 'Выдержать 10 секунд, затем доложить инструктору', 'Продолжить стрельбу', 'Уйти с рубежа'],
     options_uz: ['Zotvorni darhol ochish', '10 soniya kutib, instruktorga xabar berish', 'Otishni davom ettirish', 'Chiziqdan ketish'],
     correct: 1,
@@ -168,17 +168,17 @@ const testQuestions = computed(() => [
   {
     id: 3,
     question_ru: 'Куда должно быть направлено оружие?',
-    question_uz: 'Qurol qaysi tomonga qaratilgan bo\x02BBlishi kerak?',
+    question_uz: 'Qurol qaysi tomonga qaratilgan bo\u02BBlishi kerak?',
     options_ru: ['В любую сторону', 'В безопасном направлении - к мишеням или вверх', 'В сторону людей', 'Не имеет значения'],
-    options_uz: ['Har qanday tomonga', 'Xavfsiz yo\x02BBnalishda - nishonlarga yoki yuqoriga', 'Odamlar tomonga', 'Ahamiyatsiz'],
+    options_uz: ['Har qanday tomonga', 'Xavfsiz yo\u02BBnalishda - nishonlarga yoki yuqoriga', 'Odamlar tomonga', 'Ahamiyatsiz'],
     correct: 1,
   },
   {
     id: 4,
     question_ru: 'Что делать при команде «Стой, прекратить огонь»?',
-    question_uz: '"To\x02BBxta, o\x02BBq otishni to\x02BBxtating" buyrug\x02BBi bo\x02BByicha nima qilish kerak?',
+    question_uz: '"To\u02BBxta, o\u02BBq otishni to\u02BBxtating" buyrug\u02BBi bo\u02BByicha nima qilish kerak?',
     options_ru: ['Д закончить патроны', 'Немедленно прекратить стрельбу', 'Переспросить команду', 'Сделать ещё один выстрел'],
-    options_uz: ['O\x02BBq-dorilarni tugatish', 'Darhol otishni to\x02BBxtatish', 'Buyruqni qayta so\x02BSBrash', 'Yana bir otish otish'],
+    options_uz: ['O\u02BBq-dorilarni tugatish', 'Darhol otishni to\u02BBxtatish', 'Buyruqni qayta so\x02BSBrash', 'Yana bir otish otish'],
     correct: 1,
   },
   {
@@ -186,29 +186,29 @@ const testQuestions = computed(() => [
     question_ru: 'Какая защитная экипировка обязательна?',
     question_uz: 'Qaysi himoya jirozlari majburiy?',
     options_ru: ['Только шлем', 'Шлем, бронежилет, наушники, очки', 'Только очки', 'На усмотрение стрелка'],
-    options_uz: ['Faqat dubulg\x02BBa', 'Dubulg\x02BBa, bronekamulet, quloqchin, ko\x02BBzoynak', 'Faqat ko\x02BBzoynak', 'Otchining ixtiyoriga ko\x02BBra'],
+    options_uz: ['Faqat dubulg\u02BBa', 'Dubulg\u02BBa, bronekamulet, quloqchin, ko\u02BBzoynak', 'Faqat ko\u02BBzoynak', 'Otchining ixtiyoriga ko\u02BBra'],
     correct: 1,
   },
   {
     id: 6,
     question_ru: 'Где запрещается заряжать оружие?',
-    question_uz: 'Qurolni qayerda o\x02BBqlash ta\x02BBqiqlangan?',
+    question_uz: 'Qurolni qayerda o\u02BBqlash ta\u02BBqiqlangan?',
     options_ru: ['В любом месте', 'Вне огневого рубежа', 'На полигоне', 'В казарме'],
-    options_uz: ['Har qanday joyda', 'O\x02BBq otish chizig\x02BBidan tashqarida', 'Poligonda', 'Kazarmada'],
+    options_uz: ['Har qanday joyda', 'O\u02BBq otish chizig\u02BBidan tashqarida', 'Poligonda', 'Kazarmada'],
     correct: 1,
   },
   {
     id: 7,
     question_ru: 'Что делать при обнаружении неразорвавшегося боеприпаса?',
-    question_uz: 'Portlamagan o\x02BBq-dorini topganda nima qilish kerak?',
+    question_uz: 'Portlamagan o\u02BBq-dorini topganda nima qilish kerak?',
     options_ru: ['Подобрать и убрать', 'Доложить инструктору, эвакуировать людей', 'Продолжить стрельбу', 'Уничтожить самостоятельно'],
-    options_uz: ['Olib, o\x02BBchirish', 'Instruktorga xabar berish, odamlarni evakuatsiya qilish', 'Otishni davom ettirish', 'Mustaqil ravishda yo\x02BBq qilish'],
+    options_uz: ['Olib, o\u02BBchirish', 'Instruktorga xabar berish, odamlarni evakuatsiya qilish', 'Otishni davom ettirish', 'Mustaqil ravishda yo\u02BBq qilish'],
     correct: 1,
   },
   {
     id: 8,
     question_ru: 'Запрещается на территории полигона во время стрельбы?',
-    question_uz: 'Poligon hududida otish paytida nima ta\x02BBqiqlanadi?',
+    question_uz: 'Poligon hududida otish paytida nima ta\u02BBqiqlanadi?',
     options_ru: ['Разговаривать', 'Использовать мобильные телефоны', 'Стоять', 'Дышать'],
     options_uz: ['Gaplashish', 'Mobil telefondan foydalanish', 'Turish', 'Nafas olish'],
     correct: 1,
@@ -218,7 +218,7 @@ const testQuestions = computed(() => [
     question_ru: 'Каждый стрелок должен знать расположение:',
     question_uz: 'Har bir otchi joylashishini bilishi shart:',
     options_ru: ['Выхода', 'Аптечки, огнетушителя и эвакуационного маршрута', 'Столовой', 'Туалета'],
-    options_uz: ['Chiqishini', 'Dori-darmon qutisi, o\x02BBt o\x02BBchirgich va evakuatsiya marshruti', 'Oshxona', 'Hojatxona'],
+    options_uz: ['Chiqishini', 'Dori-darmon qutisi, o\u02BBt o\u02BBchirgich va evakuatsiya marshruti', 'Oshxona', 'Hojatxona'],
     correct: 1,
   },
 ])
@@ -304,7 +304,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
         </h1>
         <p class="text-sm text-gray-500 mt-2 max-w-lg mx-auto">
           {{ isUz
-            ? "Poligonga ruxsat olish uchun o\x02BBq otish tayyorgarligi bo\x02BByicha TB kursidan o\x02BBting va testdan 100% o\x02BBting"
+            ? "Poligonga ruxsat olish uchun o\u02BBq otish tayyorgarligi bo\u02BByicha TB kursidan o\u02BBting va testdan 100% o\u02BBting"
             : "Пройдите курс ТБ по огневой подготовке и сдайте тест на 100% для допуска на полигон" }}
         </p>
       </div>
@@ -317,7 +317,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
         </div>
         <div>
           <h3 class="font-semibold text-green-900">
-            {{ isUz ? "TB testidan o\x02BBtdingiz! ✓" : "Вы сдали ТБ-тест! ✓" }}
+            {{ isUz ? "TB testidan o\u02BBtdingiz! ✓" : "Вы сдали ТБ-тест! ✓" }}
           </h3>
           <p class="text-sm text-green-700 mt-0.5">
             {{ isUz ? "Poligonga ruxsat berildi" : "Допуск на полигон получен" }}
@@ -337,7 +337,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
           <div class="bg-green-500 h-2 rounded-full transition-all duration-300" :style="{ width: progressPercent + '%' }" />
         </div>
         <p class="text-xs text-gray-400 mt-2">
-          {{ isUz ? `${completedSections.length} / ${sections.length} bo\x02BBlim o\x02BBqildi` : `${completedSections.length} / ${sections.length} разделов прочитано` }}
+          {{ isUz ? `${completedSections.length} / ${sections.length} bo\u02BBlim o\u02BBqildi` : `${completedSections.length} / ${sections.length} разделов прочитано` }}
         </p>
       </div>
 
@@ -392,7 +392,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
             </div>
             <div>
               <p class="text-xs text-gray-400">
-                {{ isUz ? `Bo\x02BBlim ${currentSection + 1} / ${sections.length}` : `Раздел ${currentSection + 1} / ${sections.length}` }}
+                {{ isUz ? `Bo\u02BBlim ${currentSection + 1} / ${sections.length}` : `Раздел ${currentSection + 1} / ${sections.length}` }}
               </p>
               <h2 class="text-lg font-bold text-gray-900">
                 {{ isUz ? sections[currentSection].title_uz : sections[currentSection].title_ru }}
@@ -435,7 +435,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
                   class="px-6 py-2.5 rounded-full text-sm font-medium flex items-center gap-2 transition-colors text-white"
                   :style="{ background: sections[currentSection].color }">
             {{ currentSection === sections.length - 1
-              ? (isUz ? "Testga o\x02BBtish" : "К тесту")
+              ? (isUz ? "Testga o\u02BBtish" : "К тесту")
               : (isUz ? "Keyingi" : "Далее") }}
             <ChevronRight class="w-4 h-4" />
           </button>
@@ -456,7 +456,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
               {{ isUz ? "TB testi" : "ТБ-тест" }}
             </h2>
             <p class="text-xs text-gray-400">
-              {{ isUz ? "10 ta savol · 100% to\x02BBg\x02BBri javob kerak" : "10 вопросов · требуется 100% правильных ответов" }}
+              {{ isUz ? "10 ta savol · 100% to\u02BBg\u02BBri javob kerak" : "10 вопросов · требуется 100% правильных ответов" }}
             </p>
           </div>
         </div>
@@ -522,13 +522,13 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
           <h2 class="text-xl font-bold" :class="testResult.passed ? 'text-green-900' : 'text-red-900'">
             {{ testResult.passed
               ? (isUz ? "Tabriklaymiz! ✓" : "Поздравляем! ✓")
-              : (isUz ? "Testdan o\x02BBtmadi ✗" : "Тест не сдан ✗") }}
+              : (isUz ? "Testdan o\u02BBtmadi ✗" : "Тест не сдан ✗") }}
           </h2>
           <p class="text-sm text-gray-500 mt-2 max-w-md mx-auto">
             {{ testResult.passed
-              ? (isUz ? "Siz poligonga ruxsat oldingiz. Endi o\x02BBq otish sessiyalarida qatnashishingiz mumkin."
+              ? (isUz ? "Siz poligonga ruxsat oldingiz. Endi o\u02BBq otish sessiyalarida qatnashishingiz mumkin."
                       : "Вы получили допуск на полигон. Теперь можете участвовать в стрельбах.")
-              : (isUz ? "Poligonga ruxsat olish uchun 100% to\x02BBg\x02BBri javob kerak. Qayta urinib ko\x02BBring."
+              : (isUz ? "Poligonga ruxsat olish uchun 100% to\u02BBg\u02BBri javob kerak. Qayta urinib ko\u02BBring."
                       : "Для допуска на полигон требуется 100% правильных ответов. Попробуйте снова.") }}
           </p>
         </div>
@@ -549,7 +549,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
         <!-- Answer review -->
         <div v-if="!testResult.passed" class="text-left space-y-3 pt-4 max-w-2xl mx-auto">
           <h3 class="text-sm font-medium text-gray-700">
-            {{ isUz ? "Noto\x02BBg\x02BBri javoblar:" : "Неправильные ответы:" }}
+            {{ isUz ? "Noto\u02BBg\u02BBri javoblar:" : "Неправильные ответы:" }}
           </h3>
           <div v-for="q in testQuestions" :key="q.id"
                v-show="testAnswers[q.id] !== q.correct"
@@ -558,7 +558,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
               {{ isUz ? q.question_uz : q.question_ru }}
             </p>
             <p class="text-xs text-red-600">
-              {{ isUz ? "To\x02BBg\x02BBri:" : "Правильно:" }}
+              {{ isUz ? "To\u02BBg\u02BBri:" : "Правильно:" }}
               {{ isUz ? q.options_uz[q.correct] : q.options_ru[q.correct] }}
             </p>
           </div>

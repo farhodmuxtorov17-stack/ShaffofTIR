@@ -11,7 +11,7 @@
         <select v-model="reportType" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-green-500">
           <option value="summary">{{ isUz ? "Umumiy hisobot" : "Сводный отчёт" }}</option>
           <option value="individual">{{ isUz ? "Shaxsiy hisobot" : "Индивидуальный отчёт" }}</option>
-          <option value="regional">{{ isUz ? "Viloyat bo\x02BByicha" : "Региональный отчёт" }}</option>
+          <option value="regional">{{ isUz ? "Viloyat bo\u02BByicha" : "Региональный отчёт" }}</option>
           <option value="kpi">KPI {{ isUz ? "hisoboti" : "отчёт" }}</option>
         </select>
       </div>

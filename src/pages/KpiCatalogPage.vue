@@ -17,7 +17,7 @@
           <span class="px-2 py-1 rounded-full text-xs font-medium" :class="kpiCategoryColor(kpi.category)">{{ kpi.category }}</span>
         </div>
         <div class="flex items-center justify-between text-xs">
-          <span class="text-gray-500">{{ isUz ? "Me\x02BByor" : "Норматив" }}: {{ kpi.target }}{{ kpi.unit }}</span>
+          <span class="text-gray-500">{{ isUz ? "Me\u02BByor" : "Норматив" }}: {{ kpi.target }}{{ kpi.unit }}</span>
           <span class="font-medium" :class="kpi.current >= kpi.target ? 'text-green-600' : 'text-red-600'">{{ kpi.current }}{{ kpi.unit }}</span>
         </div>
         <div class="mt-2 h-2 rounded-full bg-gray-100 overflow-hidden">

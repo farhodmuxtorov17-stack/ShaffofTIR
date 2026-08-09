@@ -34,9 +34,9 @@ const isUz = computed(() => auth.user?.locale === 'uz')
 const loading = ref(true)
 
 const plans = ref([
-  { id: 1, title_ru: 'Дополнительная тренировка 300м', title_uz: 'Qo\x02BBshimcha mashq 300m', desc_ru: 'Для сотрудников с точностью ниже 65% на 300м', desc_uz: '300m da aniqlik 65% dan past xodimlar uchun', deadline: '15.08.2026', progress: 40, status: 'ACTIVE' },
+  { id: 1, title_ru: 'Дополнительная тренировка 300м', title_uz: 'Qo\u02BBshimcha mashq 300m', desc_ru: 'Для сотрудников с точностью ниже 65% на 300м', desc_uz: '300m da aniqlik 65% dan past xodimlar uchun', deadline: '15.08.2026', progress: 40, status: 'ACTIVE' },
   { id: 2, title_ru: 'ТО оружия АКС-74У', title_uz: 'AKS-74U qurol TO', desc_ru: 'Техническое обслуживание и проверка', desc_uz: 'Texnik xizmat va tekshiruv', deadline: '05.08.2026', progress: 70, status: 'ACTIVE' },
-  { id: 3, title_ru: 'Повторный ТБ-тест', title_uz: 'Qayta TB testi', desc_ru: 'Для сотрудников, не прошедших ТБ-тест', desc_uz: 'TB testidan o\x02BBtmagan xodimlar uchun', deadline: '10.08.2026', progress: 0, status: 'ACTIVE' },
+  { id: 3, title_ru: 'Повторный ТБ-тест', title_uz: 'Qayta TB testi', desc_ru: 'Для сотрудников, не прошедших ТБ-тест', desc_uz: 'TB testidan o\u02BBtmagan xodimlar uchun', deadline: '10.08.2026', progress: 0, status: 'ACTIVE' },
 ])
 onMounted(() => { setTimeout(() => { loading.value = false }, 400) })
 </script>

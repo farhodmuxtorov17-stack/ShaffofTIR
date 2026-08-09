@@ -12,7 +12,7 @@
       </div>
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="text-sm font-medium text-gray-700 block mb-1">{{ isUz ? "Me\x02BByor" : "Норматив" }}</label>
+          <label class="text-sm font-medium text-gray-700 block mb-1">{{ isUz ? "Me\u02BByor" : "Норматив" }}</label>
           <input v-model="kpi.target" type="number" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-green-500" />
         </div>
         <div>
@@ -22,7 +22,7 @@
       </div>
       <div>
         <label class="text-sm font-medium text-gray-700 block mb-1">{{ isUz ? "Kategoriya" : "Категория" }}</label>
-        <select v-model="kpi.category" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none"><option value="STRELBA">{{ isUz ? "Strelba" : "Стрельба" }}</option><option value="SAFETY">{{ isUz ? "Xavfsizlik" : "Безопасность" }}</option><option value="TRAINING">{{ isUz ? "O\x02BBqitish" : "Обучение" }}</option><option value="PROCESS">{{ isUz ? "Jarayon" : "Процесс" }}</option></select>
+        <select v-model="kpi.category" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none"><option value="STRELBA">{{ isUz ? "Strelba" : "Стрельба" }}</option><option value="SAFETY">{{ isUz ? "Xavfsizlik" : "Безопасность" }}</option><option value="TRAINING">{{ isUz ? "O\u02BBqitish" : "Обучение" }}</option><option value="PROCESS">{{ isUz ? "Jarayon" : "Процесс" }}</option></select>
       </div>
       <button class="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700">{{ isUz ? "Saqlash" : "Сохранить" }}</button>
     </div>
