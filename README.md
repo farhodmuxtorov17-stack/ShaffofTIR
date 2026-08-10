@@ -5,7 +5,7 @@
 <h1 align="center">ShaffofTIR</h1>
 
 <p align="center">
-  <strong>Ochiq va shaffof TIR dan otish poligoni boshqaruv tizimi</strong><br/>
+  <strong>TIR dan otishni raqamlashgan boshqaruv tizimi</strong><br/>
   Harbiy va huquq-tartibot idoralari uchun enterprise-darajadagi otishma oʻquv platformasi
 </p>
 
