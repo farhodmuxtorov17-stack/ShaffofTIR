@@ -17,17 +17,17 @@
   <img src="https://img.shields.io/badge/TypeScript-5.5-3178c6?logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind-3.4-06b6d4?logo=tailwindcss" alt="Tailwind CSS" />
   <img src="https://img.shields.io/badge/Vite-5.3-646cff?logo=vite" alt="Vite" />
-  <img src="https://img.shields.io/badge/License-MIT-22c55e" alt="MIT License" />
+  <img src="https://img.shields.io/badge/Litsenziya-MIT-22c55e" alt="MIT License" />
 </p>
 
 <p align="center">
-  <a href="#boshlash">Tezkor boshlash</a> ·
+  <a href="#havolalar">Havolalar</a> ·
+  <a href="#kirish-malumotlari">Kirish maʼlumotlari</a> ·
+  <a href="#asosiy-imkoniyatlar">Imkoniyatlar</a> ·
   <a href="#arxitektura">Arxitektura</a> ·
   <a href="#rollar-va-ruxsatlar">Rollar</a> ·
-  <a href="#asosiy-imkoniyatlar">Imkoniyatlar</a> ·
   <a href="#deploy">Deploy</a> ·
-  <a href="CONTRIBUTING.md">Hissa qoʻshish</a> ·
-  <a href="docs/">Hujjatlar</a>
+  <a href="CONTRIBUTING.md">Hissa qoʻshish</a>
 </p>
 
 ---
@@ -40,6 +40,40 @@ Tizim otishma oʻquv jarayonining toʻliq hayotiy siklini qamrab oladi: xodimni 
 
 ---
 
+## Havolalar
+
+| Tavsif | Havola |
+|--------|--------|
+| **Asosiy ilova** | https://farhodmuxtorov17-stack.github.io/ShaffofTIR/ |
+| **Telegram mini-app (planshet)** | https://farhodmuxtorov17-stack.github.io/ShaffofTIR/#/login?miniapp=1&device=tablet |
+| **Telegram mini-app (menejer)** | https://farhodmuxtorov17-stack.github.io/ShaffofTIR/#/login?miniapp=1&device=tablet&role=MANAGER |
+| **GitHub repozoriy** | https://github.com/farhodmuxtorov17-stack/ShaffofTIR |
+
+> **Tezkor kirish:** URL-parametri orqali — `?role=MANAGER` — avtomatik avtorizatsiya.
+
+---
+
+## Kirish maʼlumotlari
+
+### Email va parol bilan
+
+| Rol | Email | Parol |
+|-----|-------|-------|
+| **SUPER_ADMIN** | `admin@shaffoftir.uz` | `admin123` |
+| **MANAGER** (Rahbariyat) | `manager@shaffoftir.uz` | `manager123` |
+| **INSTRUCTOR** | `instructor@shaffoftir.uz` | `instructor123` |
+| **EMPLOYEE** (Xodim) | `soldier@shaffoftir.uz` | `soldier123` |
+
+### PIN-kod bilan (Texnik mutaxassis)
+
+| Rol | Kirish turi | PIN-kod |
+|-----|-------------|---------|
+| **TECHSPEC** (Texnik mutaxassis) | PIN-kod orqali login sahifasining pastki qismidagi tugma | `8424` |
+
+> Texnik mutaxassis email/parol bilan emas, login sahifasidagi «Texnik kirish» tugmasi orqali PIN-kod bilan kiradi.
+
+---
+
 ## Asosiy imkoniyatlar
 
 - 📊 **Komanda markazi** - 3 bosqichli drill-down (Respublika → Viloyat → Tuman) real vaqtdagi KPI monitoringi
@@ -49,26 +83,6 @@ Tizim otishma oʻquv jarayonining toʻliq hayotiy siklini qamrab oladi: xodimni 
 - 👥 **Rolli boshqaruv** - 5 darajali RBAC (SUPER_ADMIN, MANAGER, INSTRUCTOR, TECHSPEC, EMPLOYEE)
 - 📱 **Mobil moslashuv** - telefon va planshet uchun toʻliq optimallashtirilgan
 - 🌐 **Ikkilik lokalizatsiya** - Oʻzbek va Rus tillarida toʻliq interfeys
-
----
-
-## Boshlash
-
-```bash
-# Bogʻliqliklarni oʻrnatish
-npm install
-
-# Lokal dev-server
-npm run dev
-
-# Production-yigʻim
-npm run build
-
-# GitHub Pages-ga deploy
-npm run deploy
-```
-
-**Live-demo:** https://farhodmuxtorov17-stack.github.io/ShaffofTIR/
 
 ---
 
@@ -100,7 +114,7 @@ npm run deploy
 | TypeScript | 5.5 | Tip xavfsizligi |
 | Vite | 5.3 | Sborка va dev-server |
 | Pinia | 2.1 | Holat boshqaruvi |
-| Vue Router | 4.3 | Marshrutlash |
+| Vue Router | 4.3 | Marshrutlash (hash mode) |
 | TailwindCSS | 3.4 | Utility-first stillash |
 | jsPDF + html2canvas | — | PDF-generatsiya (lazy-loaded) |
 
@@ -115,7 +129,7 @@ Tizim 5 darajali rolli boshqaruv (RBAC) tizimini amalga oshiradi. Har bir rol mo
 | **SUPER_ADMIN** | Barcha modullarga toʻliq ruxsat, foydalanuvchilar, audit, tizim sozlamalari |
 | **MANAGER** | Boshqaruv paneli, Komanda markazi, KPI, kelishuvlar, hisobotlar |
 | **INSTRUCTOR** | Sessiya yaratish, protokollar, kameralar, oʻquv materiallari |
-| **TECHSPEC** | Texnik sahifa, kamera boshqaruvi, tizim sozlamalari |
+| **TECHSPEC** | PIN-kod orqali kirish, kamera boshqaruvi, tizim sozlamalari |
 | **EMPLOYEE** | Shaxsiy natijalar, oʻquv materiallari, sessiyalarni koʻrish |
 
 ---
@@ -129,7 +143,7 @@ npm run build
 npm run deploy
 ```
 
-**Netlify koʻzgusi:** https://e-shaffoftir.netlify.app
+Base URL — `vite.config.ts` faylida: `/ShaffofTIR/`
 
 ---
 
@@ -141,7 +155,7 @@ ShaffofTIR/
 │   ├── pages/          # 72 sahifa
 │   ├── components/     # Qayta foydalaniladigan komponentlar
 │   ├── stores/         # Pinia stores
-│   ├── router/         # Marshrutlash
+│   ├── router/         # Marshrutlash (hash mode)
 │   ├── api/            # API-mijozlar
 │   ├── data/           # Demo-maʼlumotlar
 │   ├── i18n/           # Lokalizatsiya (RU/UZ)
@@ -155,7 +169,7 @@ ShaffofTIR/
 
 ---
 
-## Hisssa qoʻshish
+## Hissa qoʻshish
 
 Loyihaga hissa qoʻshish boʻyicha qoidalar [CONTRIBUTING.md](CONTRIBUTING.md) faylida tasvirlangan.
 
