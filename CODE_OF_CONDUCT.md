@@ -1,28 +1,30 @@
-# Code of Conduct
+# Hulq-atvor kodeksi
 
-## Our Pledge
+## Bizning majburiyatimiz
 
-We are committed to providing a respectful and inclusive environment for all contributors. We aim to build a community where technical excellence and mutual respect go hand in hand.
+ShaffofTIR jamoasi barcha hissa qoʻshuvchilar uchun hurmatli va inklyuziv muhitni taʼminlashga sodiqlik bildiradi. Biz texnik mukammallik va oʻzaro hurmat qoʻl berib ketadigan hamjamiyat qurishga intilamiz.
 
-## Our Standards
+## Standartlar
 
-**Positive behavior:**
-- Using welcoming and inclusive language
-- Being respectful of differing viewpoints and experiences
-- Gracefully accepting constructive feedback
-- Focusing on what is best for the community
-- Showing empathy towards other community members
+Loyihada ishtirok etayotganda quyidagi standartlarga rioya qilish talab etiladi:
 
-**Unacceptable behavior:**
-- Trolling, insulting/derogatory comments, or personal attacks
-- Public or private harassment
-- Publishing others' private information without consent
-- Other conduct reasonably considered inappropriate in a professional setting
+- **Hurmat** — barcha ishtirokchilarga hurmat bilan munosabatda boʻling
+- **Inklyuzivlik** — har bir fikr va yondashuvni qadrlang
+- **Masʼuliyat** — oʻz hissangiz uchun masʼuliyatni oʻz zingizga oling
+- **Hamkorlik** — jamoa bilan ochiq muloqotda boʻling
+- **Sifat** — yuqori sifatli kod yozishga harakat qiling
 
-## Enforcement
+## Muvofiq emas xulq-atvor
 
-Violations may be reported to **conduct@shaffoftir.uz**. All reports will be reviewed and investigated with discretion.
+- Tahdid, haqorat yoki kamsitish
+- Trollovlash yoki bezorilik
+- Shaxsiy maʼlumotlarni oshkor qilish
+- Noprofessional munosabat
 
-## Attribution
+## Shikoyatlar
 
-Adapted from the [Contributor Covenant](https://contributor-covenant.org) v2.1.
+Muvofiq emas xulq-atvorga duch kelsangiz, loyiha maintainer-ga murojaat qiling. Barcha shikoyatlar maxfiy koʻrib chiqiladi.
+
+## Manfaatdor tomonlar
+
+Ushbu hulq-atvor kodeksi loyiha doirasida ishlaydigan barcha ishtirokchilarga taalluqlidir.

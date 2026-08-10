@@ -1,238 +1,101 @@
-# Data Model
+# Maʼlumotlar modeli
 
-## Entity Relationship Diagram
+## Entity-munosabatlar diagrammasi
 
 ```
-┌──────────┐     ┌──────────┐     ┌──────────┐
-│   User   │────►│  Employee│────►│Department│
-│          │     │          │     │          │
-│ id (PK)  │     │ id (PK)  │     │ id (PK)  │
-│ email    │     │ user_id  │     │ name     │
-│ role     │     │ rank     │     │ parent_id│
-│ full_name│     │ qual     │     └──────────┘
-└──────────┘     │ dept_id  │
-                 └────┬─────┘
-                      │
-          ┌───────────┼───────────┐
-          │           │           │
-    ┌─────▼─────┐ ┌───▼────┐ ┌───▼────────┐
-    │  Session  │ │ Shot   │ │  Protocol   │
-    │           │ │        │ │            │
-    │ id (PK)   │ │ id(PK) │ │ id (PK)    │
-    │ title     │ │ sess_id│ │ session_id │
-    │ date      │ │ emp_id │ │ number     │
-    │ status    │ │ x,y    │ │ status     │
-    │ range_id  │ │ score  │ │ approved_by│
-    │ weapon    │ │ penal  │ │ comments[] │
-    └─────┬─────┘ └────────┘ └─────┬──────┘
-          │                         │
-    ┌─────▼─────┐             ┌────▼──────────┐
-    │ShootingLane│             │OperatorComment│
-    │ id (PK)    │             │ id (PK)       │
-    │ session_id │             │ protocol_id   │
-    │ lane_num   │             │ author        │
-    │ camera_id  │             │ soldier_seq   │
-    └───────────┘             │ comment       │
-                               └───────────────┘
-
-    ┌──────────┐     ┌──────────────┐
-    │  Weapon  │────►│WeaponAssign  │
-    │ id (PK)  │     │ id (PK)      │
-    │ name     │     │ weapon_id    │
-    │ type     │     │ employee_id  │
-    │ status   │     │ session_id   │
-    │ serial   │     │ assigned_at  │
-    └──────────┘     │ returned_at  │
-                     └──────────────┘
-
-    ┌──────────┐
-    │  Camera  │
-    │ id (PK)  │
-    │ name     │
-    │ ip       │
-    │ lane_id  │
-    │ status   │
-    └──────────┘
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   Foydalanuvchi  │     │    Sessiya      │     │    Natija     │
+│   (User)         │     │   (Session)     │     │   (Result)    │
+├──────────────┤     ├──────────────┤     ├──────────────┤
+│ id             │◄────│ instructor_id  │◄────│ session_id    │
+│ full_name      │     │ range_id       │     │ employee_id   │
+│ role           │     │ date           │     │ score         │
+│ email          │     │ status         │     │ accuracy      │
+│ personal_number│     │ weapon_id      │     │ shots_fired   │
+│ rank           │     │ exercise_type  │     │ hits          │
+└──────────────┘     └──────────────┘     └──────────────┘
+       │                     │
+       │                     │
+┌──────┴──────────┐  ┌──────┴──────────┐  ┌──────────────┐
+│  Boʻlinma (Unit)    │  │   Poligon (Range) │  │   Qurol (Weapon) │
+├──────────────────┤  ├──────────────────┤  ├──────────────┤
+│ id               │  │ id               │  │ id           │
+│ name             │  │ name             │  │ name         │
+│ type             │  │ region           │  │ serial_number│
+│ parent_id        │  │ lanes_count      │  │ type         │
+│ region           │  │ status           │  │ status       │
+│ district         │  └──────────────────┘  │ last_service│
+└──────────────────┘                        └──────────────┘
+       │
+┌──────┴──────────────────────────────────────────┐
+│                    KPI                            │
+├──────────────────────────────────────────────────┤
+│ id · unit_id · period · indicator_type           │
+│ value · target_value · status (green/yellow/red) │
+└──────────────────────────────────────────────────┘
 ```
 
-## Frontend Types
+## Asosiy entity-lar
 
-### Core Types (`src/types/index.ts`)
+### 1. Foydalanuvchi (User)
 
-```typescript
-interface SystemUser {
-  id: string
-  email: string
-  full_name: string
-  role: UserRole
-  rank?: string
-  department?: string
-  phone?: string
-  is_active: boolean
-  created_at: string
-  last_login?: string
-  locale: 'ru' | 'uz'
-}
+| Maydon | Tur | Tavsif |
+|--------|-----|--------|
+| `id` | number | Unikal identifikator |
+| `full_name` | string | Toʻliq F.I.Sh. |
+| `role` | enum | SUPER_ADMIN / MANAGER / INSTRUCTOR / TECHSPEC / EMPLOYEE |
+| `email` | string | Email manzil |
+| `personal_number` | string | Shaxsiy raqam |
+| `rank` | string | Unvon |
+| `unit_id` | number | Boʻlinma identifikatori |
 
-type UserRole = 'SUPER_ADMIN' | 'MANAGER' | 'INSTRUCTOR' | 'EMPLOYEE' | 'TECHSPEC'
+### 2. Sessiya (Session)
 
-interface Session {
-  id: string
-  title: string
-  date: string
-  status: 'pending' | 'active' | 'completed'
-  range_id: string
-  weapon_type: string
-  soldiers: Soldier[]
-  shots: Shot[]
-}
+| Maydon | Tur | Tavsif |
+|--------|-----|--------|
+| `id` | string | Unikal identifikator (S-2026-XXX) |
+| `date` | date | Oʻtkazilgan sana |
+| `range_id` | number | Poligon identifikatori |
+| `instructor_id` | number | Instruktur identifikatori |
+| `exercise_type` | string | Mashq turi |
+| `bullets` | number | Patronlar soni |
+| `distance` | number | Masofa (metr) |
+| `status` | enum | PLANNED / ACTIVE / COMPLETED / CANCELLED |
 
-interface Soldier {
-  id: string
-  name: string
-  rank: string
-  qualification: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED' | 'EXPERT'
-  department: string
-}
+### 3. Natija (Result)
 
-interface Shot {
-  id: string
-  session_id: string
-  soldier_id: string
-  x: number
-  y: number
-  score: number
-  penalty: number
-  timestamp: string
-}
+| Maydon | Tur | Tavsif |
+|--------|-----|--------|
+| `id` | number | Unikal identifikator |
+| `session_id` | string | Sessiya identifikatori |
+| `employee_id` | number | Xodim identifikatori |
+| `score` | number | Ball (0–100) |
+| `accuracy` | number | Aniqlik foizi |
+| `shots_fired` | number | Oʻqlangan patronlar |
+| `hits` | number | Nishonga tegishlar |
+| `soldier_seq` | number | Ketma-ketlik raqami |
 
-interface Protocol {
-  id: string
-  session_id: string
-  protocol_number: string
-  status: 'DRAFT' | 'REVIEW' | 'APPROVED' | 'ARCHIVED'
-  participants: string[]
-  approved_by?: string
-  created_at: string
-  updated_at: string
-}
+### 4. KPI
 
-interface Weapon {
-  id: string
-  name: string
-  type: string
-  status: 'active' | 'maintenance' | 'retired'
-  serial_number: string
-}
-```
+| Maydon | Tur | Tavsif |
+|--------|-----|--------|
+| `id` | number | Unikal identifikator |
+| `unit_id` | number | Boʻlinma identifikatori |
+| `period` | string | Davr (2026-Q3) |
+| `indicator_type` | string | Koʻrsatkich turi |
+| `value` | number | Joriy qiymat |
+| `target_value` | number | Maqsadli qiymat |
+| `status` | enum | GREEN (≥70) / YELLOW (≥60) / RED (<60) |
 
-### Extended Types (`src/types/extended.ts`)
+### 5. Protokol
 
-```typescript
-interface LoginRequest {
-  email: string
-  password: string
-}
+| Maydon | Tur | Tavsif |
+|--------|-----|--------|
+| `id` | string | Unikal identifikator |
+| `session_id` | string | Bogʻliq sessiya |
+| `status` | enum | DRAFT / PENDING / APPROVED / ARCHIVED |
+| `created_by` | number | Yaratuvchi |
+| `approved_by` | number | Tasdiqlovchi |
+| `pdf_url` | string | PDF fayl havolasi |
 
-interface LoginResponse {
-  access_token: string
-  refresh_token: string
-  user: SystemUser
-}
-```
-
-## KPI Data Structure
-
-### Republic Hierarchy (`src/data/republicData.ts`)
-
-```typescript
-interface RegionData {
-  id: string
-  name: string
-  name_uz: string
-  kpi: number              // 0-100 readiness score
-  districts: DistrictData[]
-}
-
-interface DistrictData {
-  id: string
-  name: string
-  name_uz: string
-  kpi: number
-  units: UnitData[]
-}
-```
-
-### Traffic-Light Logic
-
-| KPI Score | Color | Status |
-|-----------|-------|--------|
-| ≥ 70 | 🟢 Green | Ready |
-| ≥ 60 | 🟡 Yellow | Warning |
-| < 60 | 🔴 Red | Critical |
-
-```typescript
-function getKpiStatus(kpi: number): 'green' | 'yellow' | 'red' {
-  if (kpi >= 70) return 'green'
-  if (kpi >= 60) return 'yellow'
-  return 'red'
-}
-```
-
-## Backend Models (Django)
-
-### User Model
-
-| Field | Type | Constraints |
-|-------|------|-------------|
-| id | UUID | PK |
-| email | VARCHAR(255) | Unique, not null |
-| full_name | VARCHAR(255) | Not null |
-| role | VARCHAR(20) | Choices: 5 roles |
-| rank | VARCHAR(50) | Optional |
-| department | VARCHAR(100) | Optional |
-| phone | VARCHAR(20) | Optional |
-| is_active | BOOLEAN | Default: true |
-| created_at | TIMESTAMP | Auto |
-| last_login | TIMESTAMP | Nullable |
-| locale | VARCHAR(2) | Default: 'ru' |
-
-### Session Model
-
-| Field | Type | Constraints |
-|-------|------|-------------|
-| id | UUID | PK |
-| title | VARCHAR(200) | Not null |
-| date | DATE | Not null |
-| status | VARCHAR(20) | pending/active/completed |
-| range_id | FK → Range | Not null |
-| weapon_type | VARCHAR(50) | Not null |
-| created_by | FK → User | Auto |
-| created_at | TIMESTAMP | Auto |
-| updated_at | TIMESTAMP | Auto |
-
-### Shot Model
-
-| Field | Type | Constraints |
-|-------|------|-------------|
-| id | UUID | PK |
-| session_id | FK → Session | Not null |
-| soldier_id | FK → Employee | Not null |
-| x | FLOAT | 0-300 |
-| y | FLOAT | 0-300 |
-| score | INT | 0-10 |
-| penalty | INT | Default: 0 |
-| timestamp | TIMESTAMP | Auto |
-
-### Protocol Model
-
-| Field | Type | Constraints |
-|-------|------|-------------|
-| id | UUID | PK |
-| session_id | FK → Session | Not null |
-| protocol_number | VARCHAR(50) | Unique |
-| status | VARCHAR(20) | DRAFT/REVIEW/APPROVED/ARCHIVED |
-| approved_by | FK → User | Nullable |
-| created_at | TIMESTAMP | Auto |
-| updated_at | TIMESTAMP | Auto |
-| signed_at | TIMESTAMP | Nullable |
+> **Muhim:** APPROVED va ARCHIVED holatidagi protokollarni tahrirlash taqiqlangan.

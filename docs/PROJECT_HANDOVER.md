@@ -75,7 +75,7 @@ Barcha hisoblar demo-rejimda ishlaydi (real backendsiz).
 | HR / Xodimlar | `/hr/employees` | Shaxsiy tarkibni hisobga olish |
 | Qurollar | `/weapons` | Hisob, xizmat, inventar |
 | Analitika | `/analytics` | Grafiklar, trendlar, bashoratlar |
-| Administratsiya | `/admin` | Foydalanuvchilar, spravochniklar, audit (SUPER_ADMIN) |
+| Administratsiya | `/admin` | Foydalanuvchilar, maʼlumotnomalar, audit (SUPER_ADMIN) |
 
 ---
 
@@ -125,7 +125,7 @@ ShaffofTIR/
 │   ├── DEPLOYMENT.md
 │   ├── VIDEO_SCRIPT.md
 │   └── PROJECT_HANDOVER.md
-├── dist/              # Production-sborка
+├── dist/              # Production-yigʻim
 ├── vite.config.ts
 ├── package.json
 └── tailwind.config.js

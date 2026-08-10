@@ -61,7 +61,7 @@ npm install
 # Lokal dev-server
 npm run dev
 
-# Production-sborка
+# Production-yigʻim
 npm run build
 
 # GitHub Pages-ga deploy
@@ -148,7 +148,7 @@ ShaffofTIR/
 │   ├── types/          # TypeScript turlari
 │   └── utils/          # Yordamchi funksiyalar
 ├── docs/              # Hujjatlar
-├── dist/              # Production-sborка
+├── dist/              # Production-yigʻim
 ├── vite.config.ts
 └── tailwind.config.js
 ```
