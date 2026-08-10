@@ -1,25 +1,71 @@
-# Развёртывание ShaffofTIR
+# Deployment Guide
 
-## Netlify (Frontend)
+## Overview
 
-```bash
-npm install
-npm run build
-netlify deploy --dir=dist --prod
+ShaffofTIR can be deployed to multiple platforms. The primary deployment target is **GitHub Pages**, with alternatives for Netlify, Vercel, and Docker.
+
+## GitHub Pages (Primary)
+
+### Automatic Deployment
+
+Pushing to the `main` branch triggers the CI/CD pipeline:
+
+1. **Quality Gate** — type check + unit tests
+2. **Build** — production build via `npm run build`
+3. **Deploy** — auto-deploy to GitHub Pages via `peaceiris/actions-gh-pages`
+
+```yaml
+# .github/workflows/ci.yml (deploy job)
+- name: Deploy to GitHub Pages
+  uses: peaceiris/actions-gh-pages@v4
+  with:
+    github_token: ${{ secrets.GITHUB_TOKEN }}
+    publish_dir: ./dist
+    force_orphan: true
 ```
 
-Конфигурация: `netlify.toml`
+### Manual Deployment
+
+```bash
+npm run build
+npx gh-pages -d dist
+```
+
+### Configuration
+
+The `base` path is set in `vite.config.ts`:
+
+```typescript
+export default defineConfig({
+  base: '/ShaffofTIR/',  // GitHub Pages subpath
+  // ...
+})
+```
+
+Hash-based routing ensures SPA compatibility:
+
+```typescript
+const router = createRouter({
+  history: createWebHashHistory(import.meta.env.BASE_URL || '/'),
+})
+```
+
+### URL
+
+```
+https://farhodmuxtorov17-stack.github.io/ShaffofTIR/
+```
+
+---
+
+## Netlify
+
+### Configuration (`netlify.toml`)
 
 ```toml
 [build]
-  command = "npm install && npx vite build"
+  command = "npm run build"
   publish = "dist"
-
-[[redirects]]
-  from = "/api/*"
-  to = "https://api.shaffoftir.uz/api/:splat"
-  status = 200
-  force = true
 
 [[redirects]]
   from = "/*"
@@ -27,39 +73,136 @@ netlify deploy --dir=dist --prod
   status = 200
 ```
 
-## Docker Compose
+### Deploy
+
+```bash
+npm run build
+npx netlify deploy --prod --dir=dist
+```
+
+---
+
+## Vercel
+
+### Configuration (`vercel.json`)
+
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+}
+```
+
+### Deploy
+
+```bash
+npm run build
+npx vercel --prod
+```
+
+---
+
+## Docker
+
+### Frontend Only
+
+```bash
+docker build -t shaffoftir .
+docker run -p 8080:80 shaffoftir
+```
+
+### Full Stack
 
 ```bash
 docker-compose up -d
 ```
 
-Сервисы:
-- `frontend`: Vue 3 SPA (port 3000)
-- `backend`: Django REST (port 8000)
-- `scoring`: FastAPI (port 8001)
-- `db`: PostgreSQL 16 (port 5432)
-- `redis`: Redis 7 (port 6379)
+Services:
+- `frontend` — Nginx serving built SPA (port 8080)
+- `backend` — Django REST API (port 8000)
+- `scoring` — FastAPI scoring service (port 8001)
+- `db` — PostgreSQL 16 (port 5432)
 
-## Production checklist
+---
 
-1. Установить `DEBUG=False` в Django settings
-2. Сгенерировать новый `SECRET_KEY`
-3. Настроить `ALLOWED_HOSTS`
-4. Включить HTTPS (Let's Encrypt / Cloudflare)
-5. Настроить static files (WhiteNoise / Nginx)
-6. Включить Gunicorn/uWSGI
-7. Настроить PostgreSQL connection pooling
-8. Включить Redis для кэширования
-9. Настроить backup-стратегию для БД
-10. Проверить CORS-политику
+## Environment Variables
 
-## Статические IP
+### Frontend
 
-Камеры и оборудование используют статические IP-адреса:
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_URL` | Django REST API URL | `https://soldier.mrdev.uz` |
+| `VITE_API_URL_EXTENDED` | Extended API URL | `https://soldier.mrdev.uz` |
 
-| Оборудование | Диапазон | Назначение |
-|-------------|----------|-----------|
-| Камеры Тир 1 | 88.1.92.10 - 88.1.92.15 | Дорожки 1-6 |
-| Камеры Тир 2 | 88.1.93.10 - 88.1.93.15 | Дорожки 1-6 |
-| Сервер | 88.1.90.1 | Backend |
-| NVR | 88.1.90.2 | Запись видео |
+### Backend
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | `postgres://...` |
+| `SECRET_KEY` | Django secret key | — |
+| `DEBUG` | Debug mode | `False` |
+| `ALLOWED_HOSTS` | Comma-separated hosts | `*` |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated origins | — |
+
+---
+
+## Build Output
+
+```
+dist/
+├── index.html              # Entry point (~2KB)
+├── assets/
+│   ├── index-[hash].js     # Main bundle (~1.8MB, gzipped ~400KB)
+│   └── style-[hash].css   # Stylesheet (~166KB, gzipped ~25KB)
+└── favicon.svg             # Favicon
+```
+
+Build configuration highlights:
+- `inlineDynamicImports: true` — single optimized bundle
+- `cssCodeSplit: false` — one CSS file
+- `assetsInlineLimit: 100MB` — assets inlined
+- `minify: 'esbuild'` — fast, efficient minification
+- `chunkSizeWarningLimit: 2000` — suppress size warnings
+
+---
+
+## Health Checks
+
+### Frontend
+
+```bash
+curl -s https://farhodmuxtorov17-stack.github.io/ShaffofTIR/ | head -1
+# Should return: <!DOCTYPE html>
+```
+
+### Backend
+
+```bash
+curl https://your-api.com/api/health
+# {"status": "ok", "version": "3.3.0"}
+```
+
+### Scoring Service
+
+```bash
+curl http://localhost:8001/health
+# {"status": "ok", "opencv": true}
+```
+
+---
+
+## Rollback
+
+### GitHub Pages
+
+```bash
+# Checkout a previous commit
+git checkout <commit-hash>
+npm run build
+npx gh-pages -d dist
+```
+
+### Netlify
+
+Use the Netlify dashboard to rollback to a previous deploy with one click.

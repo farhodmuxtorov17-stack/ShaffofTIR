@@ -1,55 +1,166 @@
-# Архитектура ShaffofTIR
+# Architecture
 
-## Общая схема
+## System Overview
 
-Система построена по паттерну "модульный монолит" с двумя независимыми backend-сервисами и SPA-фронтендом.
+ShaffofTIR follows a **modular monolith** pattern with a SPA frontend and two independent backend services.
 
 ```
-                   +----------------------------+
-                   |       Browser (SPA)        |
-                   |    Vue 3 / TypeScript      |
-                   |   Tailwind / Pinia         |
-                   +------+----------+--------+
-                          |          |
-              +-----------+          +-----------+
-              |                                   |
-    +---------v---------+              +-----------v-----------+
-    |  Django REST API  |              |  Automated Scoring    |
-    |  (Extended BFF)   |              |  (FastAPI + OpenCV)   |
-    |                   |              |                       |
-    |  Port: 8000       |              |  Port: 8001           |
-    +--------+----------+              +-----------------------+
-             |
-    +--------v----------+
-    |  PostgreSQL 16+    |
-    +-------------------+
+                         ┌──────────────────────────┐
+                         │    Browser (SPA)         │
+                         │  Vue 3 · TypeScript      │
+                         │  Tailwind · Pinia        │
+                         │  72 pages · 5 roles      │
+                         └────────┬─────────┬───────┘
+                                  │         │
+                   ┌──────────────┘         └──────────────┐
+                   │                                       │
+         ┌─────────▼─────────┐                ┌────────────▼──────────┐
+         │  Django REST API  │                │  Automated Scoring     │
+         │  (Extended BFF)   │                │  (FastAPI + OpenCV)    │
+         │                   │                │                        │
+         │  • Auth (JWT)    │                │  • Image capture       │
+         │  • CRUD (all)    │                │  • Hit detection (CV)  │
+         │  • Business logic│                │  • Score calculation   │
+         │  • Permissions   │                │  • Dataprizma sync     │
+         │  • Audit logging │                │                        │
+         │                  │                │  Async · High-perf     │
+         │  Port: 8000      │                │  Port: 8001             │
+         └────────┬─────────┘                └────────────────────────┘
+                  │
+         ┌────────▼──────────┐
+         │  PostgreSQL 16+   │
+         │                   │
+         │  • Users          │
+         │  • Sessions       │
+         │  • Shots          │
+         │  • Protocols       │
+         │  • Weapons        │
+         │  • Audit logs      │
+         └───────────────────┘
 ```
 
-## Frontend (Vue 3)
+## Frontend Architecture
 
-### Структура
+### Component Hierarchy
 
-- `pages/` - 72 страницы, lazy-loaded через Vue Router
-- `components/` - переиспользуемые UI-компоненты (layout, ui, session, camera, target)
-- `stores/` - Pinia stores (auth, session, master, audit, notifications, ui)
-- `api/` - типизированные HTTP-клиенты (httpClient, session.api, scoring.api)
-- `i18n/` - локализация RU/UZ с поддержкой U+02BB
-- `data/` - статические данные иерархии (Республика, Регион, Район)
-- `router/` - конфигурация маршрутов с role-based guard
+```
+App.vue
+├── AppShell.vue
+│   ├── AppSidebar.vue          # Role-aware navigation
+│   ├── AppTopbar.vue            # Search, language, profile
+│   └── <router-view />          # Page outlet
+├── MobileAppShell.vue           # Mobile breakpoint
+└── ToastContainer.vue          # Global notifications
+```
 
-### Роутинг и доступ
+### State Management (Pinia)
 
-Маршрутизация использует meta-поля `roles` для проверки доступа. Guard проверяет роль пользователя через Pinia auth store перед каждым переходом.
+| Store | File | Responsibility |
+|-------|------|----------------|
+| `auth` | `stores/auth.ts` | User session, JWT, RBAC, login/logout |
+| `master` | `stores/master.ts` | Reference data (sessions, employees, weapons) |
+| `session` | `stores/session.ts` | Active session state, shot recording |
+| `ui` | `stores/ui.ts` | Sidebar state, modals, theme |
+| `audit` | `stores/audit.ts` | Audit trail for sensitive actions |
+| `notifications` | `stores/notifications.ts` | In-app notification center |
+| `sessionsHistory` | `stores/sessionsHistory.ts` | Session history pagination |
+| `sessionRequests` | `stores/sessionRequests.ts` | Pending session requests |
+| `baseline` | `stores/baseline.ts` | Performance baseline data |
 
-### Локализация
+### Routing
 
-Два locale-файла (ru, uz). Узбекские строки используют символ U+02BB (MODIFIER LETTER TURNED COMMA) для апострофов вместо стандартного U+0027. Это требование орфографического стандарта узбекского языка.
+Routes use lazy imports for code splitting:
 
-## Backend (Django REST Framework)
+```typescript
+{ path: '/sessions/:id', component: () => import('@/pages/SessionsDetailPage.vue') }
+```
 
-### Модели
+Role guards check `meta.roles` before navigation:
 
-| Модуль | Модели |
+```typescript
+router.beforeEach((to) => {
+  if (to.meta.roles && !authStore.hasRole(to.meta.roles as UserRole[])) {
+    return '/403'
+  }
+})
+```
+
+### API Layer
+
+```
+src/api/
+├── httpClient.ts           # Axios instance with auth interceptor
+├── httpClientExtended.ts    # Extended API client (5s timeout)
+├── extended.ts             # Auth, users, sessions API
+├── session.api.ts          # Session CRUD
+├── scoring.api.ts          # Scoring service
+├── camera.api.ts           # Camera management
+├── health.api.ts           # System health checks
+├── dataprizma.api.ts       # Dataprizma integration
+└── imageUrl.ts             # Image URL resolution utility
+```
+
+### Internationalization
+
+Custom i18n implementation (no external dependency):
+
+```typescript
+// src/i18n/index.ts
+const translations = {
+  ru: { 'common.login': 'Войти', 'nav.results': 'Результаты', ... },
+  uz: { 'common.login': "Kirish", 'nav.results': "Natijalar", ... }
+}
+
+export function useI18n() {
+  const { t, locale, setLocale } = ...
+  return { t, locale, setLocale }
+}
+```
+
+**Uzbek apostrophe handling:** The letter U+02BB (MODIFIER LETTER TURNED COMMA, ʻ) is used instead of ASCII apostrophe (') to comply with the official Uzbek Latin orthography standard.
+
+### Static Data Model
+
+The Command Center uses a three-level hierarchy:
+
+```
+Republic of Uzbekistan
+├── Region (Viloyat)
+│   ├── District (Tuman)
+│   │   ├── Unit (Podrazdelenie)
+│   │   │   ├── Employee
+│   │   │   └── Employee
+│   │   └── Unit
+│   └── District
+└── Region
+```
+
+Data files:
+- `src/data/republicData.ts` — regions with KPI scores
+- `src/data/unitData.ts` — units (districts) with personnel
+- `src/data/employeeHistory.ts` — employee shooting history
+- `src/data/uzbekistan_regions.json` — geographic SVG paths
+
+## Backend Architecture
+
+### Django REST Framework
+
+```
+backend/
+├── config/                  # Django settings, URLs, WSGI
+├── shaffoftir_api/         # API application
+│   ├── models/              # Django models
+│   ├── serializers/         # DRF serializers
+│   ├── views/               # ViewSets and API views
+│   ├── permissions/         # Custom permission classes
+│   └── urls.py              # API URL routing
+├── manage.py
+└── requirements.txt
+```
+
+### Data Models
+
+| Module | Models |
 |--------|--------|
 | User | User, Role |
 | Employee | Employee, Department, Qualification |
@@ -59,46 +170,100 @@
 | Training | TrainingPlan, TrainingAssignment |
 | Notification | Notification, AuditAnnotation |
 
-### ViewSets
+### API Patterns
 
-Каждый модуль следует паттерну DRF ModelViewSet с дополнительными custom actions:
+Each module follows the DRF ModelViewSet pattern with custom actions:
 
-- `SessionViewSet` - `soldiers`, `process_turn`, `finalize`
-- `ProtocolViewSet` - `sign`, `export_pdf`, `add_comment`
-- `WeaponViewSet` - `assign`, `return`, `maintenance_log`
-- `AnalyticsSummaryView` - агрегированные метрики
-- `PerformanceTrendsView` - временные ряды эффективности
+```python
+class SessionViewSet(viewsets.ModelViewSet):
+    @action(detail=True, methods=['post'])
+    def soldiers(self, request, pk=None):
+        """Add soldiers to a session."""
 
-### Сериализаторы
+    @action(detail=True, methods=['post'])
+    def finalize(self, request, pk=None):
+        """Finalize session and calculate scores."""
+```
 
-Многоуровневые сериализаторы для оптимизации payload:
-- `*ListSerializer` - сокращённый формат для списков
-- `*Serializer` - полный формат с вложенными объектами
-- `*CreateSerializer` - валидация при создании
+### FastAPI Scoring Service
 
-## Automated Scoring (FastAPI)
+```
+backend_fastapi/
+├── app/
+│   ├── main.py              # FastAPI application
+│   ├── routes/              # API endpoints
+│   ├── services/            # OpenCV processing logic
+│   └── models/              # Pydantic schemas
+├── Dockerfile
+└── requirements.txt
+```
 
-Отдельный сервис для обработки изображений мишеней:
+Endpoints:
+- `POST /capture` — Capture target image from IP camera
+- `POST /analyze` — Detect hits using OpenCV
+- `POST /score` — Calculate score from hit coordinates
+- `POST /sync` — Sync results with Dataprizma
+- `GET /health` — Service health check
 
-- Захват кадра с IP-камеры дорожки
-- Детекция попаданий (computer vision)
-- Расчёт координат и баллов
-- Синхронизация с Dataprizma
-- 8 endpoints (capture, analyze, score, sync, health, etc.)
+## Security Architecture
 
-## Безопасность
+### Authentication Flow
 
-### Аутентификация
+```
+Client                     Django API
+  │                           │
+  │── POST /auth/login ──────►│
+  │   {email, password}       │
+  │                           │── verify password (PBKDF2)
+  │                           │── generate JWT (access + refresh)
+  │◄── {access, refresh} ────│
+  │                           │
+  │── GET /api/* ────────────►│
+  │   Authorization: Bearer   │── verify JWT
+  │                           │── check permissions
+  │◄── 200 / 403 ─────────────│
+```
 
-JWT с access/refresh токенами. Access-токен живёт 15 минут, refresh - 7 дней.
+### RBAC Enforcement
 
-### Ролевая модель (RBAC)
+| Layer | Mechanism |
+|-------|-----------|
+| Frontend route | `meta.roles` in router config |
+| Frontend sidebar | Role-filtered `NavGroup[]` |
+| Frontend module | `canAccess(module)` in auth store |
+| Backend route | DRF permission classes |
+| Backend query | ORM-level data filtering |
 
-5 ролей с гранулярным доступом к модулям. Доступ определяется через `moduleAccess` в auth store на frontend и через permissions на backend.
+### Zero-Edit Policy
 
-### Изоляция
+Protocols in APPROVED or ARCHIVED status cannot be modified:
 
-- TechSpec не имеет доступа к результатам стрельб
-- EMPLOYEE видит только свои результаты
-- Рахбар ограничен аналитикой, операционное управление недоступно
-- Zero-edit policy: исторические результаты не редактируются
+- **Frontend**: Edit buttons hidden/disabled when `protocol.status === 'APPROVED' || 'ARCHIVED'`
+- **Backend**: PATCH/PUT returns 403 for locked protocols
+- **Audit**: All access attempts logged
+
+## Performance Considerations
+
+### Bundle Optimization
+
+- Heavy libraries (jspdf, html2canvas) are **lazy-loaded** — only imported when ProtocolCreatePage needs PDF export
+- `inlineDynamicImports: true` in Vite config produces a single optimized bundle
+- CSS is not split (`cssCodeSplit: false`) — one stylesheet, one request
+- Assets inlined up to 100MB limit (no separate asset requests for small files)
+
+### Runtime Performance
+
+- Pinia stores use `computed()` for derived state (memoized)
+- Vue Router lazy imports split code per route (72 chunks)
+- `v-for` lists use `key` attribute for efficient DOM diffing
+- Sidebar navigation is role-gated at render time (no wasted DOM)
+
+### Build Output
+
+```
+dist/
+├── index.html        # ~2KB
+├── assets/
+│   ├── index-*.js    # ~1.8MB (single bundle, gzipped ~400KB)
+│   └── style-*.css   # ~166KB (gzipped ~25KB)
+```

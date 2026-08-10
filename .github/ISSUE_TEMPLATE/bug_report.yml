@@ -1,0 +1,83 @@
+name: Bug Report
+description: Сообщить об ошибке в ShaffofTIR
+title: "[BUG] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Спасибо за сообщение! Пожалуйста, заполните форму максимально подробно.
+  
+  - type: textarea
+    id: description
+    attributes:
+      label: Описание ошибки
+      description: Чёткое описание проблемы
+    validations:
+      required: true
+  
+  - type: textarea
+    id: steps
+    attributes:
+      label: Шаги для воспроизведения
+      description: Как воспроизвести ошибку
+      value: |
+        1. Перейти на страницу '...'
+        2. Нажать кнопку '...'
+        3. Увидеть ошибку
+    validations:
+      required: true
+  
+  - type: textarea
+    id: expected
+    attributes:
+      label: Ожидаемое поведение
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: role
+    attributes:
+      label: Роль пользователя
+      options:
+        - SUPER_ADMIN
+        - MANAGER
+        - INSTRUCTOR
+        - EMPLOYEE
+        - TECHSPEC
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Браузер
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Other
+    validations:
+      required: true
+  
+  - type: input
+    id: os
+    attributes:
+      label: Операционная система
+      placeholder: "Windows 11, macOS 14, Ubuntu 22.04"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Скриншоты
+      description: Приложите скриншоты, если применимо
+  
+  - type: textarea
+    id: logs
+    attributes:
+      label: Логи консоли
+      description: Вставьте логи из DevTools Console (если есть)
+      render: shell
