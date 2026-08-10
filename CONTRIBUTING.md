@@ -184,7 +184,7 @@ Brief description of what this PR does.
 - [ ] Tests pass
 - [ ] Build succeeds
 - [ ] All user-facing strings are localized (UZ + RU)
-- [ ] No AI-generated markers in code or UI
+- [ ] No third-party generator markers in code or UI
 - [ ] New routes have role guards
 - [ ] No hardcoded secrets or passwords
 
@@ -200,7 +200,7 @@ Closes #123
 - **Type safety** — no `any`, proper types throughout
 - **Localization** — all strings in both UZ and RU
 - **Access control** — correct role guards on new routes
-- **No AI markers** — no ChatGPT/AI/Claude references in code or UI
+- **No third-party markers** — no external tool references in code or UI
 - **Production quality** — clean, maintainable, well-structured code
 - **Performance** — lazy loading for heavy dependencies (jspdf, html2canvas)
 
