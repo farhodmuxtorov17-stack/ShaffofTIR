@@ -1,36 +1,31 @@
 <script setup lang="ts">
 import {
-  LayoutDashboard, Users, Radio,
+  LayoutDashboard, Users,
   Camera, FileText, Settings,
-  Crosshair, Award, Bell,
+  Crosshair, Award,
   Target, Calendar, Zap,
   HelpCircle, Globe, GitCompare, History,
-  Eye, Monitor, Wrench,
-  Building2, ShieldCheck, Network,
-  MessageSquareWarning, CheckCircle, Sparkles, ClipboardList,
+  Eye, Wrench,
+  MessageSquareWarning, CheckCircle, Sparkles,
   UsersRound, ScrollText, Shield,
-  GraduationCap, Activity
+  GraduationCap, Activity, Radio,
+  LogOut
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
-import { useMasterStore } from '@/stores/master'
 import { useI18n } from '@/i18n'
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const emit = defineEmits<{ navigate: [] }>()
 const authStore = useAuthStore()
-const masterStore = useMasterStore()
-const router = useRouter()
 const { t, locale, setLocale } = useI18n()
+const router = useRouter()
 const role = computed(() => authStore.user?.role || 'EMPLOYEE')
-
-const unreadCount = computed(() => masterStore.getNotificationsUnread().length)
 
 interface NavItem {
   labelKey: string
   path: string
   icon: any
-  badge?: () => number
   roles: string[]
 }
 
@@ -42,22 +37,16 @@ interface NavGroup {
 const managerNavGroups: NavGroup[] = [
   { labelKey: 'nav.main', items: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['MANAGER'] },
-    { labelKey: 'nav.commandCenter', path: '/command-center', icon: Monitor, roles: ['MANAGER'] },
     { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['MANAGER'] },
     { labelKey: 'nav.compare', path: '/compare/0', icon: GitCompare, roles: ['MANAGER'] },
+    { labelKey: 'nav.sessions', path: '/sessions', icon: Users, roles: ['MANAGER'] },
   ]},
   { labelKey: 'nav.kpi', items: [
-    { labelKey: 'nav.orgStructure', path: '/org-structure', icon: Building2, roles: ['MANAGER'] },
     { labelKey: 'nav.kpiCatalog', path: '/kpi/catalog', icon: Target, roles: ['MANAGER'] },
-    { labelKey: 'nav.kpiPeriods', path: '/kpi/periods', icon: Calendar, roles: ['MANAGER'] },
   ]},
   { labelKey: 'nav.workflow', items: [
     { labelKey: 'nav.objections', path: '/objections', icon: MessageSquareWarning, roles: ['MANAGER'] },
     { labelKey: 'nav.approvalTasks', path: '/approval-tasks', icon: CheckCircle, roles: ['MANAGER'] },
-  ]},
-  { labelKey: 'nav.recommendations', items: [
-    { labelKey: 'nav.recommendationsItems', path: '/recommendations', icon: Sparkles, roles: ['MANAGER'] },
-    { labelKey: 'nav.actionPlans', path: '/action-plans', icon: ClipboardList, roles: ['MANAGER'] },
   ]},
   { labelKey: 'nav.training', items: [
     { labelKey: 'nav.trainingMaterials', path: '/training/materials', icon: GraduationCap, roles: ['MANAGER'] },
@@ -66,13 +55,13 @@ const managerNavGroups: NavGroup[] = [
     { labelKey: 'nav.reports', path: '/reports', icon: FileText, roles: ['MANAGER'] },
     { labelKey: 'nav.protocols', path: '/protocols', icon: FileText, roles: ['MANAGER'] },
   ]},
+  { labelKey: 'nav.liveRange', items: [
+    { labelKey: 'nav.liveRange', path: '/live-range', icon: Radio, roles: ['MANAGER'] },
+  ]},
   { labelKey: 'nav.analytics', items: [
     { labelKey: 'nav.analytics', path: '/analytics', icon: Eye, roles: ['MANAGER'] },
-    { labelKey: 'nav.dataQuality', path: '/data-quality', icon: ShieldCheck, roles: ['MANAGER'] },
-    { labelKey: 'nav.integrationMonitoring', path: '/integration-monitoring', icon: Network, roles: ['MANAGER'] },
   ]},
   { labelKey: 'nav.system', items: [
-    { labelKey: 'nav.notifications', path: '/notifications', icon: Bell, roles: ['MANAGER'], badge: () => unreadCount.value },
     { labelKey: 'nav.settings', path: '/settings', icon: Settings, roles: ['MANAGER'] },
     { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['MANAGER'] },
   ]},
@@ -83,7 +72,7 @@ const instructorNavGroups: NavGroup[] = [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['INSTRUCTOR'] },
     { labelKey: 'nav.tablet', path: '/range/instructor-tablet', icon: Zap, roles: ['INSTRUCTOR'] },
     { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['INSTRUCTOR'] },
-    { labelKey: 'nav.range', path: '/range/dashboard', icon: Radio, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.range', path: '/range/dashboard', icon: Target, roles: ['INSTRUCTOR'] },
     { labelKey: 'nav.sessions', path: '/sessions', icon: Users, roles: ['INSTRUCTOR'] },
     { labelKey: 'nav.schedule', path: '/range/schedule', icon: Calendar, roles: ['INSTRUCTOR'] },
   ]},
@@ -101,7 +90,6 @@ const instructorNavGroups: NavGroup[] = [
     { labelKey: 'nav.protocols', path: '/protocols', icon: FileText, roles: ['INSTRUCTOR'] },
   ]},
   { labelKey: 'nav.system', items: [
-    { labelKey: 'nav.notifications', path: '/notifications', icon: Bell, roles: ['INSTRUCTOR'], badge: () => unreadCount.value },
     { labelKey: 'nav.settings', path: '/settings', icon: Settings, roles: ['INSTRUCTOR'] },
     { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['INSTRUCTOR'] },
   ]},
@@ -113,6 +101,9 @@ const employeeNavGroups: NavGroup[] = [
     { labelKey: 'nav.schedule', path: '/range/schedule', icon: Calendar, roles: ['EMPLOYEE'] },
     { labelKey: 'nav.myHistory', path: '/training/history', icon: History, roles: ['EMPLOYEE'] },
     { labelKey: 'nav.trainingMaterials', path: '/training/materials', icon: GraduationCap, roles: ['EMPLOYEE'] },
+  ]},
+  { labelKey: 'nav.recommendations', items: [
+    { labelKey: 'nav.recommendationsItems', path: '/recommendations', icon: Sparkles, roles: ['EMPLOYEE'] },
   ]},
   { labelKey: 'nav.reports', items: [
     { labelKey: 'nav.protocols', path: '/protocols', icon: FileText, roles: ['EMPLOYEE'] },
@@ -138,25 +129,18 @@ const superAdminNavGroups: NavGroup[] = [
   { labelKey: 'nav.main', items: [
     { labelKey: 'nav.adminPanel', path: '/admin', icon: Shield, roles: ['SUPER_ADMIN'] },
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['SUPER_ADMIN'] },
-    { labelKey: 'nav.commandCenter', path: '/command-center', icon: Monitor, roles: ['SUPER_ADMIN'] },
     { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['SUPER_ADMIN'] },
     { labelKey: 'nav.sessions', path: '/sessions', icon: Users, roles: ['SUPER_ADMIN'] },
   ]},
   { labelKey: 'nav.hr', items: [
     { labelKey: 'nav.employees', path: '/hr/employees', icon: Users, roles: ['SUPER_ADMIN'] },
-    { labelKey: 'nav.orgStructure', path: '/org-structure', icon: Building2, roles: ['SUPER_ADMIN'] },
   ]},
   { labelKey: 'nav.kpi', items: [
     { labelKey: 'nav.kpiCatalog', path: '/kpi/catalog', icon: Target, roles: ['SUPER_ADMIN'] },
-    { labelKey: 'nav.kpiPeriods', path: '/kpi/periods', icon: Calendar, roles: ['SUPER_ADMIN'] },
   ]},
   { labelKey: 'nav.workflow', items: [
     { labelKey: 'nav.objections', path: '/objections', icon: MessageSquareWarning, roles: ['SUPER_ADMIN'] },
     { labelKey: 'nav.approvalTasks', path: '/approval-tasks', icon: CheckCircle, roles: ['SUPER_ADMIN'] },
-  ]},
-  { labelKey: 'nav.recommendations', items: [
-    { labelKey: 'nav.recommendationsItems', path: '/recommendations', icon: Sparkles, roles: ['SUPER_ADMIN'] },
-    { labelKey: 'nav.actionPlans', path: '/action-plans', icon: ClipboardList, roles: ['SUPER_ADMIN'] },
   ]},
   { labelKey: 'nav.equipment', items: [
     { labelKey: 'nav.techspec', path: '/techspec', icon: Wrench, roles: ['SUPER_ADMIN'] },
@@ -166,8 +150,6 @@ const superAdminNavGroups: NavGroup[] = [
   { labelKey: 'nav.analytics', items: [
     { labelKey: 'nav.analytics', path: '/analytics', icon: Eye, roles: ['SUPER_ADMIN'] },
     { labelKey: 'nav.compare', path: '/compare/0', icon: GitCompare, roles: ['SUPER_ADMIN'] },
-    { labelKey: 'nav.dataQuality', path: '/data-quality', icon: ShieldCheck, roles: ['SUPER_ADMIN'] },
-    { labelKey: 'nav.integrationMonitoring', path: '/integration-monitoring', icon: Network, roles: ['SUPER_ADMIN'] },
   ]},
   { labelKey: 'nav.training', items: [
     { labelKey: 'nav.trainingMaterials', path: '/training/materials', icon: GraduationCap, roles: ['SUPER_ADMIN'] },
@@ -182,7 +164,6 @@ const superAdminNavGroups: NavGroup[] = [
     { labelKey: 'nav.systemHealth', path: '/system-health', icon: Activity, roles: ['SUPER_ADMIN'] },
   ]},
   { labelKey: 'nav.system', items: [
-    { labelKey: 'nav.notifications', path: '/notifications', icon: Bell, roles: ['SUPER_ADMIN'], badge: () => unreadCount.value },
     { labelKey: 'nav.settings', path: '/settings', icon: Settings, roles: ['SUPER_ADMIN'] },
     { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['SUPER_ADMIN'] },
   ]},
@@ -197,11 +178,6 @@ const navGroups = computed<NavGroup[]>(() => {
   return employeeNavGroups
 })
 
-function handleLogout() {
-  authStore.logout()
-  router.push('/login')
-}
-
 function toggleLocale() {
   setLocale(locale.value === 'ru' ? 'uz' : 'ru')
 }
@@ -213,6 +189,7 @@ function handleNavigate() {
 
 <template>
   <aside class="sidebar-root">
+    <div class="sidebar-top-glow"></div>
     <div class="sidebar-header">
       <div class="sidebar-logo-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="url(#sidebarGrad)" stroke-width="2" stroke-linecap="round" class="w-3.5 h-3.5">
@@ -227,153 +204,93 @@ function handleNavigate() {
           </defs>
         </svg>
       </div>
-      <span class="sidebar-logo-text">
-        Shaffof<span class="sidebar-logo-accent">TIR</span>
-      </span>
+      <span class="sidebar-logo-text">Shaffof<span class="sidebar-logo-accent">TIR</span></span>
       <button class="sidebar-lang-btn" @click="toggleLocale">
         <Globe class="w-3 h-3 text-gray-500" />
       </button>
     </div>
 
     <div class="flex-1 overflow-y-auto px-2.5 py-2 space-y-3 sidebar-scroll">
-      <div v-for="group in navGroups" :key="group.labelKey">
-        <p class="text-[9px] font-medium uppercase tracking-wider px-2 mb-1" style="color: rgba(255,255,255,0.2);">{{ t(group.labelKey) }}</p>
+      <div v-for="group in navGroups" :key="group.labelKey" class="nav-group">
+        <p class="nav-group-label">{{ t(group.labelKey) }}</p>
         <div class="space-y-0.5">
           <router-link
             v-for="item in group.items"
             :key="item.path"
             :to="item.path"
-            class="sidebar-item relative"
+            class="sidebar-item relative group"
             active-class="sidebar-item-active"
             @click="handleNavigate"
           >
-            <component :is="item.icon" class="w-3.5 h-3.5 shrink-0" />
+            <component :is="item.icon" class="sidebar-item-icon" />
             <span class="truncate">{{ t(item.labelKey) }}</span>
-            <span v-if="item.badge && item.badge() > 0" class="ml-auto px-1.5 py-0.5 text-[9px] font-medium rounded-full" style="background: rgba(22,163,74,0.15); color: #16a34a;">
-              {{ item.badge() }}
-            </span>
+            <div class="sidebar-item-glow"></div>
           </router-link>
         </div>
       </div>
     </div>
 
-    <div class="p-3 border-t border-white/[0.04] shrink-0">
-      <button class="w-full flex items-center gap-2 p-2 rounded-lg hover:bg-white/[0.03] transition" @click="router.push('/profile'); handleNavigate()">
-        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-green-600 to-green-800 flex items-center justify-center text-[11px] font-bold text-white shrink-0">
-          {{ authStore.user?.full_name?.[0] || 'A' }}
+    <div class="sidebar-footer">
+      <div class="sidebar-user-btn">
+        <div class="sidebar-user-avatar">{{ authStore.user?.full_name?.[0] || 'A' }}</div>
+        <div class="min-w-0 text-left flex-1">
+          <p class="sidebar-user-name">{{ authStore.user?.full_name || 'Admin' }}</p>
+          <p class="sidebar-user-role">{{ role }}</p>
         </div>
-        <div class="min-w-0 text-left">
-          <p class="text-[11px] font-medium text-gray-300 truncate">{{ authStore.user?.full_name || 'Admin' }}</p>
-          <p class="text-[9px] text-gray-600">{{ role }}</p>
-        </div>
-        <button class="ml-auto p-1 rounded hover:bg-white/5 transition shrink-0" @click.stop="handleLogout">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-500">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
-          </svg>
-        </button>
-      </button>
+      </div>
     </div>
   </aside>
 </template>
 
 <style scoped>
 .sidebar-root {
-  width: 220px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  overflow: hidden;
+  width: 224px; flex-shrink: 0; display: flex; flex-direction: column;
+  height: 100%; overflow: hidden;
   background: linear-gradient(180deg, #080c0a 0%, #0a0f0d 100%);
   border-right: 1px solid rgba(22,163,74,0.04);
   position: relative;
 }
-.sidebar-root::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 200px;
+.sidebar-top-glow {
+  position: absolute; top: 0; left: 0; right: 0; height: 200px;
   background: radial-gradient(ellipse at top, rgba(22,163,74,0.06), transparent 70%);
   pointer-events: none;
 }
-
 .sidebar-header {
-  height: 52px;
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
+  display: flex; align-items: center; gap: 8px;
+  padding: 16px 14px 12px; flex-shrink: 0;
 }
 .sidebar-logo-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(22,163,74,0.08);
-  border: 1px solid rgba(22,163,74,0.12);
-  filter: drop-shadow(0 0 8px rgba(22,163,74,0.15));
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(22,163,74,0.08); border: 1px solid rgba(22,163,74,0.12);
 }
-.sidebar-logo-text {
-  font-size: 13px;
-  font-weight: 600;
-  color: #f8fafc;
-  letter-spacing: -0.02em;
-}
-.sidebar-logo-accent {
-  color: #22c55e;
-}
+.sidebar-logo-text { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; color: #e5e7eb; flex: 1; }
+.sidebar-logo-accent { color: #22c55e; }
 .sidebar-lang-btn {
-  margin-left: auto;
-  padding: 4px;
-  border-radius: 6px;
-  transition: all 0.15s;
-  background: none;
-  border: none;
-  cursor: pointer;
-  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 7px;
+  background: none; border: none; cursor: pointer; transition: all 0.15s;
 }
-.sidebar-lang-btn:hover {
-  background: rgba(255,255,255,0.05);
-}
-
+.sidebar-lang-btn:hover { background: rgba(22,163,74,0.08); }
+.sidebar-scroll::-webkit-scrollbar { width: 4px; }
+.sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(22,163,74,0.15); border-radius: 100px; }
+.nav-group-label { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #4b5563; padding: 0 10px; margin-bottom: 4px; }
 .sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  color: rgba(255,255,255,0.42);
-  transition: all 0.15s;
-  cursor: pointer;
-  border: none;
-  background: transparent;
-  width: 100%;
-  text-align: left;
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 10px; border-radius: 8px;
+  font-size: 12px; font-weight: 500; color: #9ca3af;
+  transition: all 0.15s; cursor: pointer; position: relative;
+  text-decoration: none;
 }
-.sidebar-item:hover {
-  background: rgba(255,255,255,0.03);
-  color: rgba(255,255,255,0.65);
-}
-.sidebar-item-active {
-  background: rgba(22,163,74,0.1) !important;
-  color: #4ade80 !important;
-}
-.sidebar-item-active::before {
-  content: '';
-  position: absolute;
-  left: -10px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 18px;
-  background: linear-gradient(180deg, #22c55e, #15803d);
-  border-radius: 0 3px 3px 0;
-  box-shadow: 0 0 8px rgba(34,197,94,0.3);
-}
-.sidebar-scroll::-webkit-scrollbar { width: 3px; }
-.sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 3px; }
+.sidebar-item:hover { background: rgba(255,255,255,0.03); color: #e5e7eb; }
+.sidebar-item-active { background: rgba(22,163,74,0.1) !important; color: #22c55e !important; }
+.sidebar-item-icon { width: 14px; height: 14px; flex-shrink: 0; }
+.sidebar-item-glow { position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 2px; height: 0; background: #22c55e; border-radius: 100px; transition: height 0.2s; }
+.sidebar-item-active .sidebar-item-glow { height: 60%; }
+.sidebar-footer { padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.04); flex-shrink: 0; }
+.sidebar-user-btn { display: flex; align-items: center; gap: 8px; padding: 6px 4px; }
+.sidebar-user-avatar { width: 28px; height: 28px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; background: linear-gradient(135deg, #22c55e, #15803d); flex-shrink: 0; }
+.sidebar-user-name { font-size: 11px; font-weight: 600; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar-user-role { font-size: 9px; color: #6b7280; }
 </style>

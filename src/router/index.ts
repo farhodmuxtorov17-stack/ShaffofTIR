@@ -42,23 +42,16 @@ const routes = [
   { path: '/range/stats', redirect: '/analytics' },
   { path: '/range/config', redirect: '/settings' },
 
-  { path: '/command-center', name: 'CommandCenter', component: () => import('@/pages/CommandCenterPage.vue') },
   { path: '/techspec', name: 'TechSpec', component: () => import('@/pages/TechSpecPage.vue') },
 
-  { path: '/org-structure', name: 'OrgStructure', component: () => import('@/pages/OrgStructurePage.vue') },
   { path: '/kpi/catalog', name: 'KpiCatalog', component: () => import('@/pages/KpiCatalogPage.vue') },
   { path: '/kpi/editor', name: 'KpiEditor', component: () => import('@/pages/KpiEditorPage.vue') },
-  { path: '/kpi/periods', name: 'EvaluationPeriods', component: () => import('@/pages/EvaluationPeriodsPage.vue') },
-  { path: '/kpi/jobs', name: 'CalculationJobs', component: () => import('@/pages/CalculationJobsPage.vue') },
 
-  { path: '/data-quality', name: 'DataQuality', component: () => import('@/pages/DataQualityPage.vue') },
-  { path: '/integration-monitoring', name: 'IntegrationMonitoring', component: () => import('@/pages/IntegrationMonitoringPage.vue') },
 
   { path: '/objections', name: 'Objections', component: () => import('@/pages/ObjectionsPage.vue') },
   { path: '/approval-tasks', name: 'ApprovalTasks', component: () => import('@/pages/ApprovalTasksPage.vue') },
 
   { path: '/recommendations', name: 'AutoRecommendations', component: () => import('@/pages/AutoRecommendationsPage.vue') },
-  { path: '/action-plans', name: 'ActionPlans', component: () => import('@/pages/ActionPlansPage.vue') },
 
   { path: '/reports', name: 'Reports', component: () => import('@/pages/ReportsPage.vue') },
   { path: '/reports/create', name: 'ReportCreation', component: () => import('@/pages/ReportCreationPage.vue') },
@@ -98,12 +91,11 @@ const routes = [
   { path: '/training/:id', name: 'TrainingPlanDetail', component: () => import('@/pages/TrainingPlanDetailPage.vue') },
 
   { path: '/analytics', name: 'Analytics', component: () => import('@/pages/AnalyticsDashboardPage.vue') },
+  { path: '/live-range', name: 'LiveRange', component: () => import('@/pages/LiveRangePage.vue'), meta: { roles: ['SUPER_ADMIN', 'MANAGER', 'INSTRUCTOR'] } },
   { path: '/analytics/soldiers', name: 'SoldierAnalytics', component: () => import('@/pages/SoldierAnalyticsPage.vue') },
   { path: '/analytics/groups', name: 'GroupAnalytics', component: () => import('@/pages/GroupAnalyticsPage.vue') },
   { path: '/analytics/trends', name: 'PerformanceTrends', component: () => import('@/pages/PerformanceTrendsPage.vue') },
 
-  { path: '/notifications', name: 'Notifications', component: () => import('@/pages/NotificationsPage.vue') },
-  { path: '/notifications/settings', name: 'NotificationSettings', component: () => import('@/pages/NotificationSettingsPage.vue') },
 
   { path: '/help', name: 'Help', component: () => import('@/pages/HelpPage.vue') },
   { path: '/about', redirect: '/help' },
@@ -131,22 +123,17 @@ const routeRoles: Record<string, string[]> = {
   '/training/materials': ['SUPER_ADMIN', 'MANAGER', 'INSTRUCTOR', 'EMPLOYEE', 'TECHSPEC'],
   '/training/schedule': ['INSTRUCTOR', 'EMPLOYEE'],
   '/training/history': ['INSTRUCTOR', 'EMPLOYEE'],
-  '/training': ['INSTRUCTOR'],
+  '/training': ['SUPER_ADMIN', 'MANAGER', 'INSTRUCTOR', 'EMPLOYEE', 'TECHSPEC'],
   '/analytics': ['SUPER_ADMIN', 'MANAGER'],
+  '/live-range': ['SUPER_ADMIN', 'MANAGER', 'INSTRUCTOR'],
   '/reports': ['MANAGER', 'INSTRUCTOR', 'EMPLOYEE'],
   '/protocols': ['MANAGER', 'INSTRUCTOR', 'EMPLOYEE'],
   '/settings': ['MANAGER', 'INSTRUCTOR', 'SUPER_ADMIN'],
-  '/notifications': ['SUPER_ADMIN', 'MANAGER', 'INSTRUCTOR'],
-  '/command-center': ['SUPER_ADMIN', 'MANAGER'],
   '/techspec': ['SUPER_ADMIN', 'TECHSPEC'],
-  '/org-structure': ['SUPER_ADMIN', 'MANAGER'],
   '/kpi': ['SUPER_ADMIN', 'MANAGER'],
-  '/data-quality': ['SUPER_ADMIN', 'MANAGER'],
-  '/integration-monitoring': ['SUPER_ADMIN', 'MANAGER'],
   '/objections': ['SUPER_ADMIN', 'MANAGER'],
   '/approval-tasks': ['SUPER_ADMIN', 'MANAGER'],
   '/recommendations': ['SUPER_ADMIN', 'MANAGER'],
-  '/action-plans': ['SUPER_ADMIN', 'MANAGER'],
   '/admin': ['SUPER_ADMIN'],
   '/profile': ['SUPER_ADMIN', 'MANAGER', 'INSTRUCTOR', 'EMPLOYEE', 'TECHSPEC'],
   '/system-health': ['SUPER_ADMIN'],

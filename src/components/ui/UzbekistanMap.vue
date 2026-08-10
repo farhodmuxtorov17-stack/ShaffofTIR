@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import geoJsonData from '@/data/uzbekistan_regions.json'
 import { republicRegions } from '@/data/republicData'
 import { useI18n } from '@/i18n'
 
@@ -8,176 +11,202 @@ const isUz = computed(() => locale.value === 'uz')
 
 const props = defineProps<{
   selectedId?: string
+  compact?: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'select', regionId: string): void
 }>()
 
-// --- 3 Palettes 
-const paletteType = ref<'traffic' | 'blue' | 'heat'>('traffic')
+const mapContainer = ref<HTMLDivElement | null>(null)
+let map: L.Map | null = null
+let geoLayer: L.GeoJSON | null = null
+let labels: L.Marker[] = []
 
-const palettes = {
-  traffic: {
-    name_ru: 'Светофор', name_uz: 'Svetofor',
-    high:   { fill: '#22c55e', stroke: '#16a34a' },
-    medium: { fill: '#f59e0b', stroke: '#d97706' },
-    low:    { fill: '#ef4444', stroke: '#dc2626' },
-    legend: [
-      { color: '#22c55e', label_ru: 'Высокий (≥70)', label_uz: 'Yuqori (≥70)' },
-      { color: '#f59e0b', label_ru: 'Средний (≥60)', label_uz: "O\x02bbrta (≥60)" },
-      { color: '#ef4444', label_ru: 'Низкий (<60)', label_uz: 'Past (<60)' },
-    ]
-  },
-  blue: {
-    name_ru: 'Синий', name_uz: "Ko\x02bbk",
-    high:   { fill: '#1e40af', stroke: '#1e3a8a' },
-    medium: { fill: '#3b82f6', stroke: '#2563eb' },
-    low:    { fill: '#bfdbfe', stroke: '#60a5fa' },
-    legend: [
-      { color: '#1e40af', label_ru: 'Высокий (≥70)', label_uz: 'Yuqori (≥70)' },
-      { color: '#3b82f6', label_ru: 'Средний (≥60)', label_uz: "O\x02bbrta (≥60)" },
-      { color: '#bfdbfe', label_ru: 'Низкий (<60)', label_uz: 'Past (<60)' },
-    ]
-  },
-  heat: {
-    name_ru: 'Тепловая', name_uz: 'Issiqlik',
-    high:   { fill: '#eab308', stroke: '#ca8a04' },
-    medium: { fill: '#f97316', stroke: '#ea580c' },
-    low:    { fill: '#dc2626', stroke: '#991b1b' },
-    legend: [
-      { color: '#eab308', label_ru: 'Высокий (≥70)', label_uz: 'Yuqori (≥70)' },
-      { color: '#f97316', label_ru: 'Средний (≥60)', label_uz: "O\x02bbrta (≥60)" },
-      { color: '#dc2626', label_ru: 'Низкий (<60)', label_uz: 'Past (<60)' },
-    ]
-  },
+const palette = {
+  high:   { fill: '#22c55e', fillOpacity: 0.35, stroke: '#15803d', weight: 1 },
+  medium: { fill: '#f59e0b', fillOpacity: 0.35, stroke: '#b45309', weight: 1 },
+  low:    { fill: '#ef4444', fillOpacity: 0.35, stroke: '#991b1b', weight: 1 },
+  default:{ fill: '#64748b', fillOpacity: 0.2, stroke: '#475569', weight: 1 },
 }
 
-function getColor(score: number) {
-  const p = palettes[paletteType.value]
-  if (score >= 70) return p.high
-  if (score >= 60) return p.medium
-  return p.low
+function getStyle(score: number) {
+  if (score >= 70) return palette.high
+  if (score >= 60) return palette.medium
+  return palette.low
 }
 
-// Real geographic SVG paths (from Natural Earth data, projected to 1000x600)
-const regionPaths: Record<string, { d: string; labelX: number; labelY: number }> = {
-  ferghana: { d: `M 903.8,392.4 L 904.0,393.1 L 902.8,397.4 L 902.2,398.2 L 901.4,398.4 L 899.9,398.0 L 898.8,397.5 L 897.6,396.7 L 897.1,395.8 L 898.0,394.8 L 899.4,394.7 L 900.4,394.2 L 902.4,392.8 L 903.8,392.4 Z M 916.5,374.2 L 917.2,375.0 L 916.1,375.9 L 914.5,375.5 L 913.7,375.4 L 910.9,375.5 L 906.6,375.1 L 903.9,378.8 L 902.4,380.5 L 898.6,382.3 L 897.2,380.8 L 896.8,376.7 L 895.0,374.4 L 893.7,376.6 L 893.0,378.5 L 889.0,378.1 L 886.6,377.0 L 885.1,375.1 L 882.1,373.6 L 879.2,372.0 L 876.5,372.1 L 875.1,371.2 L 874.1,370.1 L 872.4,371.5 L 871.1,374.1 L 862.9,373.4 L 857.6,375.8 L 851.5,376.1 L 841.1,378.5 L 836.5,376.9 L 834.8,371.0 L 832.0,368.3 L 829.9,368.7 L 827.5,368.5 L 825.5,365.0 L 824.9,364.2 L 824.8,364.1 L 823.9,363.0 L 823.8,361.2 L 826.3,359.0 L 830.7,357.9 L 832.6,355.2 L 834.1,354.2 L 835.8,353.6 L 838.5,350.8 L 842.7,347.6 L 844.0,346.8 L 845.1,346.4 L 845.4,345.8 L 846.3,345.2 L 848.3,343.8 L 849.4,342.5 L 851.1,342.0 L 853.4,342.1 L 857.2,339.9 L 858.5,340.6 L 860.7,341.1 L 863.4,345.2 L 865.9,345.7 L 867.9,347.4 L 868.9,347.8 L 870.6,348.2 L 874.2,350.3 L 876.3,350.3 L 881.7,344.7 L 887.8,341.4 L 894.1,342.3 L 895.9,345.1 L 896.2,344.1 L 897.1,343.9 L 899.4,344.8 L 900.2,344.7 L 901.7,344.7 L 905.2,345.9 L 906.2,347.2 L 908.9,350.2 L 910.8,350.6 L 913.5,350.3 L 919.5,351.7 L 921.0,351.0 L 922.4,351.0 L 923.9,352.8 L 927.4,353.6 L 928.2,354.6 L 928.2,355.8 L 927.9,358.2 L 928.5,360.7 L 928.6,361.0 L 925.1,361.4 L 920.8,363.9 L 919.7,367.0 L 913.4,370.6 L 913.5,372.6 L 916.1,374.0 Z M 860.4,381.2 L 861.6,381.9 L 862.6,383.6 L 863.3,385.4 L 864.3,386.5 L 865.8,387.4 L 868.9,388.6 L 869.1,388.8 L 869.4,388.9 L 869.8,388.9 L 870.1,388.8 L 870.7,388.4 L 871.0,388.2 L 872.4,387.9 L 873.1,388.0 L 873.5,388.6 L 873.2,389.7 L 870.6,391.3 L 869.7,392.2 L 869.8,393.9 L 872.2,396.3 L 872.1,398.4 L 871.5,399.2 L 870.8,399.5 L 868.9,399.5 L 866.2,400.1 L 865.4,400.1 L 864.8,399.5 L 864.6,398.8 L 864.4,398.2 L 863.3,398.2 L 862.7,398.6 L 861.9,399.3 L 861.1,399.7 L 860.4,399.4 L 860.3,397.7 L 862.7,394.2 L 862.4,392.3 L 861.8,391.8 L 860.3,391.5 L 859.6,391.2 L 858.9,390.3 L 857.6,387.5 L 857.3,386.5 L 857.3,385.3 L 857.6,384.2 L 858.6,382.1 L 860.4,381.2 Z`, labelX: 880.1, labelY: 360.3 },
-  tashkent_region: { d: `M 873.9,244.7 L 866.5,249.8 L 851.2,256.0 L 847.5,264.0 L 832.3,272.3 L 825.8,279.1 L 813.3,290.1 L 823.3,291.9 L 827.1,294.7 L 829.7,299.4 L 826.2,304.4 L 826.7,306.8 L 828.0,308.9 L 827.0,312.2 L 829.9,317.3 L 828.9,323.1 L 819.7,333.1 L 794.2,344.0 L 788.2,349.2 L 783.7,347.8 L 780.0,344.1 L 773.9,339.3 L 769.6,338.5 L 765.6,343.0 L 765.4,351.9 L 759.2,355.2 L 763.1,363.7 L 765.1,372.1 L 760.0,373.8 L 759.1,379.5 L 752.5,376.3 L 752.0,370.3 L 754.0,362.5 L 754.7,359.8 L 753.6,357.8 L 752.9,356.7 L 754.9,352.9 L 753.5,352.0 L 751.9,352.2 L 751.7,349.4 L 748.6,346.7 L 746.6,346.5 L 745.6,344.5 L 743.4,342.9 L 742.7,341.5 L 741.2,339.3 L 738.2,336.7 L 734.5,334.9 L 733.0,333.6 L 731.9,331.7 L 729.0,327.9 L 732.9,323.3 L 737.4,318.3 L 741.0,314.9 L 743.7,314.0 L 747.9,312.4 L 750.0,310.5 L 751.1,303.2 L 750.9,301.8 L 750.3,301.2 L 750.0,300.1 L 751.9,298.9 L 754.7,298.3 L 756.5,296.5 L 760.7,294.0 L 763.2,294.4 L 766.2,293.0 L 770.2,293.3 L 770.0,291.7 L 769.7,289.3 L 773.2,287.0 L 781.2,281.7 L 786.8,279.2 L 797.9,277.6 L 801.2,274.9 L 804.0,273.2 L 810.9,268.9 L 815.8,261.9 L 817.7,260.9 L 819.5,259.9 L 820.9,257.1 L 826.7,252.8 L 830.8,252.2 L 832.4,253.9 L 833.4,255.9 L 835.7,256.8 L 838.7,255.2 L 841.0,250.7 L 843.5,247.5 L 844.6,245.3 L 847.7,245.1 L 852.1,244.6 L 858.2,240.4 L 872.1,244.2 Z`, labelX: 787.3, labelY: 306.3 },
-  namangan: { d: `M 830.3,297.8 L 832.6,297.2 L 841.3,293.3 L 843.3,295.1 L 847.0,301.3 L 846.3,306.8 L 847.1,308.9 L 849.0,308.3 L 851.4,308.6 L 853.3,310.1 L 855.1,312.0 L 858.6,311.7 L 862.5,312.7 L 864.7,314.0 L 867.7,314.9 L 870.0,317.6 L 870.4,314.9 L 870.3,312.8 L 872.8,312.4 L 874.1,315.7 L 875.3,317.3 L 876.7,316.0 L 881.9,317.3 L 883.4,314.0 L 883.3,301.6 L 886.8,304.1 L 891.1,304.7 L 894.5,299.6 L 895.5,296.0 L 893.7,293.0 L 893.2,291.9 L 894.3,289.3 L 896.2,288.1 L 898.1,289.2 L 898.4,291.8 L 897.4,296.4 L 898.3,296.0 L 898.8,294.9 L 899.7,296.2 L 900.7,296.1 L 901.1,294.4 L 902.0,295.0 L 908.1,304.0 L 908.3,309.1 L 910.1,312.5 L 915.9,312.8 L 917.7,314.4 L 920.6,312.5 L 923.2,311.5 L 925.3,313.6 L 925.6,317.3 L 926.2,322.1 L 925.0,324.9 L 926.4,325.5 L 924.6,331.5 L 924.0,331.7 L 919.8,332.0 L 917.9,332.1 L 909.1,330.6 L 906.5,330.5 L 903.5,331.7 L 895.9,332.2 L 894.5,333.7 L 892.4,335.6 L 893.1,336.9 L 892.4,340.0 L 882.8,343.8 L 880.0,347.1 L 875.0,350.5 L 871.7,349.0 L 869.9,348.0 L 868.3,347.6 L 866.3,345.9 L 863.7,345.5 L 867.0,340.8 L 858.9,340.9 L 858.1,340.3 L 856.1,339.9 L 852.7,342.2 L 850.4,342.1 L 848.8,343.1 L 847.7,344.4 L 846.4,344.7 L 844.7,341.3 L 838.7,339.2 L 839.1,337.2 L 842.2,338.6 L 843.4,337.8 L 832.7,326.7 L 830.8,325.1 L 829.6,323.8 L 830.0,322.3 L 829.6,315.8 L 827.4,312.7 L 826.9,311.7 L 827.0,310.9 L 828.2,308.4 L 828.3,307.0 L 826.5,306.5 L 826.3,305.1 L 826.3,303.9 L 829.2,300.2 L 830.3,297.8 Z`, labelX: 872.9, labelY: 317.8 },
-  andijan: { d: `M 934.4,320.0 L 936.7,322.7 L 939.5,323.8 L 942.7,324.3 L 942.9,324.9 L 942.8,326.8 L 945.2,327.4 L 948.7,331.2 L 952.6,333.8 L 962.2,333.4 L 964.6,335.9 L 965.2,336.9 L 971.9,333.6 L 973.6,335.1 L 978.0,335.6 L 979.7,336.0 L 980.0,337.3 L 975.6,340.8 L 965.6,345.3 L 959.6,347.0 L 957.6,353.3 L 953.9,353.1 L 952.5,354.2 L 952.2,356.2 L 950.8,357.6 L 944.6,355.3 L 940.8,354.3 L 937.1,350.8 L 935.3,352.6 L 936.5,354.4 L 936.5,355.6 L 936.1,357.5 L 936.6,358.1 L 939.0,359.7 L 939.6,361.0 L 939.6,362.6 L 937.8,365.7 L 935.0,365.4 L 930.9,363.4 L 927.6,363.3 L 927.9,362.7 L 929.5,362.4 L 930.5,361.5 L 930.0,361.1 L 928.6,361.0 L 928.5,360.7 L 927.9,358.2 L 928.2,355.8 L 928.2,354.6 L 927.4,353.6 L 923.9,352.8 L 922.4,351.0 L 921.0,351.0 L 919.5,351.7 L 913.5,350.3 L 910.8,350.6 L 908.9,350.2 L 906.2,347.2 L 905.2,345.9 L 901.7,344.7 L 900.2,344.7 L 899.4,344.8 L 897.1,343.9 L 896.2,344.1 L 895.9,345.1 L 894.1,342.3 L 894.0,338.5 L 892.5,336.0 L 892.7,335.2 L 895.2,333.2 L 901.7,330.8 L 905.9,330.7 L 907.7,330.5 L 910.6,330.4 L 918.9,332.2 L 923.2,331.9 L 924.4,331.6 L 925.1,331.1 L 926.7,324.4 L 932.0,323.3 L 933.1,321.2 L 934.4,320.0 Z`, labelX: 931.7, labelY: 344.2 },
-  syrdarya: { d: `M 752.2,377.2 L 749.2,376.2 L 738.9,377.9 L 735.7,379.1 L 731.2,378.7 L 728.1,379.4 L 727.4,378.2 L 727.8,377.2 L 728.8,374.2 L 729.3,373.5 L 729.5,372.9 L 712.6,376.7 L 698.3,376.2 L 697.8,375.4 L 697.3,373.0 L 697.7,371.1 L 704.1,356.4 L 702.6,356.7 L 701.4,356.6 L 701.6,353.7 L 701.8,351.8 L 702.4,351.5 L 706.2,350.8 L 707.1,347.4 L 718.0,352.7 L 718.2,352.3 L 718.9,351.7 L 719.7,351.7 L 720.1,351.2 L 720.4,350.7 L 721.0,350.3 L 721.6,350.4 L 723.8,351.5 L 725.3,351.7 L 726.5,351.0 L 726.9,350.1 L 725.8,349.6 L 727.1,347.6 L 727.3,347.1 L 726.8,346.4 L 726.4,345.6 L 726.2,344.7 L 726.2,343.9 L 724.8,343.6 L 724.3,343.3 L 723.8,342.8 L 723.5,341.5 L 722.9,335.9 L 723.1,334.9 L 723.4,334.5 L 723.8,334.3 L 724.1,333.5 L 724.2,332.9 L 724.1,331.4 L 724.1,330.7 L 724.3,330.8 L 724.9,331.0 L 725.1,331.1 L 725.7,329.6 L 727.3,328.6 L 731.3,330.5 L 731.9,331.7 L 732.2,333.8 L 733.0,333.6 L 733.4,334.1 L 734.5,334.9 L 736.9,335.6 L 738.2,336.7 L 739.3,338.4 L 741.2,339.3 L 742.1,340.1 L 742.7,341.5 L 742.7,342.6 L 743.4,342.9 L 744.2,343.0 L 745.6,344.5 L 745.0,346.2 L 746.6,346.5 L 748.3,345.7 L 748.6,346.7 L 750.1,347.6 L 751.7,349.4 L 753.0,350.8 L 751.9,352.2 L 752.3,352.9 L 753.5,352.0 L 754.5,351.9 L 754.9,352.9 L 752.9,354.4 L 752.9,356.7 L 754.1,356.9 L 753.6,357.8 L 754.3,358.9 L 754.7,359.8 L 755.0,361.0 L 754.0,362.5 L 753.3,363.7 L 752.0,370.3 L 753.2,372.7 L 752.5,376.3 L 752.2,377.2 Z M 744.2,381.9 L 746.8,383.7 L 747.2,384.6 L 747.4,385.6 L 747.3,386.6 L 746.8,387.4 L 745.5,387.6 L 741.5,387.0 L 740.3,387.3 L 738.4,388.9 L 737.6,389.1 L 736.4,387.1 L 735.5,386.4 L 734.8,387.6 L 734.9,388.2 L 735.9,389.0 L 736.1,389.5 L 735.9,390.9 L 736.0,391.5 L 736.3,392.2 L 741.2,398.4 L 741.4,399.9 L 739.0,400.8 L 737.8,399.0 L 736.9,396.1 L 735.8,393.8 L 734.6,393.1 L 734.2,393.6 L 734.4,394.8 L 735.0,396.3 L 736.2,398.7 L 736.2,399.7 L 735.5,400.9 L 735.3,401.1 L 734.7,401.2 L 734.5,401.3 L 734.1,402.3 L 734.1,402.4 L 734.1,402.7 L 734.0,403.4 L 733.6,403.8 L 732.9,403.5 L 731.4,401.2 L 730.5,400.6 L 728.6,402.1 L 728.0,401.9 L 728.1,401.2 L 728.1,400.2 L 728.4,399.6 L 728.6,399.1 L 728.7,398.7 L 728.5,398.5 L 728.2,398.3 L 727.2,397.7 L 727.0,397.5 L 726.9,397.2 L 726.9,396.9 L 727.4,396.7 L 727.7,396.7 L 728.0,396.9 L 728.2,397.1 L 728.4,397.4 L 728.6,397.4 L 728.8,397.0 L 729.0,394.8 L 728.9,394.2 L 728.9,393.8 L 728.7,393.2 L 728.2,392.0 L 728.1,391.7 L 728.1,391.7 L 727.9,391.3 L 727.7,390.7 L 727.6,390.3 L 727.6,389.9 L 727.6,389.4 L 727.9,388.6 L 728.7,387.2 L 731.1,384.3 L 744.2,381.9 Z`, labelX: 731.9, labelY: 351.7 },
-  jizzakh: { d: `M 728.1,379.5 L 728.6,383.7 L 727.9,388.6 L 727.7,390.7 L 728.2,392.0 L 729.0,394.8 L 728.2,397.1 L 726.9,396.9 L 728.2,398.3 L 728.4,399.6 L 727.8,401.9 L 725.7,415.6 L 720.5,420.7 L 720.0,422.4 L 706.5,421.8 L 674.3,417.6 L 663.9,425.6 L 663.0,426.2 L 654.1,420.8 L 653.1,413.6 L 656.3,412.7 L 657.2,411.0 L 656.9,409.2 L 657.2,406.9 L 661.4,404.6 L 664.4,403.5 L 651.0,394.1 L 648.6,393.5 L 646.3,393.6 L 640.7,391.5 L 637.9,388.9 L 637.4,386.9 L 635.3,387.4 L 633.4,387.4 L 632.7,383.4 L 634.5,382.4 L 633.4,378.3 L 633.4,376.4 L 631.4,375.1 L 630.1,369.8 L 630.2,365.4 L 631.0,361.9 L 629.7,359.8 L 625.8,360.0 L 615.0,358.6 L 623.4,336.8 L 623.5,333.5 L 622.8,332.2 L 616.2,329.8 L 614.7,319.2 L 622.7,314.6 L 637.9,314.7 L 663.7,313.3 L 679.4,312.9 L 682.9,314.4 L 687.3,312.3 L 689.4,313.4 L 689.9,314.2 L 692.9,318.3 L 694.1,322.0 L 695.5,321.2 L 696.8,322.0 L 698.7,320.4 L 699.0,322.0 L 699.4,322.8 L 698.2,323.7 L 698.2,324.2 L 698.9,325.3 L 698.4,329.4 L 696.7,333.4 L 695.2,335.1 L 692.4,336.6 L 691.7,337.5 L 694.3,338.2 L 701.1,343.7 L 706.9,350.1 L 702.1,351.6 L 701.3,356.2 L 703.6,356.4 L 697.5,372.0 L 698.1,375.9 L 729.3,372.9 L 729.0,373.8 L 727.6,377.7 L 728.1,379.5 Z`, labelX: 678.4, labelY: 366.2 },
-  samarkand: { d: `M 660.7,426.1 L 659.0,434.5 L 657.0,438.9 L 640.0,436.0 L 640.0,437.6 L 639.1,438.6 L 631.1,438.7 L 630.1,437.3 L 629.2,431.5 L 618.1,429.8 L 615.4,431.3 L 608.5,435.9 L 602.1,432.0 L 587.4,436.3 L 579.6,436.3 L 578.8,434.4 L 578.7,431.5 L 572.5,426.4 L 571.6,425.1 L 570.6,422.0 L 569.2,421.5 L 566.2,422.1 L 566.1,424.2 L 563.3,426.1 L 535.1,418.3 L 537.1,413.3 L 534.9,405.5 L 531.3,401.6 L 532.5,400.7 L 539.5,398.9 L 540.5,396.7 L 546.0,398.6 L 549.2,397.3 L 551.4,391.1 L 550.8,390.0 L 549.9,389.2 L 551.7,386.4 L 551.9,383.5 L 553.1,381.9 L 560.3,384.4 L 565.5,387.9 L 571.2,390.3 L 589.9,384.9 L 590.5,382.9 L 588.8,382.2 L 587.0,381.9 L 589.3,375.9 L 591.5,372.1 L 590.4,370.2 L 590.7,363.2 L 592.5,361.5 L 592.4,359.1 L 592.8,354.0 L 595.1,351.2 L 598.6,352.2 L 602.6,353.1 L 609.0,349.9 L 613.2,353.8 L 612.9,356.1 L 614.0,357.7 L 624.9,359.8 L 629.4,359.8 L 630.8,361.2 L 630.7,364.4 L 630.0,366.7 L 631.2,374.8 L 633.2,376.2 L 633.2,377.8 L 634.7,382.2 L 632.9,383.1 L 633.1,387.1 L 634.9,387.5 L 637.0,386.8 L 638.1,388.5 L 640.0,391.8 L 641.9,392.4 L 648.2,393.5 L 650.4,394.3 L 662.9,397.3 L 662.9,404.3 L 657.6,406.4 L 656.9,408.6 L 657.2,410.7 L 656.8,412.5 L 653.4,413.0 L 653.3,419.9 Z`, labelX: 603.4, labelY: 397.2 },
-  kashkadarya: { d: `M 656.3,439.2 L 655.5,440.3 L 655.8,443.9 L 668.7,447.7 L 671.6,449.5 L 673.2,449.7 L 674.1,450.6 L 673.9,458.4 L 673.1,459.0 L 667.3,459.7 L 666.0,460.4 L 665.1,461.8 L 665.8,466.3 L 667.4,469.3 L 667.2,470.4 L 667.1,471.5 L 667.3,472.6 L 667.5,474.0 L 666.5,475.9 L 666.1,478.1 L 665.4,478.6 L 663.9,477.2 L 662.4,476.7 L 660.0,476.8 L 658.3,477.8 L 654.1,485.0 L 651.7,486.7 L 648.5,489.2 L 645.1,492.2 L 643.8,497.7 L 642.5,500.3 L 632.4,506.9 L 629.5,508.1 L 627.8,511.5 L 626.7,513.9 L 619.1,521.6 L 617.6,526.7 L 615.3,525.9 L 611.4,523.7 L 603.2,522.6 L 593.3,515.6 L 584.4,511.2 L 573.5,507.3 L 567.3,509.8 L 558.2,509.6 L 535.9,495.4 L 519.5,482.3 L 492.3,466.5 L 490.0,461.8 L 505.4,452.0 L 518.0,447.7 L 518.4,446.5 L 516.2,443.8 L 515.5,442.4 L 515.5,441.4 L 520.6,435.8 L 522.1,435.3 L 523.9,434.6 L 537.7,426.4 L 563.3,426.1 L 565.9,424.5 L 566.2,423.5 L 566.3,421.8 L 569.2,421.5 L 570.3,421.8 L 570.9,422.6 L 571.6,425.2 L 572.5,426.4 L 578.5,431.1 L 578.9,432.9 L 578.8,434.9 L 579.6,436.3 L 586.2,437.0 L 593.0,433.8 L 603.5,432.9 L 608.5,435.9 L 613.6,433.8 L 616.3,430.6 L 618.9,429.8 L 629.2,431.5 L 630.2,436.3 L 630.4,438.3 L 631.5,438.8 L 639.1,438.6 L 639.9,438.0 L 640.1,436.9 L 643.0,436.1 Z`, labelX: 608.9, labelY: 461.5 },
-  surkhandarya: { d: `M 673.9,458.4 L 683.5,460.4 L 687.8,459.0 L 689.3,458.5 L 691.5,459.0 L 694.2,459.7 L 696.0,458.9 L 696.9,459.0 L 697.8,460.0 L 701.3,466.2 L 701.3,470.1 L 698.8,472.2 L 695.9,472.8 L 696.2,475.5 L 696.1,477.3 L 694.4,480.5 L 695.1,488.2 L 697.0,492.5 L 697.7,496.6 L 702.4,503.1 L 710.7,509.3 L 711.4,517.8 L 707.2,525.9 L 707.2,525.9 L 706.5,528.1 L 705.2,529.5 L 700.0,530.7 L 695.0,541.5 L 685.0,553.1 L 680.8,564.0 L 681.9,574.5 L 679.9,579.8 L 678.0,577.0 L 674.2,576.8 L 671.7,575.4 L 669.4,575.9 L 668.3,577.5 L 665.7,574.1 L 662.2,574.6 L 658.1,577.7 L 654.1,578.4 L 649.5,579.5 L 647.9,576.1 L 643.2,573.5 L 641.0,569.0 L 636.6,566.7 L 621.5,568.1 L 619.2,569.4 L 613.3,567.7 L 609.4,568.0 L 609.0,564.6 L 610.7,561.2 L 608.0,557.5 L 609.6,547.9 L 611.3,536.7 L 616.0,527.7 L 618.8,524.2 L 619.9,519.9 L 627.5,512.4 L 628.6,509.4 L 630.4,507.2 L 636.3,505.0 L 643.3,499.3 L 644.7,493.1 L 647.5,490.2 L 649.5,487.2 L 653.1,485.9 L 658.0,478.2 L 659.2,477.1 L 661.5,476.6 L 663.6,477.0 L 665.1,478.4 L 666.0,478.4 L 666.3,476.4 L 667.4,474.5 L 667.5,473.2 L 667.2,471.9 L 667.1,470.8 L 667.4,469.6 L 667.2,468.6 L 665.1,462.4 L 665.6,460.8 L 666.7,460.0 L 672.1,459.4 Z`, labelX: 665.8, labelY: 512.2 },
-  karakalpakstan: { d: `M 192.1,35.7 L 226.8,55.4 L 270.3,80.1 L 299.4,96.7 L 305.7,103.4 L 316.3,119.0 L 329.6,131.8 L 342.3,144.5 L 356.0,158.1 L 364.3,167.9 L 383.1,174.9 L 350.1,231.5 L 355.4,257.2 L 343.6,266.4 L 366.8,298.6 L 367.2,325.8 L 358.7,315.3 L 340.6,301.1 L 324.8,299.5 L 319.8,305.6 L 315.9,304.7 L 310.5,298.2 L 302.3,293.8 L 286.2,282.1 L 281.4,274.3 L 275.7,272.9 L 271.2,265.7 L 269.8,259.6 L 262.5,257.6 L 257.3,260.6 L 253.4,261.5 L 254.1,263.5 L 251.6,264.7 L 240.3,261.2 L 241.4,258.4 L 244.8,257.3 L 245.0,247.7 L 246.5,244.7 L 239.3,239.4 L 227.6,237.3 L 209.3,236.2 L 202.8,233.6 L 197.2,222.8 L 191.2,223.2 L 179.4,218.3 L 164.2,212.3 L 155.0,214.1 L 143.6,213.8 L 140.3,217.5 L 152.0,225.0 L 160.5,237.0 L 156.3,239.0 L 155.0,235.7 L 151.3,229.1 L 141.5,227.5 L 137.6,224.7 L 133.0,225.0 L 129.0,228.5 L 129.7,234.3 L 124.0,241.9 L 124.8,245.2 L 117.6,246.3 L 98.6,247.1 L 85.8,258.4 L 74.5,267.0 L 75.1,279.5 L 77.9,287.6 L 79.1,295.6 L 83.0,299.4 L 85.5,301.4 L 78.9,307.3 L 53.2,305.0 L 20.1,303.4 L 20.1,242.0 L 20.1,180.6 L 20.0,119.2 L 20.0,57.8 L 20.0,57.8 L 20.0,57.7 L 20.0,57.7 L 20.0,57.7 L 20.0,57.7 L 20.1,57.7 L 20.1,57.6 L 20.1,57.6 L 20.1,57.6 L 25.4,56.2 L 46.3,50.5 L 62.1,46.2 L 83.0,40.5 L 104.0,34.8 L 131.9,27.6 L 144.9,24.4 L 158.3,21.1 L 170.0,23.1 L 187.3,32.9 Z`, labelX: 181.3, labelY: 196.0 },
-  navoi: { d: `M 518.4,142.8 L 528.1,151.3 L 551.2,169.5 L 565.3,192.8 L 586.0,191.8 L 583.1,229.1 L 581.1,231.0 L 580.9,257.8 L 600.3,258.2 L 607.9,258.2 L 609.5,266.9 L 618.8,311.6 L 615.9,317.4 L 615.9,329.2 L 622.8,332.2 L 623.5,334.1 L 625.2,339.9 L 613.1,356.6 L 613.3,354.1 L 609.0,349.9 L 601.5,353.2 L 596.6,351.1 L 593.2,353.1 L 592.4,359.1 L 592.1,361.8 L 591.5,367.2 L 590.7,371.4 L 589.3,375.9 L 587.1,382.3 L 589.8,382.3 L 590.4,384.4 L 571.2,390.3 L 563.2,387.2 L 559.0,384.1 L 552.1,383.1 L 551.7,386.4 L 549.9,389.6 L 551.3,390.4 L 550.1,393.8 L 546.0,398.6 L 540.1,396.8 L 538.6,399.5 L 531.4,401.2 L 534.9,405.5 L 536.9,413.9 L 538.8,425.7 L 531.4,423.5 L 528.1,419.9 L 525.0,414.9 L 515.5,408.0 L 510.7,407.4 L 501.6,397.9 L 505.7,391.5 L 512.3,386.7 L 517.1,380.6 L 518.1,378.6 L 516.1,375.7 L 515.8,369.5 L 519.5,366.9 L 525.4,369.2 L 536.1,362.3 L 539.3,355.9 L 543.3,354.9 L 544.9,344.3 L 515.9,340.2 L 512.2,328.1 L 496.9,332.5 L 475.4,337.6 L 472.0,327.1 L 464.4,335.7 L 450.5,338.0 L 411.5,319.9 L 386.7,291.9 L 343.6,266.4 L 349.1,246.8 L 367.6,200.8 L 367.1,170.1 L 366.9,157.6 L 380.3,155.4 L 403.9,152.0 L 432.8,149.8 L 473.9,153.1 L 494.4,154.0 L 517.4,143.1 Z`, labelX: 532.3, labelY: 321.7 },
-  khorezm: { d: `M 257.6,273.7 L 258.4,273.6 L 259.1,272.7 L 259.0,271.8 L 258.4,270.8 L 257.8,270.1 L 257.0,269.5 L 254.3,268.1 L 253.5,267.3 L 252.9,266.4 L 253.5,265.8 L 254.2,264.3 L 254.1,263.5 L 253.4,262.4 L 253.3,262.1 L 253.2,261.8 L 253.4,261.5 L 253.8,261.2 L 254.6,261.1 L 256.2,261.0 L 257.3,260.6 L 260.2,258.8 L 261.2,257.9 L 261.6,257.8 L 262.5,257.6 L 263.7,258.4 L 264.3,258.7 L 267.1,259.4 L 269.8,259.6 L 270.6,260.2 L 270.8,261.6 L 270.8,264.6 L 271.2,265.7 L 272.7,267.8 L 273.4,269.5 L 274.9,272.0 L 275.7,272.9 L 276.7,273.5 L 277.8,273.7 L 280.5,273.8 L 281.4,274.3 L 282.0,275.4 L 283.0,278.0 L 284.4,280.3 L 286.2,282.1 L 299.5,292.9 L 300.9,293.1 L 301.6,293.4 L 302.3,293.8 L 304.3,295.8 L 306.0,297.2 L 307.3,297.7 L 310.5,298.2 L 311.5,298.8 L 314.5,301.8 L 315.2,302.7 L 315.9,304.7 L 316.7,305.1 L 317.1,305.3 L 318.4,305.7 L 319.8,305.6 L 320.8,304.9 L 323.1,301.1 L 323.9,300.1 L 324.8,299.5 L 325.8,299.0 L 326.9,298.8 L 329.9,298.8 L 340.6,301.1 L 343.3,302.2 L 345.9,303.6 L 349.2,305.8 L 358.7,315.3 L 365.3,324.9 L 365.6,325.2 L 366.4,325.6 L 367.2,325.8 L 370.2,324.9 L 379.3,334.2 L 381.1,336.8 L 381.8,339.0 L 378.9,344.8 L 367.2,357.9 L 367.2,357.9 L 367.1,357.8 L 366.7,356.3 L 366.3,355.6 L 364.3,353.1 L 363.5,351.7 L 362.4,347.6 L 361.7,346.7 L 359.9,344.8 L 359.3,343.9 L 358.8,342.5 L 358.2,339.5 L 356.4,333.8 L 355.8,332.5 L 356.2,332.0 L 355.9,331.0 L 355.8,326.3 L 355.6,325.0 L 355.1,323.8 L 351.0,317.6 L 349.9,316.5 L 337.4,308.2 L 332.6,306.3 L 327.1,305.0 L 325.1,304.8 L 323.8,305.3 L 323.1,306.8 L 322.5,309.1 L 321.2,309.8 L 320.1,311.9 L 318.5,313.5 L 316.6,314.4 L 314.5,314.4 L 312.2,313.6 L 306.4,309.9 L 305.4,309.9 L 302.1,310.4 L 301.8,309.8 L 301.6,309.2 L 301.4,309.0 L 301.1,309.5 L 300.4,310.7 L 300.0,311.0 L 299.6,311.3 L 297.0,308.8 L 293.1,308.0 L 281.8,308.6 L 275.0,310.6 L 271.7,310.7 L 269.7,310.2 L 268.1,309.1 L 265.1,306.4 L 261.7,304.2 L 256.3,301.7 L 250.2,298.8 L 248.7,297.4 L 248.3,295.8 L 249.0,290.5 L 249.4,289.3 L 250.1,288.4 L 251.1,287.6 L 253.4,286.6 L 254.2,285.8 L 253.7,284.5 L 249.9,279.8 L 248.2,276.8 L 247.7,274.5 L 249.1,272.6 L 250.7,271.7 L 252.4,271.6 L 254.5,272.1 L 256.5,273.2 L 257.6,273.7 Z`, labelX: 300.7, labelY: 297.9 },
-  bukhara: { d: `M 478.6,462.3 L 475.3,461.2 L 458.5,450.0 L 448.9,442.6 L 439.4,431.7 L 413.2,414.4 L 396.5,403.4 L 386.7,396.1 L 382.1,391.1 L 380.5,385.6 L 380.6,382.6 L 381.3,380.2 L 379.4,375.3 L 379.1,372.2 L 378.5,369.7 L 376.7,365.8 L 376.0,362.4 L 368.7,359.2 L 367.2,357.9 L 378.9,344.8 L 381.1,336.8 L 370.2,324.9 L 382.7,318.5 L 386.7,291.9 L 393.1,295.7 L 403.9,307.8 L 412.8,320.6 L 425.1,324.2 L 450.5,338.0 L 453.8,341.9 L 460.4,341.1 L 467.7,329.4 L 469.8,327.2 L 472.0,327.1 L 474.3,329.5 L 474.6,336.2 L 477.8,338.4 L 494.2,339.0 L 496.9,332.5 L 506.2,331.6 L 510.4,330.4 L 512.9,328.2 L 514.6,336.5 L 515.9,340.2 L 519.8,342.7 L 542.2,345.0 L 543.6,348.4 L 543.2,351.9 L 543.3,354.9 L 543.5,356.5 L 539.8,355.9 L 538.7,356.0 L 537.7,357.2 L 536.1,362.3 L 533.8,364.5 L 532.0,369.3 L 524.1,368.8 L 521.8,367.2 L 519.5,366.9 L 516.6,367.7 L 515.9,368.9 L 515.8,370.1 L 517.5,372.7 L 516.1,375.7 L 515.8,375.9 L 516.5,377.1 L 519.0,379.6 L 519.1,380.3 L 517.1,380.6 L 516.3,381.1 L 515.0,381.7 L 511.5,387.7 L 509.6,389.2 L 505.7,391.5 L 505.1,392.2 L 502.3,396.2 L 502.4,399.6 L 508.0,405.7 L 510.7,407.4 L 511.2,408.6 L 513.1,409.0 L 516.4,408.2 L 523.5,411.8 L 525.0,414.9 L 525.2,417.4 L 526.7,419.4 L 528.9,420.3 L 530.8,422.4 L 531.4,423.5 L 532.0,425.7 L 529.5,429.4 L 523.2,435.1 L 522.1,435.3 L 521.0,435.6 L 516.4,440.1 L 515.5,441.4 L 515.4,442.1 L 515.6,442.7 L 516.2,443.8 L 518.2,446.1 L 518.4,446.8 L 518.0,447.7 L 508.4,451.0 L 497.7,454.9 L 490.0,461.8 L 489.1,462.6 L 486.1,459.8 L 480.1,462.0 Z`, labelX: 482.9, labelY: 383.9 },
-  tashkent_city: { d: `M 762.4,297.9 L 763.8,298.7 L 765.5,298.9 L 767.5,300.1 L 767.8,301.2 L 766.9,302.5 L 767.7,303.0 L 768.2,303.8 L 767.8,304.4 L 768.4,304.9 L 766.3,305.9 L 763.5,308.2 L 761.7,310.2 L 760.0,309.8 L 759.3,308.7 L 759.6,308.0 L 759.6,307.8 L 758.7,308.6 L 757.3,307.2 L 756.9,306.4 L 756.8,305.6 L 755.9,306.1 L 755.7,306.0 L 757.1,302.7 L 757.6,300.6 L 760.6,297.9 L 762.4,297.9 Z`, labelX: 762.0, labelY: 304.2 },
-}
-
-const tooltip = ref<{ x: number; y: number; name: string; score: number; color: string } | null>(null)
-
-const regionData = computed(() => {
-  return republicRegions.map(r => {
-    const pathInfo = regionPaths[r.id]
-    if (!pathInfo) return null
-    const colors = getColor(r.avgScore)
-    const isSelected = props.selectedId === r.id
-    const isDimmed = !!props.selectedId && !isSelected
-    return { ...r, ...pathInfo, colors, isSelected, isDimmed }
-  }).filter(Boolean)
+const scoreMap = computed(() => {
+  const m: Record<string, number> = {}
+  republicRegions.forEach(r => { m[r.id] = r.avgScore })
+  return m
 })
 
-function onHover(e: MouseEvent, r: any) {
-  const svgEl = (e.currentTarget as SVGElement).closest('svg')!
-  const svgRect = svgEl.getBoundingClientRect()
-  const px = ((e.clientX - svgRect.left) / svgRect.width) * 1000
-  const py = ((e.clientY - svgRect.top) / svgRect.height) * 600
-  tooltip.value = {
-    x: Math.min(px + 8, 820),
-    y: Math.max(py - 60, 10),
-    name: isUz.value ? r.name_uz : r.name_ru,
-    score: r.avgScore,
-    color: r.colors.fill
+function styleForFeature(feature: any) {
+  const rid = feature.properties.id
+  const score = scoreMap.value[rid] ?? -1
+  const isSelected = props.selectedId === rid
+  const isDimmed = props.selectedId && props.selectedId !== rid
+  const base = score >= 0 ? getStyle(score) : palette.default
+  return {
+    fillColor: base.fill,
+    fillOpacity: isSelected ? 0.6 : (isDimmed ? 0.1 : base.fillOpacity),
+    color: isSelected ? '#1e293b' : base.stroke,
+    weight: isSelected ? 2.5 : base.weight,
   }
 }
+
+function buildPopupHtml(feature: any, region: any): string {
+  const name = isUz.value ? feature.properties.name_uz : feature.properties.name_ru
+  const score = region.avgScore
+  const tier = score >= 70 ? (isUz.value ? 'Yuqori' : 'Высокий') : score >= 60 ? (isUz.value ? "O\u02BBrta" : 'Средний') : (isUz.value ? 'Past' : 'Низкий')
+  const tierColor = score >= 70 ? '#16a34a' : score >= 60 ? '#d97706' : '#dc2626'
+  return `<div style="font-family:system-ui,sans-serif;min-width:150px;">
+    <div style="font-weight:700;font-size:13px;color:#1e293b;margin-bottom:4px;">${name}</div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-size:11px;color:#64748b;">KPI:</span>
+      <span style="font-size:18px;font-weight:800;color:${tierColor};">${score}</span>
+      <span style="font-size:10px;color:${tierColor};background:${tierColor}1a;padding:1px 6px;border-radius:4px;">${tier}</span>
+    </div>
+    <div style="font-size:10px;color:#94a3b8;margin-top:3px;">
+      ${isUz.value ? 'Xodimlar' : 'Сотрудников'}: ${region.totalEmployees} \u00B7 ${isUz.value ? 'Sessiya' : 'Сессий'}: ${region.sessionsThisMonth}
+    </div>
+  </div>`
+}
+
+function onEachFeature(feature: any, layer: L.Layer) {
+  const rid = feature.properties.id
+  const region = republicRegions.find(r => r.id === rid)
+  if (!region) return
+  layer.bindPopup(buildPopupHtml(feature, region), { closeButton: false, className: 'uzmap-popup', maxWidth: 200 })
+  layer.on({
+    mouseover: (e: any) => {
+      const l = e.target
+      l.setStyle({ weight: 2, color: '#334155', fillOpacity: 0.5 })
+      l.bringToFront()
+    },
+    mouseout: (e: any) => {
+      if (geoLayer) geoLayer.resetStyle(e.target)
+    },
+    click: () => {
+      emit('select', rid)
+    },
+  })
+}
+
+function getRegionCenter(feature: any): [number, number] {
+  const rid = feature.properties.id
+  const region = republicRegions.find(r => r.id === rid)
+  const r = region as any
+  if (r?.centerLat && r?.centerLng) {
+    return [r.centerLat, r.centerLng]
+  }
+  const g = feature.geometry
+  let latSum = 0, lngSum = 0, count = 0
+  const collect = (coords: number[]) => {
+    lngSum += coords[0]
+    latSum += coords[1]
+    count++
+  }
+  if (g.type === 'Polygon') {
+    g.coordinates[0].forEach(collect)
+  } else if (g.type === 'MultiPolygon') {
+    g.coordinates.forEach((poly: number[][][]) => poly[0].forEach(collect))
+  }
+  return [latSum / count, lngSum / count]
+}
+
+function addLabels() {
+  labels.forEach(m => m.remove())
+  labels = []
+  geoJsonData.features.forEach((feat: any) => {
+    const rid = feat.properties.id
+    const region = republicRegions.find(r => r.id === rid)
+    if (!region) return
+    const [lat, lng] = getRegionCenter(feat)
+    const name = isUz.value ? feat.properties.name_uz : feat.properties.name_ru
+    const score = region.avgScore
+    const color = score >= 70 ? '#16a34a' : score >= 60 ? '#d97706' : '#dc2626'
+    const shortName = name.length > 14 ? name.substring(0, 12) + '\u2026' : name
+    const icon = L.divIcon({
+      className: 'uzmap-label',
+      html: `<div style="background:rgba(255,255,255,0.92);color:#334155;padding:1px 5px;border-radius:4px;font-size:9px;font-weight:600;white-space:nowrap;border:1px solid ${color}44;pointer-events:none;line-height:1.3;">${shortName} <span style="color:${color};font-weight:800;">${score}</span></div>`,
+      iconSize: [0, 0],
+    })
+    const marker = L.marker([lat, lng], { icon, interactive: false, zIndexOffset: 1000 })
+    marker.addTo(map!)
+    labels.push(marker)
+  })
+}
+
+function initMap() {
+  if (!mapContainer.value) return
+  map = L.map(mapContainer.value, {
+    center: [41.0, 64.5],
+    zoom: props.compact ? 5 : 6,
+    minZoom: 4,
+    maxZoom: 8,
+    zoomControl: !props.compact,
+    scrollWheelZoom: false,
+    attributionControl: false,
+    dragging: true,
+    doubleClickZoom: true,
+  })
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    subdomains: 'abcd',
+    maxZoom: 19,
+  }).addTo(map)
+  geoLayer = L.geoJSON(geoJsonData as any, {
+    style: styleForFeature,
+    onEachFeature: onEachFeature,
+  }).addTo(map)
+  addLabels()
+  const bounds = geoLayer.getBounds()
+  map.fitBounds(bounds, { padding: [10, 10] })
+}
+
+watch(() => props.selectedId, () => {
+  if (geoLayer) {
+    geoLayer.eachLayer((layer: any) => {
+      geoLayer!.resetStyle(layer)
+    })
+  }
+})
+
+watch(locale, () => {
+  if (map) {
+    addLabels()
+    geoLayer?.eachLayer((layer: any) => {
+      const feat = layer.feature
+      const rid = feat.properties.id
+      const region = republicRegions.find(r => r.id === rid)
+      if (!region) return
+      layer.setPopupContent(buildPopupHtml(feat, region))
+    })
+  }
+})
+
+onMounted(() => { initMap() })
+onUnmounted(() => { if (map) { map.remove(); map = null } })
 </script>
 
 <template>
-  <div class="w-full space-y-3">
-    <!-- Palette Switcher -->
-    <div class="flex items-center gap-2">
-      <button
-        v-for="(p, key) in palettes"
-        :key="key"
-        @click="paletteType = key as any"
-        class="px-3 py-1 text-xs rounded-lg border transition-colors font-medium"
-        :class="paletteType === key ? 'border-gray-800 bg-gray-800 text-white' : 'border-gray-200 text-gray-600 hover:bg-gray-50'"
-      >{{ isUz ? p.name_uz : p.name_ru }}</button>
-    </div>
-
-    <!-- SVG Map -->
-    <div class="relative w-full rounded-xl border border-gray-200 overflow-hidden bg-[#d4e8f5]">
-      <svg
-        viewBox="20 150 970 430"
-        class="w-full"
-        style="max-height: 380px;"
-        @mouseleave="tooltip = null"
-      >
-        <!-- Regions -->
-        <g v-for="r in regionData" :key="r!.id">
-          <path
-            :d="r!.d"
-            :fill="r!.colors.fill"
-            :stroke="r!.isSelected ? '#1e293b' : '#ffffff'"
-            :stroke-width="r!.isSelected ? 2.5 : 1"
-            :opacity="r!.isDimmed ? 0.45 : 1"
-            class="cursor-pointer transition-opacity duration-200"
-            @click="emit('select', r!.id)"
-            @mousemove="onHover($event, r)"
-            @mouseleave="tooltip = null"
-          />
-          <!-- Label -->
-          <text
-            :x="r!.labelX"
-            :y="r!.labelY - 5"
-            text-anchor="middle"
-            fill="white"
-            :font-size="r!.id === 'tashkent_city' ? 7 : 10"
-            font-weight="700"
-            class="pointer-events-none select-none"
-            style="paint-order: stroke; stroke: rgba(0,0,0,0.4); stroke-width: 3;"
-          >{{ isUz ? r!.short_uz : r!.short_ru }}</text>
-          <text
-            :x="r!.labelX"
-            :y="r!.labelY + 10"
-            text-anchor="middle"
-            fill="white"
-            :font-size="r!.id === 'tashkent_city' ? 9 : 13"
-            font-weight="800"
-            class="pointer-events-none select-none"
-            style="paint-order: stroke; stroke: rgba(0,0,0,0.4); stroke-width: 3;"
-          >{{ r!.avgScore }}</text>
-        </g>
-
-        <!-- Tooltip -->
-        <g v-if="tooltip" :transform="`translate(${tooltip.x}, ${tooltip.y})`" style="pointer-events:none">
-          <rect x="0" y="0" width="148" height="44" rx="6" fill="white" stroke="#e2e8f0" stroke-width="1" style="filter:drop-shadow(0 2px 6px rgba(0,0,0,0.15))"/>
-          <text x="8" y="16" font-size="11" font-weight="600" fill="#1e293b">{{ tooltip.name }}</text>
-          <text x="8" y="32" font-size="12" fill="#475569">KPI: <tspan :fill="tooltip.color" font-weight="800">{{ tooltip.score }}</tspan></text>
-        </g>
-      </svg>
-    </div>
-
-    <!-- Legend -->
-    <div class="flex items-center gap-5 justify-center flex-wrap">
-      <div v-for="(l, i) in palettes[paletteType].legend" :key="i" class="flex items-center gap-1.5">
-        <div class="w-4 h-3 rounded-sm" :style="{ background: l.color }"></div>
-        <span class="text-xs text-gray-500">{{ isUz ? l.label_uz : l.label_ru }}</span>
-      </div>
-    </div>
+  <div class="relative w-full" :style="{ height: compact ? '300px' : '500px' }">
+    <div ref="mapContainer" class="w-full h-full rounded-2xl overflow-hidden" />
   </div>
 </template>
+
+<style>
+.uzmap-popup .leaflet-popup-content-wrapper {
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+}
+.uzmap-popup .leaflet-popup-content {
+  margin: 8px 12px;
+}
+.uzmap-label {
+  background: transparent !important;
+  border: none !important;
+}
+</style>

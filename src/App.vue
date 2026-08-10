@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import AppShell from '@/components/layout/AppShell.vue'
 import MobileAppShell from '@/components/layout/MobileAppShell.vue'
 import { useAuthStore } from '@/stores/auth'
+import CreativeLoader from '@/components/ui/CreativeLoader.vue'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -17,10 +18,21 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="loading" class="flex items-center justify-center h-screen w-full bg-[#f6f7f6]">
-    <div class="text-gray-400 text-sm">Загрузка...</div>
+  <div v-if="loading" class="app-initial-loader">
+    <CreativeLoader variant="radar" :size="64" message="" />
   </div>
   <router-view v-else-if="isPublicPage" />
   <MobileAppShell v-else-if="isMiniApp" />
   <AppShell v-else />
 </template>
+
+<style scoped>
+.app-initial-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #0a0f1a 0%, #0d1a14 100%);
+}
+</style>

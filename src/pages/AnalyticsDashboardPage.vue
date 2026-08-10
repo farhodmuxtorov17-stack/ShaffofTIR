@@ -1,17 +1,29 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useSessionsHistoryStore } from '@/stores/sessionsHistory'
 import { useMasterStore } from '@/stores/master'
 import { useI18n } from '@/i18n'
-import { TrendingUp, Target, Users, Award, BarChart3, Activity, Crosshair, CheckCircle2 } from 'lucide-vue-next'
+import { TrendingUp, Target, Users, Award, BarChart3, Activity, Crosshair, CheckCircle2, MapPin } from 'lucide-vue-next'
 import KPICard from '@/components/ui/KPICard.vue'
 import LoadingState from '@/components/ui/LoadingState.vue'
+import { republicRegions } from '@/data/republicData'
 
 const loading = ref(false)
+const router = useRouter()
+const route = useRoute()
 const historyStore = useSessionsHistoryStore()
 const masterStore = useMasterStore()
 const { t, locale } = useI18n()
 const isUz = computed(() => locale.value === 'uz')
+
+const selectedRegionId = computed(() => (route.query.region as string) || '')
+const selectedRegionName = computed(() => {
+  const id = selectedRegionId.value
+  if (!id) return ''
+  const r = republicRegions.find(x => x.id === id)
+  return r ? (isUz.value ? r.name_uz : r.name_ru) : id
+})
 
 const maxScore = computed(() => Math.max(...historyStore.monthlyTrends.map((d: any) => (d as any).avg_score || (d as any).score || 0), 1))
 
@@ -50,6 +62,49 @@ const donutSegments = computed(() => {
     return seg
   })
 })
+
+// Regional breakdown
+const regionalStats = computed(() => {
+  const byRegion = new Map<string, { count: number; sessions: number; avgAccuracy: number; qualified: number }>()
+  masterStore.employees.forEach(e => {
+    const region = e.region || 'Неизвестно'
+    if (!byRegion.has(region)) byRegion.set(region, { count: 0, sessions: 0, avgAccuracy: 0, qualified: 0 })
+    const stat = byRegion.get(region)!
+    stat.count++
+    stat.sessions += e.total_sessions
+    stat.avgAccuracy += e.avg_accuracy
+    if (e.shooting_qualified) stat.qualified++
+  })
+  return Array.from(byRegion.entries()).map(([region, stat]) => ({
+    region,
+    count: stat.count,
+    sessions: stat.sessions,
+    avgAccuracy: stat.count > 0 ? Math.round(stat.avgAccuracy / stat.count) : 0,
+    qualified: stat.qualified,
+  })).sort((a, b) => b.avgAccuracy - a.avgAccuracy)
+})
+
+// Accuracy distribution
+const accuracyBuckets = computed(() => {
+  const buckets = [
+    { label: isUz.value ? '0-40%' : '0-40%', count: 0, color: '#ef4444' },
+    { label: isUz.value ? '40-60%' : '40-60%', count: 0, color: '#f59e0b' },
+    { label: isUz.value ? '60-75%' : '60-75%', count: 0, color: '#eab308' },
+    { label: isUz.value ? '75-90%' : '75-90%', count: 0, color: '#22c55e' },
+    { label: isUz.value ? '90-100%' : '90-100%', count: 0, color: '#16a34a' },
+  ]
+  historyStore.sessions.forEach(s => {
+    const a = s.accuracy || 0
+    if (a < 40) buckets[0].count++
+    else if (a < 60) buckets[1].count++
+    else if (a < 75) buckets[2].count++
+    else if (a < 90) buckets[3].count++
+    else buckets[4].count++
+  })
+  return buckets
+})
+const maxBucket = computed(() => Math.max(...accuracyBuckets.value.map(b => b.count), 1))
+
 </script>
 
 <template>
@@ -61,12 +116,21 @@ const donutSegments = computed(() => {
       <p class="text-sm text-gray-400 mt-1">{{ isUz ? "Umumiy statistika va trendlar" : "Сводная аналитика и тренды" }}</p>
     </div>
 
+    <!-- Selected region banner -->
+    <div v-if="selectedRegionId" class="rounded-2xl p-4 bg-gradient-to-r from-[#1a5c3a] to-[#145030] text-white flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <MapPin class="w-4 h-4" />
+        <span class="text-sm font-medium">{{ isUz ? 'Tanlangan viloyat' : 'Выбранный регион' }}: <b>{{ selectedRegionName || selectedRegionId }}</b></span>
+      </div>
+      <button @click="router.push('/dashboard')" class="text-xs text-emerald-200 hover:text-white">{{ isUz ? '← Boshqaruv paneli' : '← На панель' }}</button>
+    </div>
+
     <!-- KPI cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <KPICard :title="isUz ? 'Jami sessiya' : 'Сессий всего'" :value="historyStore.totalSessions" :icon="Activity" accent="brand" />
-      <KPICard :title="isUz ? 'O\'rtacha aniqlik' : 'Средняя точность'" :value="historyStore.avgAccuracy + '%'" :icon="Target" accent="blue" />
-      <KPICard :title="isUz ? 'O\'rtacha ball' : 'Средний балл'" :value="historyStore.avgScore" :icon="BarChart3" accent="purple" />
-      <KPICard :title="isUz ? 'O\'tish foizi' : 'Процент сдачи'" :value="historyStore.passRate + '%'" :icon="CheckCircle2" accent="amber" />
+      <KPICard :title="isUz ? 'Jami sessiya' : 'Сессий всего'" :value="historyStore.totalSessions" :icon="Activity" accent="brand" @click="router.push('/sessions')" style="cursor: pointer;" />
+      <KPICard :title="isUz ? 'O\'rtacha aniqlik' : 'Средняя точность'" :value="historyStore.avgAccuracy + '%'" :icon="Target" accent="blue" @click="router.push('/results')" style="cursor: pointer;" />
+      <KPICard :title="isUz ? 'O\'rtacha ball' : 'Средний балл'" :value="historyStore.avgScore" :icon="BarChart3" accent="purple" @click="router.push('/reports')" style="cursor: pointer;" />
+      <KPICard :title="isUz ? 'O\'tish foizi' : 'Процент сдачи'" :value="historyStore.passRate + '%'" :icon="CheckCircle2" accent="amber" @click="router.push('/results')" style="cursor: pointer;" />
     </div>
 
     <!-- Trend Chart -->
@@ -186,6 +250,64 @@ const donutSegments = computed(() => {
               <div class="absolute inset-x-0 top-0 h-0.5 rounded-full bg-white/30"></div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Regional breakdown table -->
+    <div class="card p-0 overflow-hidden">
+      <div class="p-5 pb-3">
+        <div class="flex items-center gap-2">
+          <MapPin class="w-4 h-4 text-gray-500" />
+          <h2 class="text-sm font-bold text-gray-700">{{ isUz ? "Viloyatlar boʻyicha tahlil" : "Анализ по регионам" }}</h2>
+        </div>
+      </div>
+      <table class="premium-table">
+        <thead>
+          <tr>
+            <th>{{ isUz ? "Viloyat" : "Регион" }}</th>
+            <th>{{ isUz ? "Xodimlar" : "Сотрудников" }}</th>
+            <th>{{ isUz ? "Sessiyalar" : "Сессий" }}</th>
+            <th>{{ isUz ? "Oʻrtacha aniqlik" : "Ср. точность" }}</th>
+            <th>{{ isUz ? "Malakali" : "Квалиф." }}</th>
+            <th>{{ isUz ? "Daraja" : "Уровень" }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="r in regionalStats" :key="r.region" class="cursor-pointer hover:bg-gray-50" @click="router.push('/hr/employees')">
+            <td class="text-sm font-bold text-gray-800">{{ r.region }}</td>
+            <td class="text-sm text-gray-600">{{ r.count }}</td>
+            <td class="text-sm text-gray-600">{{ r.sessions }}</td>
+            <td>
+              <div class="flex items-center gap-2">
+                <div class="w-16 h-1.5 rounded-full bg-gray-100 overflow-hidden">
+                  <div class="h-full rounded-full" :class="r.avgAccuracy >= 70 ? 'bg-brand-500' : r.avgAccuracy >= 60 ? 'bg-amber-500' : 'bg-red-400'" :style="`width: ${r.avgAccuracy}%`"></div>
+                </div>
+                <span class="text-xs font-bold" :class="r.avgAccuracy >= 70 ? 'text-brand-600' : r.avgAccuracy >= 60 ? 'text-amber-600' : 'text-red-500'">{{ r.avgAccuracy }}%</span>
+              </div>
+            </td>
+            <td class="text-sm text-gray-600">{{ r.qualified }}/{{ r.count }}</td>
+            <td>
+              <span class="badge" :class="r.avgAccuracy >= 70 ? 'badge-success' : r.avgAccuracy >= 60 ? 'badge-warning' : 'badge-error'">
+                {{ r.avgAccuracy >= 70 ? (isUz ? 'Yuqori' : 'Высокий') : r.avgAccuracy >= 60 ? (isUz ? "O'rta" : 'Средний') : (isUz ? 'Past' : 'Низкий') }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Accuracy distribution histogram -->
+    <div class="card p-6">
+      <div class="flex items-center gap-2 mb-5">
+        <BarChart3 class="w-4 h-4 text-gray-500" />
+        <h2 class="text-sm font-bold text-gray-700">{{ isUz ? "Aniqlik taqsimoti" : "Распределение точности" }}</h2>
+      </div>
+      <div class="flex items-end justify-between gap-4 h-40">
+        <div v-for="(b, i) in accuracyBuckets" :key="i" class="flex-1 flex flex-col items-center gap-2">
+          <span class="text-xs font-bold text-gray-700">{{ b.count }}</span>
+          <div class="w-full rounded-t-lg transition-all duration-500" :style="{ height: Math.max((b.count / maxBucket) * 100, 3) + '%', background: `linear-gradient(180deg, ${b.color} 0%, ${b.color}cc 100%)` }"></div>
+          <span class="text-[10px] text-gray-500 font-medium">{{ b.label }}</span>
         </div>
       </div>
     </div>

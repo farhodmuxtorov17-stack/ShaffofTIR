@@ -13,3 +13,13 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+declare module '*.geojson' {
+  const value: any
+  export default value
+}
+
+declare module '*.json' {
+  const value: any
+  export default value
+}

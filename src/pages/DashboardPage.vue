@@ -5,10 +5,11 @@ import { Plus, ArrowUpRight, Users, Target, Bell, ChevronRight, Crosshair, MapPi
 import { useAuthStore } from '@/stores/auth'
 import { useMasterStore } from '@/stores/master'
 import { useSessionsHistoryStore } from '@/stores/sessionsHistory'
-import UzbekistanMap from '@/components/ui/UzbekistanMap.vue'
 import { useSessionRequestStore } from '@/stores/sessionRequests'
 import { useI18n } from '@/i18n'
+import { republicRegions } from '@/data/republicData'
 import LoadingState from '@/components/ui/LoadingState.vue'
+import UzbekistanMap from '@/components/ui/UzbekistanMap.vue'
 import NewSessionModal from '@/components/session/NewSessionModal.vue'
 
 const router = useRouter()
@@ -121,6 +122,11 @@ const weekDays = computed(() => {
   return days.map((d, i) => ({ label: d, value: values[i], pct: Math.round((values[i] / maxVal) * 100), isToday: i === 3 }))
 })
 
+const _dashboardVersion = '2.1.0'
+const topRegions = computed(() => {
+  return [...republicRegions].sort((a, b) => b.avgScore - a.avgScore).slice(0, 8)
+})
+
 const topPerformers = computed(() => historyStore.topPerformers)
 const recentSessions = computed(() => historyStore.sessions.slice(0, 5))
 const activeLanes = computed(() => masterStore.lanes.filter(l => l.status === 'OCCUPIED').slice(0, 2))
@@ -130,6 +136,10 @@ function handleSessionCreated(sessionId: string) {
   router.push(`/sessions/${sessionId}`)
 }
 
+function onRegionSelect(regionId: string) {
+  router.push({ path: '/analytics', query: { region: regionId } })
+}
+
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 300)
 })
@@ -137,7 +147,7 @@ onMounted(() => {
 
 <template>
   <LoadingState v-if="loading" />
-  <div v-if="!loading" class="space-y-5">
+  <div v-if="!loading" class="space-y-5 animate-fade-in">
     <!-- Page Header -->
     <div class="flex items-start justify-between">
       <div>
@@ -145,13 +155,13 @@ onMounted(() => {
           {{ isUz ? "Boshqaruv paneli" : "Панель управления" }}
         </h1>
         <p class="text-sm text-gray-400 mt-0.5">
-          {{ isUz ? "Otish mashg'ulotlarini rejalashtiring va nazorat qiling." : "Планируйте и контролируйте стрелковую подготовку." }}
+          {{ isUz ? "Otish mashg'ulotlarini rejalashtiring va nazorat qiling." : "Планируйте и контролируйте огневую подготовку." }}
         </p>
       </div>
       <div class="flex items-center gap-2" v-if="!isEmployee">
         <button @click="showNewSession = true"
           class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a5c3a] text-white text-sm font-medium hover:bg-[#145030] transition shadow-sm">
-          <Plus class="w-4 h-4" /> {{ isUz ? "Yangi sessiya" : "+ Новая сессия" }}
+          <Plus class="w-4 h-4" /> {{ isUz ? "Yangi sessiya" : "Новая сессия" }}
         </button>
         <button @click="router.push('/reports')"
           class="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 text-sm font-medium hover:bg-gray-50 transition">
@@ -183,7 +193,7 @@ onMounted(() => {
 
     <!-- KPI Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="rounded-2xl p-5 cursor-pointer hover:opacity-95 transition" style="background: #1a5c3a;" @click="router.push('/sessions')">
+      <div class="rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-lg" style="background: linear-gradient(135deg, #1a5c3a, #145030);" @click="router.push('/sessions')">
         <div class="flex items-start justify-between mb-4">
           <p class="text-sm text-emerald-200/80">{{ isUz ? "Jami sessiyalar" : "Всего сессий" }}</p>
           <ArrowUpRight class="w-3.5 h-3.5 text-white" />
@@ -195,7 +205,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="rounded-2xl p-5 bg-white border border-gray-100 cursor-pointer hover:border-gray-200 hover:shadow-sm transition" @click="router.push('/sessions')">
+      <div class="rounded-2xl p-5 bg-white border border-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md hover:border-gray-200" @click="router.push('/sessions')">
         <div class="flex items-start justify-between mb-4">
           <p class="text-sm text-gray-400">{{ isUz ? "Tugatilgan" : "Завершённые" }}</p>
           <ArrowUpRight class="w-3.5 h-3.5 text-gray-500" />
@@ -207,7 +217,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="rounded-2xl p-5 bg-white border border-gray-100 cursor-pointer hover:border-gray-200 hover:shadow-sm transition" @click="router.push('/hr/employees')">
+      <div class="rounded-2xl p-5 bg-white border border-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md hover:border-gray-200" @click="router.push('/hr/employees')">
         <div class="flex items-start justify-between mb-4">
           <p class="text-sm text-gray-400">{{ isUz ? "Xodimlar" : "Сотрудники" }}</p>
           <ArrowUpRight class="w-3.5 h-3.5 text-gray-500" />
@@ -219,7 +229,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <div class="rounded-2xl p-5 bg-white border border-gray-100 cursor-pointer hover:border-gray-200 hover:shadow-sm transition" @click="router.push('/sessions')">
+      <div class="rounded-2xl p-5 bg-white border border-gray-100 cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md hover:border-gray-200" @click="router.push('/sessions')">
         <div class="flex items-start justify-between mb-4">
           <p class="text-sm text-gray-400">{{ isUz ? "Kutilayotgan" : "В ожидании" }}</p>
           <ArrowUpRight class="w-3.5 h-3.5 text-gray-500" />
@@ -232,18 +242,40 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Uzbekistan Map -->
-    <div class="bg-white rounded-2xl p-5 border border-gray-100" v-if="!isEmployee">
-      <div class="flex items-center justify-between mb-4">
-        <div class="flex items-center gap-2">
-          <MapPin class="w-4 h-4 text-[#1a5c3a]" />
-          <h2 class="font-semibold text-gray-900 text-sm">{{ isUz ? "Respublika boʻyicha holat" : "Состояние по Республике" }}</h2>
+    <!-- Regional map + top regions -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4" v-if="!isEmployee">
+      <!-- Compact map (3/5 width on desktop) -->
+      <div class="lg:col-span-3 bg-white rounded-2xl p-5 border border-gray-100 transition-all duration-300 hover:shadow-md">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <MapPin class="w-4 h-4 text-[#1a5c3a]" />
+            <h2 class="font-semibold text-gray-900 text-sm">{{ isUz ? "Respublika xaritasi" : "Карта Республики" }}</h2>
+          </div>
+          <button @click="router.push('/analytics')" class="text-xs text-[#1a5c3a] hover:underline font-medium">
+            {{ isUz ? "Batafsil →" : "Подробнее →" }}
+          </button>
         </div>
-        <button @click="router.push('/command-center')" class="text-xs text-[#1a5c3a] hover:underline font-medium">
-          {{ isUz ? "Batafsil →" : "Подробнее →" }}
-        </button>
+        <div class="aspect-[5/3] w-full">
+          <UzbekistanMap @select="onRegionSelect"
+          compact /> />
+        </div>
       </div>
-      <UzbekistanMap @select="(id: string) => router.push('/command-center')" />
+      <!-- Top regions list (2/5 width on desktop) -->
+      <div class="lg:col-span-2 bg-white rounded-2xl p-5 border border-gray-100 transition-all duration-300 hover:shadow-md">
+        <div class="flex items-center gap-2 mb-3">
+          <Target class="w-4 h-4 text-[#1a5c3a]" />
+          <h2 class="font-semibold text-gray-900 text-sm">{{ isUz ? "Top viloyatlar" : "Топ регионов" }}</h2>
+        </div>
+        <div class="space-y-2">
+          <div v-for="r in topRegions" :key="r.id" class="flex items-center gap-2.5 p-2.5 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer" @click="router.push('/analytics')">
+            <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" :class="r.avgScore >= 70 ? 'bg-green-500' : r.avgScore >= 60 ? 'bg-amber-500' : 'bg-red-500'"></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-medium text-gray-700 truncate">{{ isUz ? r.short_uz : r.short_ru }}</p>
+            </div>
+            <p class="text-sm font-bold flex-shrink-0" :class="r.avgScore >= 70 ? 'text-green-600' : r.avgScore >= 60 ? 'text-amber-600' : 'text-red-600'">{{ r.avgScore }}</p>
+          </div>
+        </div>
+      </div>
     </div>
     <!-- Stats row: Bar chart + Regional breakdown -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -259,7 +291,7 @@ onMounted(() => {
             <div class="w-full rounded-t-lg relative overflow-hidden transition-all duration-500"
               :style="{ height: d.pct + '%', minHeight: '8px', background: d.isToday ? '#1a5c3a' : '#e8f5ee' }">
               <div v-if="!d.isToday" class="absolute inset-0"
-                style="background: repeating-linear-gradient(135deg, #d1eedd 0px, #d1eedd 3px, transparent 3px, transparent 7px)"></div>
+                style="background: repeating-linear-gradient(135deg, #d1eedd 0px, #d1eedd 3px, transparent 3px, transparent 7px); animation: barRise 0.6s ease-out"></div>
             </div>
           </div>
         </div>
@@ -298,7 +330,7 @@ onMounted(() => {
 
     <!-- Quick stats row -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3">
+      <div class="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3 transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
         <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
           <Target class="w-5 h-5 text-emerald-600" />
         </div>
@@ -307,7 +339,7 @@ onMounted(() => {
           <p class="text-[10px] text-gray-400">{{ isUz ? "Oʻrtacha aniqlik" : "Средняя точность" }}</p>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3">
+      <div class="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3 transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
         <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
           <Crosshair class="w-5 h-5 text-blue-600" />
         </div>
@@ -316,7 +348,7 @@ onMounted(() => {
           <p class="text-[10px] text-gray-400">{{ isUz ? "Jami oʻq otish" : "Всего выстрелов" }}</p>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3">
+      <div class="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3 transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
         <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center shrink-0">
           <Users class="w-5 h-5 text-amber-600" />
         </div>
@@ -325,7 +357,7 @@ onMounted(() => {
           <p class="text-[10px] text-gray-400">{{ isUz ? "Oʻtish foizi" : "Процент сдачи" }}</p>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3">
+      <div class="bg-white rounded-2xl p-4 border border-gray-100 flex items-center gap-3 transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
         <div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
           <Crosshair class="w-5 h-5 text-purple-600" />
         </div>

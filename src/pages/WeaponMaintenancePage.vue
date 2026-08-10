@@ -21,10 +21,10 @@ const conditionColors: Record<string, string> = { EXCELLENT: 'text-brand-600', G
   <div v-if="!loading" class="space-y-6">
     <div>
       <h1 class="text-xl font-bold text-gray-900">{{ isUz ? 'Texnik xizmat' : 'Обслуживание' }} оружия</h1>
-      <p class="text-sm text-gray-500 mt-1">График ТО и состояние оружия</p>
+      <p class="text-sm text-gray-500 mt-1">{ isUz ? 'TO grafik va qurol holati' : 'График ТО и состояние оружия' }</p>
     </div>
     <div v-if="maintenanceWeapons.length > 0" class="card border-amber-200 bg-amber-50/30">
-      <div class="flex items-center gap-2 mb-3"><AlertCircle class="w-4 h-4 text-amber-600" /><h2 class="text-sm font-bold text-amber-900">Требует внимания</h2></div>
+      <div class="flex items-center gap-2 mb-3"><AlertCircle class="w-4 h-4 text-amber-600" /><h2 class="text-sm font-bold text-amber-900">{{ isUz ? 'E\u02bbeibor berish kerak' : 'Требует внимания' }}</h2></div>
       <div class="space-y-2">
         <div v-for="w in maintenanceWeapons" :key="w.id" class="flex items-center justify-between p-3 rounded-xl bg-white border border-amber-100">
           <div class="flex items-center gap-3"><Crosshair class="w-5 h-5 text-gray-400" /><div><p class="text-sm font-semibold text-gray-800">{{ w.name }}</p><p class="text-xs text-gray-400">{{ w.serial_number }} · {{ w.total_shots_fired }} выстрелов</p></div></div>
@@ -34,7 +34,7 @@ const conditionColors: Record<string, string> = { EXCELLENT: 'text-brand-600', G
     </div>
     <div class="card overflow-hidden p-0">
       <table class="w-full text-left text-sm">
-        <thead class="bg-gray-50/70 border-b border-shell-border text-gray-500"><tr><th class="px-4 py-3 font-medium">{{ isUz ? 'Qurol' : 'Оружие' }}</th><th class="px-4 py-3 font-medium">Состояние</th><th class="px-4 py-3 font-medium">{{ isUz ? 'Holat' : 'Статус' }}</th><th class="px-4 py-3 font-medium">Выстрелов</th><th class="px-4 py-3 font-medium">Последнее ТО</th></tr></thead>
+        <thead class="bg-gray-50/70 border-b border-shell-border text-gray-500"><tr><th class="px-4 py-3 font-medium">{{ isUz ? 'Qurol' : 'Оружие' }}</th><th class="px-4 py-3 font-medium">{{ isUz ? 'Holat' : 'Состояние' }}</th><th class="px-4 py-3 font-medium">{{ isUz ? 'Holat' : 'Статус' }}</th><th class="px-4 py-3 font-medium">{{ isUz ? 'O\u02bbqilar' : 'Выстрелов' }}</th><th class="px-4 py-3 font-medium">{{ isUz ? 'So\u02bbnggi TO' : 'Последнее ТО' }}</th></tr></thead>
         <tbody class="divide-y divide-shell-border">
           <tr v-for="w in allWeapons" :key="w.id" class="hover:bg-gray-50/50 transition">
             <td class="px-4 py-3"><p class="text-xs font-semibold text-gray-800">{{ w.name }}</p><p class="text-[10px] text-gray-400 font-mono">{{ w.serial_number }}</p></td>

@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useMasterStore } from '@/stores/master'
 import { useSessionsHistoryStore } from '@/stores/sessionsHistory'
 import { useI18n } from '@/i18n'
-import { Mail, Phone, Shield, Calendar, Target, Award, TrendingUp, Activity, ChevronRight, Crosshair, Route, Camera, Wrench, Server, Zap, CheckCircle2, AlertTriangle, Clock, MapPin } from 'lucide-vue-next'
+import { Mail, Phone, Shield, Calendar, Target, Award, TrendingUp, Activity, ChevronRight, Crosshair, Route, Camera, Wrench, Server, Zap, CheckCircle2, AlertTriangle, Clock, MapPin, Settings, Globe, Bell, Lock } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import LoadingState from '@/components/ui/LoadingState.vue'
 
@@ -404,5 +404,48 @@ function regionLabel(value: string) {
         </div>
       </div>
     </template>
+
+    <!-- Settings & Preferences -->
+    <div class="bg-white rounded-2xl border border-gray-100 p-5">
+      <div class="flex items-center gap-2 mb-4">
+        <Settings class="w-4 h-4 text-gray-500" />
+        <h2 class="text-sm font-bold text-gray-900">{{ isUz ? "Sozlamalar" : "Настройки" }}</h2>
+      </div>
+      <div class="space-y-3">
+        <!-- Language -->
+        <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50">
+          <div class="flex items-center gap-3">
+            <Globe class="w-4 h-4 text-gray-400" />
+            <div>
+              <p class="text-sm font-medium text-gray-700">{{ isUz ? "Til" : "Язык" }}</p>
+              <p class="text-xs text-gray-400">{{ isUz ? "Interfeys tili" : "Язык интерфейса" }}</p>
+            </div>
+          </div>
+          <span class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-gray-200">{{ locale === 'ru' ? 'Русский' : "O'zbek" }}</span>
+        </div>
+        <!-- Password -->
+        <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50">
+          <div class="flex items-center gap-3">
+            <Lock class="w-4 h-4 text-gray-400" />
+            <div>
+              <p class="text-sm font-medium text-gray-700">{{ isUz ? "Parol" : "Пароль" }}</p>
+              <p class="text-xs text-gray-400">{{ isUz ? "Parolni o'zgartirish" : "Сменить пароль" }}</p>
+            </div>
+          </div>
+          <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-brand-600 border border-brand-200 hover:bg-brand-50 transition">{{ isUz ? "O'zgartirish" : "Изменить" }}</button>
+        </div>
+        <!-- Help -->
+        <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50">
+          <div class="flex items-center gap-3">
+            <Shield class="w-4 h-4 text-gray-400" />
+            <div>
+              <p class="text-sm font-medium text-gray-700">{{ isUz ? "Yordam" : "Помощь" }}</p>
+              <p class="text-xs text-gray-400">{{ isUz ? "Yo'riqnoma va FAQ" : "Руководство и FAQ" }}</p>
+            </div>
+          </div>
+          <button @click="router.push('/help')" class="px-3 py-1.5 rounded-lg text-xs font-medium text-gray-600 border border-gray-200 hover:bg-gray-50 transition">{{ isUz ? "Ochish" : "Открыть" }}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

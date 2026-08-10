@@ -60,6 +60,7 @@ const translations = {
     'nav.trainingMaterials': 'Учебные материалы',
     'nav.equipment': 'Оборудование',
     'nav.analytics': 'Аналитика',
+    'nav.liveRange': 'Ситуационный центр',
     'nav.system': 'Система',
     'nav.other': 'Прочее',
 
@@ -402,6 +403,7 @@ const translations = {
     'nav.trainingMaterials': "Oʻquv materiallari",
     'nav.equipment': 'Uskuna',
     'nav.analytics': 'Tahlil',
+    'nav.liveRange': 'TIR Jonli Markazi',
     'nav.system': 'Tizim',
     'nav.other': 'Boshqa',
 

@@ -181,7 +181,7 @@ export const republicRegions: RegionData[] = [
     name_uz: 'Surxondaryo viloyati',
     short_ru: 'Сурхандарья',
     short_uz: 'Surxondaryo',
-    totalEmployees: 250, qualifiedEmployees: 198, avgScore: 65.3, sessionsThisMonth: 16,
+    totalEmployees: 250, qualifiedEmployees: 168, avgScore: 58.0, sessionsThisMonth: 16,
     districts: [
       { id: 'sr_termez', name_ru: 'Термезский', name_uz: 'Termiz', units: 3, employees: 58, qualified: 46, avgScore: 68.5, sessionsThisMonth: 4 },
       { id: 'sr_denau', name_ru: 'Денауский', name_uz: 'Denov', units: 2, employees: 42, qualified: 33, avgScore: 63.2, sessionsThisMonth: 3 },
@@ -225,14 +225,14 @@ export const republicRegions: RegionData[] = [
     name_uz: 'Qoraqalpog\'iston Respublikasi',
     short_ru: 'Каракалпакстан',
     short_uz: 'Qoraqalpog\'iston',
-    totalEmployees: 280, qualifiedEmployees: 218, avgScore: 63.5, sessionsThisMonth: 15,
+    totalEmployees: 280, qualifiedEmployees: 198, avgScore: 57.5, sessionsThisMonth: 15,
     districts: [
       { id: 'kp_nukus', name_ru: 'Нукусский', name_uz: 'Nukus', units: 3, employees: 62, qualified: 48, avgScore: 66.2, sessionsThisMonth: 4 },
-      { id: 'kp_chimboy', name_ru: 'Чимбайский', name_uz: 'Chimboy', units: 2, employees: 38, qualified: 29, avgScore: 60.5, sessionsThisMonth: 3 },
-      { id: 'kp_kungrad', name_ru: 'Кунградский', name_uz: 'Qo\'ng\'irot', units: 2, employees: 40, qualified: 31, avgScore: 62.1, sessionsThisMonth: 2 },
+      { id: 'kp_chimboy', name_ru: 'Чимбайский', name_uz: 'Chimboy', units: 2, employees: 38, qualified: 29, avgScore: 54.2, sessionsThisMonth: 3 },
+      { id: 'kp_kungrad', name_ru: 'Кунградский', name_uz: 'Qo\'ng\'irot', units: 2, employees: 40, qualified: 31, avgScore: 55.8, sessionsThisMonth: 2 },
       { id: 'kp_beruniy', name_ru: 'Берунийский', name_uz: 'Beruniy', units: 2, employees: 42, qualified: 33, avgScore: 64.8, sessionsThisMonth: 3 },
-      { id: 'kp_turtkul', name_ru: 'Турткульский', name_uz: 'To\'rtko\'l', units: 2, employees: 38, qualified: 30, avgScore: 61.5, sessionsThisMonth: 2 },
-      { id: 'kp_ellikqala', name_ru: 'Элликкалинский', name_uz: 'Ellikqal\'a', units: 2, employees: 35, qualified: 27, avgScore: 60.0, sessionsThisMonth: 1 },
+      { id: 'kp_turtkul', name_ru: 'Турткульский', name_uz: 'To\'rtko\'l', units: 2, employees: 38, qualified: 30, avgScore: 56.3, sessionsThisMonth: 2 },
+      { id: 'kp_ellikqala', name_ru: 'Элликкалинский', name_uz: 'Ellikqal\'a', units: 2, employees: 35, qualified: 27, avgScore: 52.1, sessionsThisMonth: 1 },
     ],
   },
 ]

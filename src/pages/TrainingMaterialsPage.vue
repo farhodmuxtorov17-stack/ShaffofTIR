@@ -10,6 +10,32 @@ const auth = useAuthStore()
 const masterStore = useMasterStore()
 const { locale } = useI18n()
 const loading = ref(true)
+
+// Role-based view
+const userRole = computed(() => auth.user?.role || "EMPLOYEE")
+const isLearner = computed(() => userRole.value === "EMPLOYEE")
+const canManageMaterials = computed(() => userRole.value === "SUPER_ADMIN" || userRole.value === "INSTRUCTOR")
+const canMonitor = computed(() => userRole.value === "SUPER_ADMIN" || userRole.value === "MANAGER" || userRole.value === "INSTRUCTOR")
+
+// Employee training progress for monitoring
+const employeeProgress = computed(() => {
+  return masterStore.employees.map(e => ({
+    id: e.id,
+    name: e.full_name,
+    rank: e.rank,
+    department: e.department,
+    qualified: e.shooting_qualified,
+    totalSessions: e.total_sessions,
+    avgAccuracy: e.avg_accuracy,
+    tbPassed: e.tb_test_passed !== false,
+  }))
+})
+const searchQuery = ref("")
+const filteredEmployees = computed(() => {
+  if (!searchQuery.value) return employeeProgress.value
+  const q = searchQuery.value.toLowerCase()
+  return employeeProgress.value.filter(e => e.name.toLowerCase().includes(q))
+})
 const isUz = computed(() => locale.value === 'uz')
 
 type Phase = 'overview' | 'reading' | 'test' | 'result'
@@ -288,8 +314,68 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
 
 <template>
   <LoadingState v-if="loading" />
-  <div v-if="!loading" class="p-6 max-w-4xl mx-auto space-y-6">
+  <div v-if="!loading" class="p-6 max-w-6xl mx-auto space-y-6">
 
+    <!-- Manager/Admin/Instructor: Monitor employees -->
+    <template v-if="!isLearner">
+      <div>
+        <h1 class="text-xl font-extrabold text-gray-900" style="letter-spacing: -0.02em;">
+          {{ isUz ? "Oʻquv materiallari" : "Учебные материалы" }}
+        </h1>
+        <p class="text-sm text-gray-400 mt-1">{{ isUz ? "Xodimlar oʻquv natijalari monitoringi" : "Мониторинг результатов сотрудников" }}</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card p-4"><div class="text-xs text-gray-500 mb-1">{{ isUz ? "Jami xodimlar" : "Всего сотр." }}</div><p class="text-2xl font-bold text-gray-900">{{ employeeProgress.length }}</p></div>
+        <div class="card p-4"><div class="text-xs text-gray-500 mb-1">{{ isUz ? "TB oʻtgan" : "ТБ сдали" }}</div><p class="text-2xl font-bold text-green-600">{{ employeeProgress.filter(e => e.tbPassed).length }}</p></div>
+        <div class="card p-4"><div class="text-xs text-gray-500 mb-1">{{ isUz ? "Malakali" : "Квалиф." }}</div><p class="text-2xl font-bold text-blue-600">{{ employeeProgress.filter(e => e.qualified).length }}</p></div>
+        <div class="card p-4"><div class="text-xs text-gray-500 mb-1">{{ isUz ? "Oʻrtacha aniqlik" : "Ср. точн." }}</div><p class="text-2xl font-bold text-amber-600">{{ employeeProgress.length > 0 ? Math.round(employeeProgress.reduce((s, e) => s + e.avgAccuracy, 0) / employeeProgress.length) : 0 }}%</p></div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <input v-model="searchQuery" type="text" :placeholder="isUz ? 'Qidirish...' : 'Поиск...'" class="input flex-1" />
+      </div>
+
+      <div class="card p-0 overflow-hidden">
+        <table class="premium-table">
+          <thead>
+            <tr>
+              <th>{{ isUz ? "Xodim" : "Сотрудник" }}</th>
+              <th>{{ isUz ? "Lavozim" : "Звание" }}</th>
+              <th>{{ isUz ? "Boʻlinma" : "Подразд." }}</th>
+              <th>{{ isUz ? "Sessiyalar" : "Сессий" }}</th>
+              <th>{{ isUz ? "Aniqlik" : "Точн." }}</th>
+              <th>{{ isUz ? "TB test" : "ТБ тест" }}</th>
+              <th>{{ isUz ? "Malaka" : "Квал." }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="emp in filteredEmployees" :key="emp.id">
+              <td><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 text-white flex items-center justify-center text-xs font-bold">{{ emp.name.charAt(0) }}</div><p class="text-sm font-bold text-gray-800">{{ emp.name }}</p></div></td>
+              <td class="text-sm text-gray-600">{{ emp.rank }}</td>
+              <td class="text-sm text-gray-600">{{ emp.department }}</td>
+              <td class="text-sm text-gray-600">{{ emp.totalSessions }}</td>
+              <td><div class="flex items-center gap-2"><div class="w-12 h-1.5 rounded-full bg-gray-100 overflow-hidden"><div class="h-full rounded-full" :class="emp.avgAccuracy >= 70 ? 'bg-brand-500' : emp.avgAccuracy >= 60 ? 'bg-amber-500' : 'bg-red-400'" :style="`width: ${emp.avgAccuracy}%`"></div></div><span class="text-xs font-bold text-gray-600">{{ emp.avgAccuracy }}%</span></div></td>
+              <td><span class="badge" :class="emp.tbPassed ? 'badge-success' : 'badge-warning'">{{ emp.tbPassed ? (isUz ? "Oʻtgan" : "Сдал") : (isUz ? "Oʻtmagan" : "Не сдал") }}</span></td>
+              <td><span class="badge" :class="emp.qualified ? 'badge-success' : 'badge-neutral'">{{ emp.qualified ? (isUz ? "Malakali" : "Да") : (isUz ? "Emas" : "Нет") }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card p-5">
+        <h3 class="text-sm font-bold text-gray-800 mb-3">{{ isUz ? "TB kursi tarkibi" : "Содержание курса ТБ" }}</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div v-for="s in sections" :key="s.id" class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center" :style="`background: ${s.color}15`"><component :is="s.icon" class="w-4 h-4" :style="`color: ${s.color}`" /></div>
+            <div><p class="text-sm font-medium text-gray-700">{{ isUz ? s.title_uz : s.title_ru }}</p><p class="text-[10px] text-gray-400">{{ (isUz ? s.content_uz : s.content_ru).length }} {{ isUz ? "qoida" : "пунктов" }}</p></div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Employee: Learning mode -->
+    <template v-if="isLearner">
     <!-- Overview Phase -->
     <template v-if="phase === 'overview'">
       <!-- Header -->
@@ -564,6 +650,7 @@ const progressPercent = computed(() => Math.round((completedSections.value.lengt
           </div>
         </div>
       </div>
+    </template>
     </template>
 
   </div>

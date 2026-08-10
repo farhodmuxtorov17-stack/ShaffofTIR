@@ -61,12 +61,16 @@ interface Booking {
 }
 
 const bookings = ref<Booking[]>([
-  { id: 'b001', employeeId: 'e001', employeeName: 'Алиев Б.У.', lane: 1, date: '2026-07-23', startTime: '09:00', endTime: '10:00', weapon: 'АК-12', notes: 'Плановая стрельба', status: 'CONFIRMED' },
-  { id: 'b002', employeeId: 'e003', employeeName: 'Юлдашев Д.А.', lane: 1, date: '2026-07-23', startTime: '14:00', endTime: '15:00', weapon: 'АК-12', notes: 'Скоростная', status: 'CONFIRMED' },
-  { id: 'b003', employeeId: 'e005', employeeName: 'Махмудов С.Б.', lane: 2, date: '2026-07-23', startTime: '10:00', endTime: '11:00', weapon: 'ПК', notes: '', status: 'CONFIRMED' },
-  { id: 'b004', employeeId: 'e006', employeeName: 'Каримов А.У.', lane: 3, date: '2026-07-23', startTime: '11:00', endTime: '12:00', weapon: 'СВД', notes: 'Снайперская', status: 'CONFIRMED' },
-  { id: 'b005', employeeId: 'e008', employeeName: 'Тошматов Ф.Ш.', lane: 1, date: '2026-07-24', startTime: '09:00', endTime: '10:30', weapon: 'АК-12', notes: 'Инструкторская', status: 'CONFIRMED' },
-  { id: 'b006', employeeId: 'e015', employeeName: 'Назаров Б.Х.', lane: 2, date: '2026-07-24', startTime: '15:00', endTime: '16:00', weapon: 'СВД', notes: 'Разведка', status: 'CONFIRMED' },
+  { id: 'b001', employeeId: 'e001', employeeName: 'Алиев Б.У.', lane: 1, date: '2026-08-10', startTime: '09:00', endTime: '10:00', weapon: 'АК-12', notes: 'Плановая стрельба', status: 'CONFIRMED' },
+  { id: 'b002', employeeId: 'e003', employeeName: 'Юлдашев Д.А.', lane: 1, date: '2026-08-10', startTime: '14:00', endTime: '15:00', weapon: 'АК-12', notes: 'Скоростная', status: 'CONFIRMED' },
+  { id: 'b003', employeeId: 'e005', employeeName: 'Махмудов С.Б.', lane: 2, date: '2026-08-10', startTime: '10:00', endTime: '11:00', weapon: 'ПК', notes: '', status: 'CONFIRMED' },
+  { id: 'b004', employeeId: 'e006', employeeName: 'Каримов А.У.', lane: 3, date: '2026-08-10', startTime: '11:00', endTime: '12:00', weapon: 'СВД', notes: 'Снайперская', status: 'CONFIRMED' },
+  { id: 'b005', employeeId: 'e008', employeeName: 'Тошматов Ф.Ш.', lane: 1, date: '2026-08-11', startTime: '09:00', endTime: '10:30', weapon: 'АК-12', notes: 'Инструкторская', status: 'CONFIRMED' },
+  { id: 'b006', employeeId: 'e015', employeeName: 'Назаров Б.Х.', lane: 2, date: '2026-08-11', startTime: '15:00', endTime: '16:00', weapon: 'СВД', notes: 'Разведка', status: 'CONFIRMED' },
+  { id: 'b007', employeeId: 'e010', employeeName: 'Эргашев Р.Т.', lane: 4, date: '2026-08-12', startTime: '09:00', endTime: '10:00', weapon: 'АК-12', notes: 'Подготовка', status: 'CONFIRMED' },
+  { id: 'b008', employeeId: 'e012', employeeName: 'Халимов Д.С.', lane: 5, date: '2026-08-12', startTime: '13:00', endTime: '14:00', weapon: 'РПК', notes: 'Контроль', status: 'CONFIRMED' },
+  { id: 'b009', employeeId: 'e004', employeeName: 'Рахимов Ж.А.', lane: 2, date: '2026-08-13', startTime: '10:00', endTime: '11:30', weapon: 'АК-12', notes: '', status: 'CONFIRMED' },
+  { id: 'b010', employeeId: 'e007', employeeName: 'Саидов М.К.', lane: 6, date: '2026-08-14', startTime: '14:00', endTime: '15:00', weapon: 'ПМ', notes: 'Короткое', status: 'CONFIRMED' },
 ])
 
 // --- Time slots 
@@ -250,7 +254,7 @@ function openSession(id: string) {
   router.push(`/sessions/${id}`)
 }
 function newSession() {
-  router.push('/dashboard')
+  router.push('/range/dashboard')
 }
 
 // --- Requests 
@@ -286,8 +290,7 @@ const filteredEmployees = computed(() => {
         <h1 class="text-xl font-extrabold text-gray-900" style="letter-spacing: -0.02em;">{{ isUz ? "Mashg'ulotlar" : "Сессии" }}</h1>
         <p class="text-sm text-gray-400 mt-1">{{ isUz ? "Sessiyalar, kalendar va soʻrovlar" : "Сессии, календарь и запросы" }}</p>
       </div>
-      <button class="btn-primary flex items-center gap-2" @click="newSession">
-        <Plus class="w-4 h-4" />
+      <button class="btn-primary" @click="newSession">
         {{ isUz ? "Yangi mashg'ulot" : "Новая сессия" }}
       </button>
     </div>

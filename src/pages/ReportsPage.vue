@@ -69,7 +69,8 @@ function exportData() {
         <button class="btn-secondary text-xs" @click="exportData">
           <Download class="w-3.5 h-3.5" /> CSV
         </button>
-        <button class="btn-primary text-xs" @click="printReport">
+        <button class="btn-primary text-xs" @click="router.push('/reports/create')"><FileText class="w-3.5 h-3.5" /> {{ isUz ? "+ Hisobot yaratish" : "Создать отчёт" }}</button>
+        <button class="btn-secondary text-xs" @click="printReport">
           <FileText class="w-3.5 h-3.5" /> {{ isUz ? "Chop etish" : "Печать" }}
         </button>
       </div>
