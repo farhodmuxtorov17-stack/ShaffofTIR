@@ -46,12 +46,23 @@ const routes = [
 
   { path: '/kpi/catalog', name: 'KpiCatalog', component: () => import('@/pages/KpiCatalogPage.vue') },
   { path: '/kpi/editor', name: 'KpiEditor', component: () => import('@/pages/KpiEditorPage.vue') },
-
+  { path: '/kpi/periods', name: 'EvaluationPeriods', component: () => import('@/pages/EvaluationPeriodsPage.vue') },
 
   { path: '/objections', name: 'Objections', component: () => import('@/pages/ObjectionsPage.vue') },
   { path: '/approval-tasks', name: 'ApprovalTasks', component: () => import('@/pages/ApprovalTasksPage.vue') },
 
   { path: '/recommendations', name: 'AutoRecommendations', component: () => import('@/pages/AutoRecommendationsPage.vue') },
+  { path: '/action-plans', name: 'ActionPlans', component: () => import('@/pages/ActionPlansPage.vue') },
+
+  { path: '/command-center', name: 'CommandCenter', component: () => import('@/pages/CommandCenterPage.vue') },
+  { path: '/org-structure', name: 'OrgStructure', component: () => import('@/pages/OrgStructurePage.vue') },
+  { path: '/data-quality', name: 'DataQuality', component: () => import('@/pages/DataQualityPage.vue') },
+  { path: '/integration-monitoring', name: 'IntegrationMonitoring', component: () => import('@/pages/IntegrationMonitoringPage.vue') },
+
+  { path: '/notifications', name: 'Notifications', component: () => import('@/pages/NotificationsPage.vue') },
+  { path: '/notifications/settings', name: 'NotificationSettings', component: () => import('@/pages/NotificationSettingsPage.vue') },
+
+  { path: '/calculation-jobs', name: 'CalculationJobs', component: () => import('@/pages/CalculationJobsPage.vue') },
 
   { path: '/reports', name: 'Reports', component: () => import('@/pages/ReportsPage.vue') },
   { path: '/reports/create', name: 'ReportCreation', component: () => import('@/pages/ReportCreationPage.vue') },
@@ -96,7 +107,6 @@ const routes = [
   { path: '/analytics/groups', name: 'GroupAnalytics', component: () => import('@/pages/GroupAnalyticsPage.vue') },
   { path: '/analytics/trends', name: 'PerformanceTrends', component: () => import('@/pages/PerformanceTrendsPage.vue') },
 
-
   { path: '/help', name: 'Help', component: () => import('@/pages/HelpPage.vue') },
   { path: '/about', redirect: '/help' },
 
@@ -112,6 +122,7 @@ const router = createRouter({
 
 const routeRoles: Record<string, string[]> = {
   '/dashboard': ['MANAGER', 'INSTRUCTOR'],
+  '/range/schedule': ['INSTRUCTOR', 'EMPLOYEE'],
   '/range': ['INSTRUCTOR'],
   '/sessions': ['INSTRUCTOR'],
   '/results': ['MANAGER', 'INSTRUCTOR', 'EMPLOYEE'],
@@ -133,7 +144,14 @@ const routeRoles: Record<string, string[]> = {
   '/kpi': ['SUPER_ADMIN', 'MANAGER'],
   '/objections': ['SUPER_ADMIN', 'MANAGER'],
   '/approval-tasks': ['SUPER_ADMIN', 'MANAGER'],
-  '/recommendations': ['SUPER_ADMIN', 'MANAGER'],
+  '/recommendations': ['SUPER_ADMIN', 'MANAGER', 'EMPLOYEE'],
+  '/action-plans': ['SUPER_ADMIN', 'MANAGER'],
+  '/command-center': ['SUPER_ADMIN', 'MANAGER'],
+  '/org-structure': ['SUPER_ADMIN', 'MANAGER'],
+  '/data-quality': ['SUPER_ADMIN', 'MANAGER'],
+  '/integration-monitoring': ['SUPER_ADMIN'],
+  '/notifications': ['SUPER_ADMIN', 'MANAGER', 'INSTRUCTOR', 'EMPLOYEE', 'TECHSPEC'],
+  '/calculation-jobs': ['SUPER_ADMIN'],
   '/admin': ['SUPER_ADMIN'],
   '/profile': ['SUPER_ADMIN', 'MANAGER', 'INSTRUCTOR', 'EMPLOYEE', 'TECHSPEC'],
   '/system-health': ['SUPER_ADMIN'],
@@ -155,6 +173,11 @@ router.beforeEach((to, _from, next) => {
   // Preserve miniapp query param
   if (to.query.miniapp !== '1' && _from.query.miniapp === '1') {
     next({ ...to, query: { ...to.query, miniapp: '1' } })
+    return
+  }
+  // Preserve device query param (phone/tablet)
+  if (!to.query.device && _from.query.device) {
+    next({ ...to, query: { ...to.query, device: _from.query.device as string } })
     return
   }
 

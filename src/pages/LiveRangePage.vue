@@ -7,9 +7,11 @@ import {
   MapPin, Crosshair, Target, Activity, Zap, Radio, ChevronDown,
   Filter, LayoutGrid, List, Search, Clock, Wind, Eye, Thermometer,
   Play, Square, Wrench, Download, Grid2x2, Map as MapIcon, Table,
-  X, Award, Gauge, Timer, AlertTriangle
+  X, Award, Gauge, Timer, AlertTriangle, Camera, Video, Maximize
 } from 'lucide-vue-next'
 import LoadingState from '@/components/ui/LoadingState.vue'
+import LiveCameraMini from '@/components/camera/LiveCameraMini.vue'
+import LiveTargetMini from '@/components/camera/LiveTargetMini.vue'
 
 const { locale } = useI18n()
 const isUz = computed(() => locale.value === 'uz')
@@ -70,8 +72,8 @@ const shooters = [
   { name: 'Каримов А.У.', rank: 'Ефрейтор' },
   { name: 'Юлдашев Д.А.', rank: 'Сержант' },
   { name: 'Махмудов С.Б.', rank: 'Ст. сержант' },
-  { name: 'Алиев Б.У.', rank: 'Рядовой' },
-  { name: 'Рахимов Ж.Т.', rank: 'Мл. сержант' },
+  { name: 'Алиев Б.У.', rank: 'Капитан' },
+  { name: 'Рахимов Ж.Т.', rank: 'Лейтенант' },
   { name: 'Эргашев Х.М.', rank: 'Ефрейтор' },
   { name: 'Нурматов А.К.', rank: 'Рядовой' },
   { name: 'Хасанов Ш.Р.', rank: 'Ст. лейтенант' },
@@ -79,6 +81,18 @@ const shooters = [
   { name: 'Турсунов О.С.', rank: 'Лейтенант' },
   { name: 'Базаров Н.Х.', rank: 'Ст. прапорщик' },
   { name: 'Восиев А.М.', rank: 'Рядовой' },
+  { name: 'Тошматов Ф.Ш.', rank: 'Старшина' },
+  { name: 'Кадыров У.Т.', rank: 'Ст. лейтенант' },
+  { name: 'Собиров Б.И.', rank: 'Сержант' },
+  { name: 'Фазилов Д.Р.', rank: 'Ефрейтор' },
+  { name: 'Назаров Б.Х.', rank: 'Ст. сержант' },
+  { name: 'Холиков А.Х.', rank: 'Сержант' },
+  { name: 'Камилов С.Р.', rank: 'Лейтенант' },
+  { name: 'Тешабаев Ж.А.', rank: 'Полковник' },
+  { name: 'Исомиддинов Б.Ш.', rank: 'Майор' },
+  { name: 'Шерматов У.Б.', rank: 'Рядовой' },
+  { name: 'Юсупов К.А.', rank: 'Ефрейтор' },
+  { name: 'Бобонов Р.Х.', rank: 'Рядовой' },
 ]
 
 function weaponForType(wt: string): string {
@@ -147,6 +161,29 @@ const polygons = ref<Polygon[]>([
     rubegs: [
       { id: 'rb_s1', number: 1, distance: 100, weaponType: 'RIFLE', exercise: 'BASIC', lanes: generateLanes(10, 100, 'RIFLE') },
       { id: 'rb_s2', number: 2, distance: 300, weaponType: 'SNIPER', exercise: 'NIGHT', lanes: generateLanes(10, 300, 'SNIPER') },
+    ],
+  },
+  { id: 'pg_bukhara', name: isUz.value ? "Buxoro poligoni" : 'Полигон Бухара',
+    region: 'bukhara', type: 'CLOSED',
+    rubegs: [
+      { id: 'rb_b1', number: 1, distance: 25, weaponType: 'PISTOL', exercise: 'RAPID', lanes: generateLanes(10, 25, 'PISTOL') },
+      { id: 'rb_b2', number: 2, distance: 50, weaponType: 'PISTOL', exercise: 'BASIC', lanes: generateLanes(10, 50, 'PISTOL') },
+      { id: 'rb_b3', number: 3, distance: 100, weaponType: 'RIFLE', exercise: 'PRECISION', lanes: generateLanes(10, 100, 'RIFLE') },
+    ],
+  },
+  { id: 'pg_andijan', name: isUz.value ? "Andijon poligoni" : 'Полигон Андижан',
+    region: 'andijan', type: 'OPEN', weather: { wind: 3, temp: 35, visibility: 9 },
+    rubegs: [
+      { id: 'rb_a1', number: 1, distance: 100, weaponType: 'RIFLE', exercise: 'BASIC', lanes: generateLanes(10, 100, 'RIFLE') },
+      { id: 'rb_a2', number: 2, distance: 200, weaponType: 'RIFLE', exercise: 'RAPID', lanes: generateLanes(10, 200, 'RIFLE') },
+    ],
+  },
+  { id: 'pg_namangan', name: isUz.value ? "Namangan poligoni" : 'Полигон Наманган',
+    region: 'namangan', type: 'OPEN', weather: { wind: 2, temp: 33, visibility: 10 },
+    rubegs: [
+      { id: 'rb_n1', number: 1, distance: 50, weaponType: 'PISTOL', exercise: 'BASIC', lanes: generateLanes(10, 50, 'PISTOL') },
+      { id: 'rb_n2', number: 2, distance: 100, weaponType: 'RIFLE', exercise: 'BASIC', lanes: generateLanes(10, 100, 'RIFLE') },
+      { id: 'rb_n3', number: 3, distance: 300, weaponType: 'SNIPER', exercise: 'PRECISION', lanes: generateLanes(10, 300, 'SNIPER') },
     ],
   },
 ])
@@ -558,7 +595,14 @@ onUnmounted(() => {
               </div>
             </button>
             <div v-if="expandedRubegs.has(`${polygon.id}_${rubeg.id}`)" class="px-4 pb-4 pt-1">
-              <div class="grid grid-cols-2 md:grid-cols-5 gap-2">
+              <!-- LIVE CAMERAS banner -->
+              <div class="flex items-center gap-2 px-3 py-2 mb-2 rounded-lg bg-gradient-to-r from-gray-900 to-slate-800">
+                <div class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
+                <span class="text-xs font-bold text-white">{{ isUz ? "JONLI KAMERALAR" : 'LIVE КАМЕРЫ' }}</span>
+                <span class="text-[10px] text-gray-400">{{ rubeg.lanes.filter(l => l.status === 'ACTIVE').length }} {{ isUz ? "aktiv" : 'активн.' }}</span>
+                <span class="ml-auto text-[10px] text-gray-400 font-mono">{{ new Date().toLocaleTimeString('en-GB') }}</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2">
                 <div v-for="lane in filteredLanes(rubeg)" :key="lane.num" class="rounded-lg border p-2.5 transition-all cursor-pointer hover:shadow-md relative overflow-hidden" :class="laneBorder(lane.status)" @click="openLaneDetail(lane, rubeg, polygon)">
                   <div v-if="lane.status === 'ACTIVE'" class="absolute top-0 right-0 w-1.5 h-full bg-emerald-500 animate-pulse" />
                   <div class="flex items-center justify-between mb-1.5">
@@ -566,6 +610,15 @@ onUnmounted(() => {
                     <span class="text-[10px] px-1.5 py-0.5 rounded font-medium" :class="statusBadge(lane.status).bg + ' ' + statusBadge(lane.status).text_cls">{{ statusBadge(lane.status).text }}</span>
                   </div>
                   <div v-if="lane.status === 'ACTIVE'" class="space-y-1">
+                    <!-- Camera + Target mini previews -->
+                    <div class="grid grid-cols-2 gap-1 mb-1">
+                      <div class="relative rounded overflow-hidden" @click.stop="openLaneDetail(lane, rubeg, polygon)">
+                        <LiveCameraMini :lane-number="lane.num" status="ONLINE" :employee-name="lane.shooter" :is-shooting="true" :height="100" />
+                      </div>
+                      <div class="relative rounded overflow-hidden" @click.stop="openLaneDetail(lane, rubeg, polygon)">
+                        <LiveTargetMini :lane-number="lane.num" :accuracy="lane.accuracy" :shots-fired="lane.shotsFired" :hits="lane.hits" :is-shooting="true" :size="100" />
+                      </div>
+                    </div>
                     <p class="text-xs font-medium text-gray-700 truncate">{{ lane.shooter }}</p>
                     <p class="text-[10px] text-gray-400 truncate">{{ lane.rank }} · {{ lane.weapon }}</p>
                     <div class="flex items-center gap-1 text-[10px] text-gray-500"><Timer class="w-2.5 h-2.5" />{{ formatTime(lane.timeRemaining) }}</div>
@@ -722,6 +775,32 @@ onUnmounted(() => {
             </div>
           </div>
           <div class="p-5 space-y-4">
+            <!-- Live Camera + Target views -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <Camera class="w-3.5 h-3.5 text-gray-500" />
+                  <span class="text-xs font-bold text-gray-700">{{ isUz ? 'Kamera' : 'Камера' }}</span>
+                  <span class="ml-auto flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                    <span class="text-[9px] font-mono text-red-500 font-bold">LIVE</span>
+                  </span>
+                </div>
+                <LiveCameraMini :lane-number="selectedLane.lane.num" status="ONLINE" :employee-name="selectedLane.lane.shooter" :is-shooting="true" :height="260" />
+              </div>
+              <div>
+                <div class="flex items-center gap-1.5 mb-1.5">
+                  <Crosshair class="w-3.5 h-3.5 text-gray-500" />
+                  <span class="text-xs font-bold text-gray-700">{{ isUz ? 'Mishen' : 'Мишень' }}</span>
+                  <span class="ml-auto flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                    <span class="text-[9px] font-mono text-red-500 font-bold">LIVE</span>
+                  </span>
+                </div>
+                <LiveTargetMini :lane-number="selectedLane.lane.num" :accuracy="selectedLane.lane.accuracy" :shots-fired="selectedLane.lane.shotsFired" :hits="selectedLane.lane.hits" :is-shooting="true" :size="260" />
+              </div>
+            </div>
+            <!-- Stats -->
             <div class="flex items-center gap-4">
               <div class="relative" v-html="accuracyRing(selectedLane.lane.accuracy, 64)" />
               <div class="flex-1 space-y-2">

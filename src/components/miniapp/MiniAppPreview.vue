@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from '@/i18n'
-import { X, Smartphone, Tablet, Globe, Shield, Wrench, Target, Users, Monitor } from 'lucide-vue-next'
+import {
+  X, Smartphone, Tablet, Globe,
+  Shield, Wrench, Target, Users, Monitor
+} from 'lucide-vue-next'
 
 const emit = defineEmits<{ close: [] }>()
 const { locale } = useI18n()
@@ -11,17 +14,15 @@ type RoleType = 'SUPER_ADMIN' | 'MANAGER' | 'INSTRUCTOR' | 'TECHSPEC' | 'EMPLOYE
 
 const device = ref<DeviceType>('phone')
 const selectedRole = ref<RoleType>('SUPER_ADMIN')
-
 const isUz = computed(() => locale.value === 'uz')
 
 const L = computed(() => isUz.value ? {
   title: 'Telegram Mini App',
   subtitle: 'ShaffofTIR mobil ilovada',
   phone: 'Telefon',
-  tablet: 'Planshet',
+  tablet: 'Planshet (gorizontal)',
   selectDevice: 'Qurilma tanlang',
   selectRole: 'Rol tanlang',
-  openApp: 'Ilovani ochish',
   close: 'Yopish',
   roles: {
     SUPER_ADMIN: 'Bosh admin',
@@ -31,20 +32,19 @@ const L = computed(() => isUz.value ? {
     EMPLOYEE: 'Xodim',
   },
   rolesDesc: {
-    SUPER_ADMIN: 'To\\u02BBliq huquqlar',
+    SUPER_ADMIN: 'To\u02BBliq huquqlar',
     MANAGER: 'Tahlil va hisobotlar',
     INSTRUCTOR: 'Otish boshqaruvi',
     TECHSPEC: 'Infrastruktura',
-    EMPLOYEE: 'Shaxsiy ma\\u02BClumotlar',
+    EMPLOYEE: 'Shaxsiy ma\u02BClumotlar',
   },
 } : {
   title: 'Telegram Mini App',
   subtitle: 'ShaffofTIR в мобильном',
   phone: 'Телефон',
-  tablet: 'Планшет',
+  tablet: 'Планшет (горизонт.)',
   selectDevice: 'Устройство',
   selectRole: 'Роль',
-  openApp: 'Открыть приложение',
   close: 'Закрыть',
   roles: {
     SUPER_ADMIN: 'Супер админ',
@@ -62,12 +62,12 @@ const L = computed(() => isUz.value ? {
   },
 })
 
-const roleConfig: Record<RoleType, { icon: any; color: string; email: string; password: string; bg: string }> = {
-  SUPER_ADMIN: { icon: Shield, color: '#dc2626', email: 'admin@shaffoftir.uz', password: 'admin123', bg: 'from-red-500/20 to-red-700/20' },
-  MANAGER: { icon: Monitor, color: '#18181b', email: 'manager@shaffoftir.uz', password: 'manager123', bg: 'from-gray-500/20 to-gray-700/20' },
-  INSTRUCTOR: { icon: Users, color: '#059669', email: 'instructor@shaffoftir.uz', password: 'instructor123', bg: 'from-emerald-500/20 to-emerald-700/20' },
-  TECHSPEC: { icon: Wrench, color: '#d97706', email: 'techspec@shaffoftir.uz', password: 'techspec123', bg: 'from-amber-500/20 to-amber-700/20' },
-  EMPLOYEE: { icon: Target, color: '#6366f1', email: 'soldier@shaffoftir.uz', password: 'soldier123', bg: 'from-indigo-500/20 to-indigo-700/20' },
+const roleConfig: Record<RoleType, { icon: any; color: string; email: string; password: string }> = {
+  SUPER_ADMIN: { icon: Shield, color: '#dc2626', email: 'admin@shaffoftir.uz', password: 'admin123' },
+  MANAGER: { icon: Monitor, color: '#18181b', email: 'manager@shaffoftir.uz', password: 'manager123' },
+  INSTRUCTOR: { icon: Users, color: '#059669', email: 'instructor@shaffoftir.uz', password: 'instructor123' },
+  TECHSPEC: { icon: Wrench, color: '#d97706', email: 'techspec@shaffoftir.uz', password: 'techspec123' },
+  EMPLOYEE: { icon: Target, color: '#6366f1', email: 'soldier@shaffoftir.uz', password: 'soldier123' },
 }
 
 const iframeKey = ref(0)
@@ -99,7 +99,6 @@ const iframeSrc = computed(() => {
 
       <!-- Device + Role selectors -->
       <div class="selector-section">
-        <!-- Device -->
         <div class="selector-group">
           <p class="selector-label">{{ L.selectDevice }}</p>
           <div class="selector-row">
@@ -114,7 +113,6 @@ const iframeSrc = computed(() => {
           </div>
         </div>
 
-        <!-- Role -->
         <div class="selector-group">
           <p class="selector-label">{{ L.selectRole }}</p>
           <div class="roles-grid">
@@ -137,13 +135,13 @@ const iframeSrc = computed(() => {
         </div>
       </div>
 
-      <!-- Device Mockup with iframe -->
+      <!-- Device Mockup -->
       <div class="mockup-area">
-        <!-- Phone -->
+        <!-- Phone: realistic vertical smartphone -->
         <div v-if="device === 'phone'" class="phone-mockup">
           <div class="phone-frame">
-            <div class="phone-notch"></div>
             <div class="phone-screen">
+              <div class="phone-dynamic-island"></div>
               <iframe
                 :key="'phone-' + iframeKey"
                 :src="iframeSrc"
@@ -153,13 +151,14 @@ const iframeSrc = computed(() => {
               />
             </div>
           </div>
+          <div class="phone-shadow"></div>
         </div>
 
-        <!-- Tablet -->
+        <!-- Tablet: landscape orientation -->
         <div v-else class="tablet-mockup">
           <div class="tablet-frame">
-            <div class="tablet-camera"></div>
             <div class="tablet-screen">
+              <div class="tablet-camera-dot"></div>
               <iframe
                 :key="'tablet-' + iframeKey"
                 :src="iframeSrc"
@@ -169,6 +168,7 @@ const iframeSrc = computed(() => {
               />
             </div>
           </div>
+          <div class="tablet-shadow"></div>
         </div>
       </div>
     </div>
@@ -192,7 +192,7 @@ const iframeSrc = computed(() => {
 .miniapp-container {
   position: relative;
   width: 100%;
-  max-width: 900px;
+  max-width: 920px;
   max-height: 95vh;
   overflow-y: auto;
   background: linear-gradient(180deg, #0a0f0d 0%, #080c0a 100%);
@@ -217,6 +217,7 @@ const iframeSrc = computed(() => {
   border: 1px solid rgba(255,255,255,0.05);
   cursor: pointer;
   transition: all 0.15s;
+  z-index: 10;
 }
 .close-btn:hover { color: rgba(255,255,255,0.7); background: rgba(255,255,255,0.06); }
 
@@ -339,77 +340,113 @@ const iframeSrc = computed(() => {
   color: rgba(255,255,255,0.3);
 }
 
-/* Mockup area */
+/* ── Phone mockup (realistic iPhone-like, vertical) ── */
 .mockup-area {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px 0;
-  min-height: 400px;
+  padding: 24px 0;
+  min-height: 640px;
 }
 
-/* Phone */
-.phone-mockup { display: flex; justify-content: center; }
-.phone-frame {
-  width: 300px;
-  height: 600px;
-  background: #1a1a1a;
-  border-radius: 36px;
-  border: 3px solid #333;
-  padding: 8px;
+.phone-mockup {
   position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 0 2px rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: center;
 }
-.phone-notch {
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100px;
-  height: 22px;
-  background: #1a1a1a;
-  border-radius: 0 0 14px 14px;
+.phone-frame {
+  width: 320px;
+  height: 660px;
+  background: linear-gradient(135deg, #2a2a2c 0%, #1a1a1c 50%, #2a2a2c 100%);
+  border-radius: 42px;
+  padding: 4px;
+  position: relative;
   z-index: 2;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 30px 60px -12px rgba(0,0,0,0.5),
+    inset 0 0 2px rgba(255,255,255,0.08);
 }
 .phone-screen {
   width: 100%;
   height: 100%;
-  border-radius: 28px;
+  border-radius: 38px;
   overflow: hidden;
-  background: #fff;
+  background: #f8faf9;
   position: relative;
 }
-
-/* Tablet */
-.tablet-mockup { display: flex; justify-content: center; }
-.tablet-frame {
-  width: 480px;
-  height: 640px;
-  background: #1a1a1a;
-  border-radius: 24px;
-  border: 3px solid #333;
-  padding: 12px;
-  position: relative;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4), inset 0 0 2px rgba(255,255,255,0.1);
-}
-.tablet-camera {
+.phone-dynamic-island {
   position: absolute;
-  top: 6px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  width: 8px;
-  height: 8px;
-  background: #333;
+  width: 95px;
+  height: 26px;
+  background: #000;
+  border-radius: 14px;
+  z-index: 10;
+}
+.phone-shadow {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260px;
+  height: 20px;
+  background: rgba(0,0,0,0.3);
   border-radius: 50%;
+  filter: blur(12px);
+}
+
+/* ── Tablet mockup (landscape / horizontal) ── */
+.tablet-mockup {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+.tablet-frame {
+  width: 700px;
+  height: 520px;
+  background: linear-gradient(135deg, #2a2a2c 0%, #1a1a1c 50%, #2a2a2c 100%);
+  border-radius: 28px;
+  padding: 14px;
+  position: relative;
   z-index: 2;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.06),
+    0 30px 60px -12px rgba(0,0,0,0.5),
+    inset 0 0 2px rgba(255,255,255,0.08);
 }
 .tablet-screen {
   width: 100%;
   height: 100%;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
-  background: #fff;
+  background: #f8faf9;
   position: relative;
+}
+.tablet-camera-dot {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 8px;
+  background: #000;
+  border-radius: 50%;
+  z-index: 10;
+  opacity: 0.6;
+}
+.tablet-shadow {
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 580px;
+  height: 16px;
+  background: rgba(0,0,0,0.25);
+  border-radius: 50%;
+  filter: blur(10px);
 }
 
 .device-iframe {
@@ -419,8 +456,15 @@ const iframeSrc = computed(() => {
   display: block;
 }
 
-@media (max-width: 640px) {
-  .tablet-frame { width: 340px; height: 480px; }
+@media (max-width: 768px) {
+  .tablet-frame { width: 500px; height: 380px; }
   .roles-grid { grid-template-columns: 1fr 1fr; }
+  .mockup-area { min-height: 480px; padding: 16px 0; }
+}
+@media (max-width: 540px) {
+  .tablet-frame { width: 100%; max-width: 360px; height: 280px; }
+  .phone-frame { width: 280px; height: 580px; }
+  .phone-dynamic-island { width: 80px; height: 22px; }
+  .roles-grid { grid-template-columns: 1fr; }
 }
 </style>

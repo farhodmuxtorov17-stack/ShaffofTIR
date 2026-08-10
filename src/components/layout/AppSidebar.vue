@@ -9,6 +9,7 @@ import {
   MessageSquareWarning, CheckCircle, Sparkles,
   UsersRound, ScrollText, Shield,
   GraduationCap, Activity, Radio,
+  Monitor, Bell,
   LogOut
 } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
@@ -37,6 +38,7 @@ interface NavGroup {
 const managerNavGroups: NavGroup[] = [
   { labelKey: 'nav.main', items: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['MANAGER'] },
+    { labelKey: 'nav.commandCenter', path: '/command-center', icon: Monitor, roles: ['MANAGER'] },
     { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['MANAGER'] },
     { labelKey: 'nav.compare', path: '/compare/0', icon: GitCompare, roles: ['MANAGER'] },
     { labelKey: 'nav.sessions', path: '/sessions', icon: Users, roles: ['MANAGER'] },
@@ -63,6 +65,7 @@ const managerNavGroups: NavGroup[] = [
   ]},
   { labelKey: 'nav.system', items: [
     { labelKey: 'nav.settings', path: '/settings', icon: Settings, roles: ['MANAGER'] },
+    { labelKey: 'nav.notifications', path: '/notifications', icon: Bell, roles: ['MANAGER'] },
     { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['MANAGER'] },
   ]},
 ]
@@ -91,6 +94,7 @@ const instructorNavGroups: NavGroup[] = [
   ]},
   { labelKey: 'nav.system', items: [
     { labelKey: 'nav.settings', path: '/settings', icon: Settings, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.notifications', path: '/notifications', icon: Bell, roles: ['INSTRUCTOR'] },
     { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['INSTRUCTOR'] },
   ]},
 ]
@@ -129,6 +133,7 @@ const superAdminNavGroups: NavGroup[] = [
   { labelKey: 'nav.main', items: [
     { labelKey: 'nav.adminPanel', path: '/admin', icon: Shield, roles: ['SUPER_ADMIN'] },
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['SUPER_ADMIN'] },
+    { labelKey: 'nav.commandCenter', path: '/command-center', icon: Monitor, roles: ['SUPER_ADMIN'] },
     { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['SUPER_ADMIN'] },
     { labelKey: 'nav.sessions', path: '/sessions', icon: Users, roles: ['SUPER_ADMIN'] },
   ]},

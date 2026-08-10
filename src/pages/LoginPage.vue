@@ -43,7 +43,7 @@ onMounted(() => {
     form.password = creds.password
     loading.value = true
     authStore.login(form).then(() => {
-      router.push({ path: creds.redirect, query: { miniapp: '1' } })
+      router.push({ path: creds.redirect, query: { miniapp: '1', device: (route.query.device as string) || 'phone' } })
     }).catch(() => {
       loading.value = false
     }).finally(() => {

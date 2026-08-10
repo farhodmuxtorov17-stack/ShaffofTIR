@@ -45,9 +45,15 @@ const categories = computed(() => isUz.value ? [
 ])
 
 const objections = ref<Objection[]>([
-  { id: 'OB-008', employee_name: 'Каримов А.У.', session_id: 'S-2026-052', date: '28.07.2026', status: 'PENDING', category: 'SCORING', reason: 'Несогласие с результатом 3-го выстрела — счётчик показал попадание, но результат не засчитан' },
+  { id: 'OB-014', employee_name: 'Турсунов О.С.', session_id: 'S-2026-058', date: '09.08.2026', status: 'PENDING', category: 'SCORING', reason: 'Несогласие с оценкой 7-го выстрела — мишень показала попадание в зону 9, но засчитано 7' },
+  { id: 'OB-013', employee_name: 'Бобонов Р.Х.', session_id: 'S-2026-056', date: '08.08.2026', status: 'PENDING', category: 'EQUIPMENT', reason: 'Прицел сбит после 5-го выстрела, прошу пересмотр результатов с 6-го по 10-й' },
+  { id: 'OB-012', employee_name: 'Шерматов У.Б.', session_id: 'S-2026-054', date: '07.08.2026', status: 'REVIEWING', category: 'PROCEDURE', reason: 'Не был предупреждён о смене рубежа, результаты 2-й серии прошу аннулировать' },
+  { id: 'OB-011', employee_name: 'Фазилов Д.Р.', session_id: 'S-2026-053', date: '06.08.2026', status: 'PENDING', category: 'CAMERA', reason: 'Камера дорожки 4 не зафиксировала 2 выстрела, прошу восстановить по резервной камере' },
+  { id: 'OB-010', employee_name: 'Юсупов К.А.', session_id: 'S-2026-051', date: '04.08.2026', status: 'ACCEPTED', category: 'SCORING', reason: 'Ошибка подсчёта — 3 выстрела засчитаны как промах, но мишень показывает попадания', resolution: 'Результат пересчитан по данным мишени. 3 попадания восстановлены, итоговый балл увеличен на 24.' },
+  { id: 'OB-009', employee_name: 'Холиков А.Х.', session_id: 'S-2026-050', date: '02.08.2026', status: 'REVIEWING', category: 'EQUIPMENT', reason: 'АК-12 дал задержку при стрельбе сериями, результаты прошу пересмотреть' },
+  { id: 'OB-008', employee_name: 'Каримов А.У.', session_id: 'S-2026-052', date: '28.07.2026', status: 'ACCEPTED', category: 'SCORING', reason: 'Несогласие с результатом 3-го выстрела — счётчик показал попадание, но результат не засчитан', resolution: 'Результат пересчитан. Попадание засчитано, балл увеличен на 9.' },
   { id: 'OB-007', employee_name: 'Алиев Б.У.', session_id: 'S-2026-049', date: '27.07.2026', status: 'ACCEPTED', category: 'CAMERA', reason: 'Камера 4 не зафиксировала выстрел, результат восстановлен по резервной камере', resolution: 'Результат восстановлен по данным резервной камеры. Баллы пересчитаны.' },
-  { id: 'OB-006', employee_name: 'Хасанов О.Р.', session_id: 'S-2026-045', date: '25.07.2026', status: 'REVIEWING', category: 'PROCEDURE', reason: 'ТБ-тест пройден, но система не допустила к полигону' },
+  { id: 'OB-006', employee_name: 'Хасанов О.Р.', session_id: 'S-2026-045', date: '25.07.2026', status: 'REJECTED', category: 'PROCEDURE', reason: 'ТБ-тест пройден, но система не допустила к полигону', resolution: 'ТБ-тест не пройден — срок действия истёк 24.07.2026. Требуется повторное прохождение.' },
   { id: 'OB-005', employee_name: 'Юлдашев Д.А.', session_id: 'S-2026-040', date: '23.07.2026', status: 'REJECTED', category: 'EQUIPMENT', reason: 'Оружие дало осечку, прошу пересмотр результатов', resolution: 'Осечка подтверждена, но по регламенту результат не подлежит пересмотру.' },
 ])
 
