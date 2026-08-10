@@ -1,83 +1,269 @@
-# Arxitektura
+# Architecture
 
-## Tizim umumiy koʻrinishi
+## System Overview
 
-ShaffofTIR **modulli monolit** arxitektura namunasida qurilgan — SPA frontend va ikki mustaqil backend xizmati.
-
-```
-┌──────────────────────────────────────────────────────────────┐
-│                      Frontend (Vue 3 SPA)                      │
-│  ┌──────────────┐  ┌───────────────┐  ┌────────────────────┐ │
-│  │   Pinia       │  │  Vue Router   │  │    Vue I18n        │ │
-│  │   Stores      │  │  (72 sahifa)  │  │   (RU / UZ)        │ │
-│  └──────────────┘  └───────────────┘  └────────────────────┘ │
-│         │                  │                  │              │
-│  ┌──────┴─────────────────┴──────────────────┴──────────────┐ │
-│  │           TailwindCSS · Komponentlar (UI)                │ │
-│  └──────────────────────────────────────────────────────────┘ │
-│         │                                                      │
-│  ┌──────┴───────────────────────────────────────────────────┐ │
-│  │  localStorage (demo-rejim) / REST API (production)        │ │
-│  └──────────────────────────────────────────────────────────┘ │
-└──────────────────────────────────────────────────────────────┘
-```
-
-## Katalog tuzilishi
+ShaffofTIR follows a **modular monolith** pattern with a SPA frontend and two independent backend services.
 
 ```
-src/
-├── pages/              # 72 sahifa — har biri route ga bogʻlangan
-├── components/
-│   ├── camera/         # LiveCameraMini, LiveTargetMini
-│   ├── layout/         # MobileAppShell, Sidebar, TopBar
-│   └── ui/             # Button, Modal, Toast, ProgressBar
-├── stores/             # Pinia: auth, sessions, ui, notifications
-├── router/             # Vue Router — rolli himoya (beforeEach)
-├── api/                # API-mijozlar (entities, fetch wrapper)
-├── data/               # Demo-maʼlumotlar (republicData, unitData, employeeData)
-├── i18n/               # Lokalizatsiya (uz.json, ru.json)
-├── types/              # TypeScript turlari
-└── utils/              # Yordamchi funksiyalar
+                         ┌──────────────────────────┐
+                         │    Browser (SPA)         │
+                         │  Vue 3 · TypeScript      │
+                         │  Tailwind · Pinia        │
+                         │  72 pages · 5 roles      │
+                         └────────┬─────────┬───────┘
+                                  │         │
+                   ┌──────────────┘         └──────────────┐
+                   │                                       │
+         ┌─────────▼─────────┐                ┌────────────▼──────────┐
+         │  Django REST API  │                │  Automated Scoring     │
+         │  (Extended BFF)   │                │  (FastAPI + OpenCV)    │
+         │                   │                │                        │
+         │  • Auth (JWT)    │                │  • Image capture       │
+         │  • CRUD (all)    │                │  • Hit detection (CV)  │
+         │  • Business logic│                │  • Score calculation   │
+         │  • Permissions   │                │  • Dataprizma sync     │
+         │  • Audit logging │                │                        │
+         │                  │                │  Async · High-perf     │
+         │  Port: 8000      │                │  Port: 8001             │
+         └────────┬─────────┘                └────────────────────────┘
+                  │
+         ┌────────▼──────────┐
+         │  PostgreSQL 16+   │
+         │                   │
+         │  • Users          │
+         │  • Sessions       │
+         │  • Shots          │
+         │  • Protocols       │
+         │  • Weapons        │
+         │  • Audit logs      │
+         └───────────────────┘
 ```
 
-## Rolli boshqaruv (RBAC)
+## Frontend Architecture
 
-Marshrut darajasidagi himoya `router/index.ts` da amalga oshirilgan:
+### Component Hierarchy
+
+```
+App.vue
+├── AppShell.vue
+│   ├── AppSidebar.vue          # Role-aware navigation
+│   ├── AppTopbar.vue            # Search, language, profile
+│   └── <router-view />          # Page outlet
+├── MobileAppShell.vue           # Mobile breakpoint
+└── ToastContainer.vue          # Global notifications
+```
+
+### State Management (Pinia)
+
+| Store | File | Responsibility |
+|-------|------|----------------|
+| `auth` | `stores/auth.ts` | User session, JWT, RBAC, login/logout |
+| `master` | `stores/master.ts` | Reference data (sessions, employees, weapons) |
+| `session` | `stores/session.ts` | Active session state, shot recording |
+| `ui` | `stores/ui.ts` | Sidebar state, modals, theme |
+| `audit` | `stores/audit.ts` | Audit trail for sensitive actions |
+| `notifications` | `stores/notifications.ts` | In-app notification center |
+| `sessionsHistory` | `stores/sessionsHistory.ts` | Session history pagination |
+| `sessionRequests` | `stores/sessionRequests.ts` | Pending session requests |
+| `baseline` | `stores/baseline.ts` | Performance baseline data |
+
+### Routing
+
+Routes use lazy imports for code splitting:
 
 ```typescript
-const routeRoles: Record<string, string[]> = {
-  '/admin':       ['SUPER_ADMIN'],
-  '/settings':    ['SUPER_ADMIN', 'TECHSPEC'],
-  '/command-center': ['SUPER_ADMIN', 'MANAGER'],
-  '/live-range':  ['SUPER_ADMIN', 'MANAGER', 'INSTRUCTOR'],
-  '/sessions':    ['SUPER_ADMIN', 'MANAGER', 'INSTRUCTOR', 'EMPLOYEE'],
-  // ... 72 sahifa uchun toʻliq roʻyxat
+{ path: '/sessions/:id', component: () => import('@/pages/SessionsDetailPage.vue') }
+```
+
+Role guards check `meta.roles` before navigation:
+
+```typescript
+router.beforeEach((to) => {
+  if (to.meta.roles && !authStore.hasRole(to.meta.roles as UserRole[])) {
+    return '/403'
+  }
+})
+```
+
+### API Layer
+
+```
+src/api/
+├── httpClient.ts           # Axios instance with auth interceptor
+├── httpClientExtended.ts    # Extended API client (5s timeout)
+├── extended.ts             # Auth, users, sessions API
+├── session.api.ts          # Session CRUD
+├── scoring.api.ts          # Scoring service
+├── camera.api.ts           # Camera management
+├── health.api.ts           # System health checks
+├── dataprizma.api.ts       # Dataprizma integration
+└── imageUrl.ts             # Image URL resolution utility
+```
+
+### Internationalization
+
+Custom i18n implementation (no external dependency):
+
+```typescript
+// src/i18n/index.ts
+const translations = {
+  ru: { 'common.login': 'Войти', 'nav.results': 'Результаты', ... },
+  uz: { 'common.login': "Kirish", 'nav.results': "Natijalar", ... }
+}
+
+export function useI18n() {
+  const { t, locale, setLocale } = ...
+  return { t, locale, setLocale }
 }
 ```
 
-`router.beforeEach` — foydalanuvchi rolini tekshiradi va ruxsat etilmagan sahifaga oʻtishni bloklaydi.
+**Uzbek apostrophe handling:** The letter U+02BB (MODIFIER LETTER TURNED COMMA, ʻ) is used instead of ASCII apostrophe (') to comply with the official Uzbek Latin orthography standard.
 
-## Holat boshqaruvi (State)
+### Static Data Model
 
-Pinia store-lari orqali markazlashgan holat boshqaruvi:
+The Command Center uses a three-level hierarchy:
 
-| Store | Fayl | Vazifa |
-|-------|------|--------|
-| `useAuthStore` | `stores/auth.ts` | Avtorizatsiya, rol, foydalanuvchi |
-| `useSessionsStore` | `stores/sessions.ts` | Otishma sessiyalari |
-| `useUiStore` | `stores/ui.ts` | Sidebar, toast, moda holat |
-| `useNotificationsStore` | `stores/notifications.ts` | Bildirishnomalar |
+```
+Republic of Uzbekistan
+├── Region (Viloyat)
+│   ├── District (Tuman)
+│   │   ├── Unit (Podrazdelenie)
+│   │   │   ├── Employee
+│   │   │   └── Employee
+│   │   └── Unit
+│   └── District
+└── Region
+```
 
-## Lokalizatsiya
+Data files:
+- `src/data/republicData.ts` — regions with KPI scores
+- `src/data/unitData.ts` — units (districts) with personnel
+- `src/data/employeeHistory.ts` — employee shooting history
+- `src/data/uzbekistan_regions.json` — geographic SVG paths
 
-Vue I18n orqali ikki tilli qoʻllab-quvvatlash:
+## Backend Architecture
 
-- `i18n/uz.json` — oʻzbekcha matnlar
-- `i18n/ru.json` — ruscha matnlar
-- Komponentlarda: `isUz` computed orqali shartli matn: `{{ isUz ? 'Matn UZ' : 'Текст RU' }}`
+### Django REST Framework
 
-## Optimizatsiya strategiyasi
+```
+backend/
+├── config/                  # Django settings, URLs, WSGI
+├── shaffoftir_api/         # API application
+│   ├── models/              # Django models
+│   ├── serializers/         # DRF serializers
+│   ├── views/               # ViewSets and API views
+│   ├── permissions/         # Custom permission classes
+│   └── urls.py              # API URL routing
+├── manage.py
+└── requirements.txt
+```
 
-- **Lazy-loaded marshrutlar** — har bir sahifa alohida chunk sifatida yuklanadi
-- **Lazy-loaded kutubxonalar** — jsPDF va html2canvas faqat protokol sahifasida yuklanadi
-- **Bundle hajmi:** ProtocolCreatePage 611 KB → 19 KB
+### Data Models
+
+| Module | Models |
+|--------|--------|
+| User | User, Role |
+| Employee | Employee, Department, Qualification |
+| Session | Session, Soldier, Shot, ShootingLane, Camera, RangeSchedule |
+| Weapon | Weapon, WeaponAssignment |
+| Protocol | Protocol, OperatorComment, ReviewReason |
+| Training | TrainingPlan, TrainingAssignment |
+| Notification | Notification, AuditAnnotation |
+
+### API Patterns
+
+Each module follows the DRF ModelViewSet pattern with custom actions:
+
+```python
+class SessionViewSet(viewsets.ModelViewSet):
+    @action(detail=True, methods=['post'])
+    def soldiers(self, request, pk=None):
+        """Add soldiers to a session."""
+
+    @action(detail=True, methods=['post'])
+    def finalize(self, request, pk=None):
+        """Finalize session and calculate scores."""
+```
+
+### FastAPI Scoring Service
+
+```
+backend_fastapi/
+├── app/
+│   ├── main.py              # FastAPI application
+│   ├── routes/              # API endpoints
+│   ├── services/            # OpenCV processing logic
+│   └── models/              # Pydantic schemas
+├── Dockerfile
+└── requirements.txt
+```
+
+Endpoints:
+- `POST /capture` — Capture target image from IP camera
+- `POST /analyze` — Detect hits using OpenCV
+- `POST /score` — Calculate score from hit coordinates
+- `POST /sync` — Sync results with Dataprizma
+- `GET /health` — Service health check
+
+## Security Architecture
+
+### Authentication Flow
+
+```
+Client                     Django API
+  │                           │
+  │── POST /auth/login ──────►│
+  │   {email, password}       │
+  │                           │── verify password (PBKDF2)
+  │                           │── generate JWT (access + refresh)
+  │◄── {access, refresh} ────│
+  │                           │
+  │── GET /api/* ────────────►│
+  │   Authorization: Bearer   │── verify JWT
+  │                           │── check permissions
+  │◄── 200 / 403 ─────────────│
+```
+
+### RBAC Enforcement
+
+| Layer | Mechanism |
+|-------|-----------|
+| Frontend route | `meta.roles` in router config |
+| Frontend sidebar | Role-filtered `NavGroup[]` |
+| Frontend module | `canAccess(module)` in auth store |
+| Backend route | DRF permission classes |
+| Backend query | ORM-level data filtering |
+
+### Zero-Edit Policy
+
+Protocols in APPROVED or ARCHIVED status cannot be modified:
+
+- **Frontend**: Edit buttons hidden/disabled when `protocol.status === 'APPROVED' || 'ARCHIVED'`
+- **Backend**: PATCH/PUT returns 403 for locked protocols
+- **Audit**: All access attempts logged
+
+## Performance Considerations
+
+### Bundle Optimization
+
+- Heavy libraries (jspdf, html2canvas) are **lazy-loaded** — only imported when ProtocolCreatePage needs PDF export
+- `inlineDynamicImports: true` in Vite config produces a single optimized bundle
+- CSS is not split (`cssCodeSplit: false`) — one stylesheet, one request
+- Assets inlined up to 100MB limit (no separate asset requests for small files)
+
+### Runtime Performance
+
+- Pinia stores use `computed()` for derived state (memoized)
+- Vue Router lazy imports split code per route (72 chunks)
+- `v-for` lists use `key` attribute for efficient DOM diffing
+- Sidebar navigation is role-gated at render time (no wasted DOM)
+
+### Build Output
+
+```
+dist/
+├── index.html        # ~2KB
+├── assets/
+│   ├── index-*.js    # ~1.8MB (single bundle, gzipped ~400KB)
+│   └── style-*.css   # ~166KB (gzipped ~25KB)
+```

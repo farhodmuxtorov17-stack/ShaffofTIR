@@ -1,30 +1,28 @@
-# Hulq-atvor kodeksi
+# Code of Conduct
 
-## Bizning majburiyatimiz
+## Our Pledge
 
-ShaffofTIR jamoasi barcha hissa qoʻshuvchilar uchun hurmatli va inklyuziv muhitni taʼminlashga sodiqlik bildiradi. Biz texnik mukammallik va oʻzaro hurmat qoʻl berib ketadigan hamjamiyat qurishga intilamiz.
+We are committed to providing a respectful and inclusive environment for all contributors. We aim to build a community where technical excellence and mutual respect go hand in hand.
 
-## Standartlar
+## Our Standards
 
-Loyihada ishtirok etayotganda quyidagi standartlarga rioya qilish talab etiladi:
+**Positive behavior:**
+- Using welcoming and inclusive language
+- Being respectful of differing viewpoints and experiences
+- Gracefully accepting constructive feedback
+- Focusing on what is best for the community
+- Showing empathy towards other community members
 
-- **Hurmat** — barcha ishtirokchilarga hurmat bilan munosabatda boʻling
-- **Inklyuzivlik** — har bir fikr va yondashuvni qadrlang
-- **Masʼuliyat** — oʻz hissangiz uchun masʼuliyatni oʻz zingizga oling
-- **Hamkorlik** — jamoa bilan ochiq muloqotda boʻling
-- **Sifat** — yuqori sifatli kod yozishga harakat qiling
+**Unacceptable behavior:**
+- Trolling, insulting/derogatory comments, or personal attacks
+- Public or private harassment
+- Publishing others' private information without consent
+- Other conduct reasonably considered inappropriate in a professional setting
 
-## Muvofiq emas xulq-atvor
+## Enforcement
 
-- Tahdid, haqorat yoki kamsitish
-- Trollovlash yoki bezorilik
-- Shaxsiy maʼlumotlarni oshkor qilish
-- Noprofessional munosabat
+Violations may be reported to **conduct@shaffoftir.uz**. All reports will be reviewed and investigated with discretion.
 
-## Shikoyatlar
+## Attribution
 
-Muvofiq emas xulq-atvorga duch kelsangiz, loyiha maintainer-ga murojaat qiling. Barcha shikoyatlar maxfiy koʻrib chiqiladi.
-
-## Manfaatdor tomonlar
-
-Ushbu hulq-atvor kodeksi loyiha doirasida ishlaydigan barcha ishtirokchilarga taalluqlidir.
+Adapted from the [Contributor Covenant](https://contributor-covenant.org) v2.1.
