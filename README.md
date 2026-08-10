@@ -34,7 +34,7 @@
 
 ## Umumiy maʼlumot
 
-**ShaffofTIR** — Oʻzbekiston Respublikasi harbiy boʻlinmalari va huquq-tartibot idoralari otishma oʻquv markazlari uchun moʻljallangan, ishlab chiqarishga tayyor boshqaruv platformasi.
+**ShaffofTIR** - Oʻzbekiston Respublikasi harbiy boʻlinmalari va huquq-tartibot idoralari otishma oʻquv markazlari uchun moʻljallangan, ishlab chiqarishga tayyor boshqaruv platformasi.
 
 Tizim otishma oʻquv jarayonining toʻliq hayotiy siklini qamrab oladi: xodimni poligonga jalb qilishdan boshlab, natijalarni tahlil qilish va hisobot shakllantirishgacha.
 
@@ -42,13 +42,13 @@ Tizim otishma oʻquv jarayonining toʻliq hayotiy siklini qamrab oladi: xodimni 
 
 ## Asosiy imkoniyatlar
 
-- 📊 **Komanda markazi** — 3 bosqichli drill-down (Respublika → Viloyat → Tuman) real vaqtdagi KPI monitoringi
-- 🎯 **Vaziyat markazi** — LIVE kameralar, nishonlar, voqealar jurnali, 7 poligon
-- 📋 **Protokollar** — yaratishdan tortib arxivlashgacha, APPROVED/ARCHIVED holatida tahrirlash taqiqlangan
-- 🎓 **Oʻquv moduli** — TБ boʻlimlari, oʻtish, 100% ruxsat testi
-- 👥 **Rolli boshqaruv** — 5 darajali RBAC (SUPER_ADMIN, MANAGER, INSTRUCTOR, TECHSPEC, EMPLOYEE)
-- 📱 **Mobil moslashuv** — telefon va planshet uchun toʻliq optimallashtirilgan
-- 🌐 **Ikkilik lokalizatsiya** — Oʻzbek va Rus tillarida toʻliq interfeys
+- 📊 **Komanda markazi** - 3 bosqichli drill-down (Respublika → Viloyat → Tuman) real vaqtdagi KPI monitoringi
+- 🎯 **Vaziyat markazi** - LIVE kameralar, nishonlar, voqealar jurnali, 7 poligon
+- 📋 **Protokollar** - yaratishdan tortib arxivlashgacha, APPROVED/ARCHIVED holatida tahrirlash taqiqlangan
+- 🎓 **Oʻquv moduli** - TБ boʻlimlari, oʻtish, 100% ruxsat testi
+- 👥 **Rolli boshqaruv** - 5 darajali RBAC (SUPER_ADMIN, MANAGER, INSTRUCTOR, TECHSPEC, EMPLOYEE)
+- 📱 **Mobil moslashuv** - telefon va planshet uchun toʻliq optimallashtirilgan
+- 🌐 **Ikkilik lokalizatsiya** - Oʻzbek va Rus tillarida toʻliq interfeys
 
 ---
 
