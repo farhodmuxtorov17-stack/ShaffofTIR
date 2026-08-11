@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/ShaffofTIR/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShaffofTIR — TIR Axborot Tizimi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script type="module" crossorigin src="/ShaffofTIR/assets/index-BtNil0Cp.js"></script>
+    <link rel="stylesheet" crossorigin href="/ShaffofTIR/assets/style-Cdq8zV_M.css">
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+    // SPA redirect
+    (function(l) {
+      if (l.search[1] === '/') {
+        var decoded = l.search
+          .slice(1)
+          .split('&')
+          .map(function(s) {
+            return s.replace(/~and~/g, '&')
+          })
+          .join('?');
+        window.history.replaceState(null, null,
+          l.pathname.slice(0, -1) + decoded + l.hash
+        );
+      }
+    })(window.location)
+    </script>
+  </body>
+</html>
