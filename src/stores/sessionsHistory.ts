@@ -57,7 +57,7 @@ export interface ProtocolRecord {
   accuracy: number;
   qualification: 'PASSED' | 'FAILED' | 'EXCELLENT';
   qr_code: string;
-  status: 'DRAFT' | 'SIGNED' | 'APPROVED';
+  status: 'DRAFT' | 'SIGNED' | 'APPROVED' | 'ARCHIVED';
   notes?: string;
 }
 
@@ -422,6 +422,14 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
   }
 
   // --- Update session status 
+
+  function archiveProtocol(protocolId: string) {
+    const p = protocols.value.find(p => p.id === protocolId)
+    if (p && p.status === 'APPROVED') {
+      p.status = 'ARCHIVED'
+    }
+  }
+
   function updateStatus(sessionId: string, status: SessionRecord['status']) {
     const s = sessions.value.find(x => x.id === sessionId);
     if (s) {
@@ -509,7 +517,7 @@ export const useSessionsHistoryStore = defineStore('sessionsHistory', () => {
     sessionsByEmployee, employeeStats, topPerformers,
     totalProtocols, signedProtocols, draftProtocols,
     getProtocol, getProtocolBySessionId, getProtocolsByEmployee,
-    signProtocol, approveProtocol,
+    signProtocol, approveProtocol, archiveProtocol,
     addSession, updateStatus, getSession, filterSessions,
     getSessionsByEmployee,
   };

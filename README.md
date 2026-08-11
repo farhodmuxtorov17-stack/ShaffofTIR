@@ -10,9 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://farhodmuxtorov17-stack.github.io/ShaffofTIR/"><img src="https://img.shields.io/badge/LIVE%20DEMO-GitHub%20Pages-181717?logo=github" alt="Live Demo" /></a>
-  <a href="https://github.com/farhodmuxtorov17-stack/ShaffofTIR/actions/workflows/ci.yml"><img src="https://github.com/farhodmuxtorov17-stack/ShaffofTIR/actions/workflows/ci.yml/badge.svg" alt="CI Status" /></a>
-  <a href="https://github.com/farhodmuxtorov17-stack/ShaffofTIR/actions/workflows/codeql.yml"><img src="https://github.com/farhodmuxtorov17-stack/ShaffofTIR/actions/workflows/codeql.yml/badge.svg" alt="CodeQL" /></a>
+  <a href="https://farhodmuxtorov17-stack.github.io/ShaffofTIR/"><img src="https://img.shields.io/badge/LIVE-DEMO-brightgreen" alt="Live Demo" /></a>
   <img src="https://img.shields.io/badge/Vue-3.4-42b883?logo=vuedotjs" alt="Vue 3.4" />
   <img src="https://img.shields.io/badge/TypeScript-5.5-3178c6?logo=typescript" alt="TypeScript" />
   <img src="https://img.shields.io/badge/Tailwind-3.4-06b6d4?logo=tailwindcss" alt="Tailwind CSS" />
@@ -47,7 +45,7 @@ Tizim otishma oʻquv jarayonining toʻliq hayotiy siklini qamrab oladi: xodimni 
 | **Asosiy ilova** | https://farhodmuxtorov17-stack.github.io/ShaffofTIR/ |
 | **Telegram mini-app (planshet)** | https://farhodmuxtorov17-stack.github.io/ShaffofTIR/#/login?miniapp=1&device=tablet |
 | **Telegram mini-app (menejer)** | https://farhodmuxtorov17-stack.github.io/ShaffofTIR/#/login?miniapp=1&device=tablet&role=MANAGER |
-| **GitHub repozoriy** | https://github.com/farhodmuxtorov17-stack/ShaffofTIR |
+| **Manba kod** | https://farhodmuxtorov17-stack.github.io/ShaffofTIR |
 
 > **Tezkor kirish:** URL-parametri orqali — `?role=MANAGER` — avtomatik avtorizatsiya.
 
@@ -136,7 +134,7 @@ Tizim 5 darajali rolli boshqaruv (RBAC) tizimini amalga oshiradi. Har bir rol mo
 
 ## Deploy
 
-Loyiha GitHub Pages-ga avtomatik deploy qilinadi — har bir `main` branchiga push qilishda:
+Loyiha Deploy-ga avtomatik deploy qilinadi — har bir `main` branchiga push qilishda:
 
 ```bash
 npm run build

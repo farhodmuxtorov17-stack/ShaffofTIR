@@ -60,7 +60,7 @@ onUnmounted(() => {
       </div>
     </Transition>
 
-    <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+    <div class="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative z-10">
       <AppTopbar :is-mobile="isMobile" @toggle-sidebar="toggleMobileSidebar" />
       <main class="flex-1 overflow-y-auto px-4 lg:px-6 xl:px-8 py-4 lg:py-6">
         <router-view :key="$route.path" />

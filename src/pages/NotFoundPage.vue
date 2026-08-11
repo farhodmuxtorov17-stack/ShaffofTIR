@@ -37,7 +37,7 @@ onMounted(() => { setTimeout(() => mounted.value = true, 50) })
       </div>
 
       <h1 class="nf-title">{{ isUz ? 'Sahiba topilmadi' : 'Мишень не найдена' }}</h1>
-      <p class="nf-subtitle">{{ isUz ? "Bu manzilga murojaat qilib bo'lmadi. Ehtimol, sahifa ko'chirilgan yoki o'chirilgan." : 'Эта страница вне зоны поражения. Возможно, она была перемещена или больше не существует.' }}</p>
+      <p class="nf-subtitle">{{ isUz ? "Bu manzilga murojaat qilib boʻlmadi. Ehtimol, sahifa koʻchirilgan yoki oʻchirilgan." : 'Эта страница вне зоны поражения. Возможно, она была перемещена или больше не существует.' }}</p>
 
       <div class="nf-actions">
         <button class="nf-btn nf-btn-primary" @click="router.push('/dashboard')">

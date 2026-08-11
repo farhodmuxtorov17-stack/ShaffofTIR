@@ -35,6 +35,14 @@ const showPdfPreview = ref(false)
 const pdfDataUrl = ref<string>('')
 const generatingPdf = ref(false)
 
+
+// Check if protocol already exists and is approved/archived
+const existingProtocol = computed(() => {
+  if (!selectedEmployeeId.value) return null
+  return historyStore.protocols.find(p => p.employee_id === selectedEmployeeId.value && (p.status === 'APPROVED' || p.status === 'ARCHIVED'))
+})
+const isProtocolLocked = computed(() => !!existingProtocol.value)
+
 const availableEmployees = computed(() =>
   masterStore.employees.filter(e => e.status === 'ACTIVE')
 )
@@ -222,7 +230,15 @@ function closePreview() {
     </div>
 
     <!-- Draft: select employee and date range -->
-    <template v-if="protocolStatus === 'DRAFT'">
+    <div v-if="isProtocolLocked" class="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+      <div class="flex items-center gap-2">
+        <Shield class="w-5 h-5 text-amber-500" />
+        <p class="text-sm text-amber-700">
+          {{ isUz ? 'Ushbu xodim uchun bayonnoma allaqachon tasdiqlangan/arxivlangan — yangi yaratish mumkin emas' : 'Протокол для данного сотрудника уже утверждён/архивирован — создание нового невозможно' }}
+        </p>
+      </div>
+    </div>
+    <template v-if="protocolStatus === 'DRAFT' && !isProtocolLocked">
       <div class="card p-6 space-y-5">
         <div class="flex items-center gap-2 mb-2">
           <FileText class="w-4 h-4 text-gray-500" />

@@ -17,7 +17,7 @@
         </div>
         <div>
           <label class="text-sm font-medium text-gray-700 block mb-1">{{ isUz ? "Birlik" : "Единица" }}</label>
-          <select v-model="kpi.unit" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none"><option value="%">%</option><option value="ball">балл</option><option value="count">шт</option></select>
+          <select v-model="kpi.unit" class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg outline-none"><option value="%">%</option><option value="ball">{{ isUz ? 'ball' : 'балл' }}</option><option value="count">{{ isUz ? 'dona' : 'шт' }}</option></select>
         </div>
       </div>
       <div>

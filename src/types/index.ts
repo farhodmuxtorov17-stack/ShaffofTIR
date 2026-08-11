@@ -44,6 +44,9 @@ export interface CameraHealthResponse {
 export interface StartSessionRequest {
   soldier_count?: number;
   cameras?: LaneCameraRequest[];
+  range_type?: 'OPEN' | 'CLOSED';
+  scoring_mode?: 'POINTS' | 'HIT_MISS';
+  distance?: number;
 }
 
 export interface StartSessionResponse {
@@ -104,6 +107,8 @@ export interface TargetProcessResponse {
   used_camera_index?: number | null;
   used_camera_source?: string | null;
   capture_image_url?: string | null;
+  total_score?: number;
+  scoring_mode?: string | null;
 }
 
 // --- Upload Process Turn ---

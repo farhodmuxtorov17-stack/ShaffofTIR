@@ -29,11 +29,11 @@ const recordings = [
   <div class="space-y-6">
     <div>
       <h1 class="text-xl font-bold text-gray-900">{{ isUz ? "Kamera yozuvlari" : "Записи камер" }}</h1>
-      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Yo'laklardagi video arxiv" : "Архив видеозаписей с дорожек" }}</p>
+      <p class="text-sm text-gray-500 mt-1">{{ isUz ? "Yoʻlaklardagi video arxiv" : "Архив видеозаписей с дорожек" }}</p>
     </div>
     <div class="card overflow-hidden p-0">
       <table class="w-full text-left text-sm">
-        <thead class="bg-gray-50/70 border-b border-shell-border text-gray-500"><tr><th class="px-4 py-3 font-medium">{{ isUz ? "Yo'lak" : "Дорожка" }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Suvchi" : "Стрелок" }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Qurol" : "Оружие" }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Aniqlik" : "Точность" }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Sana" : "Дата" }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Davomiyligi" : "Длит." }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Hajmi" : "Размер" }}</th><th class="px-4 py-3"></th></tr></thead>
+        <thead class="bg-gray-50/70 border-b border-shell-border text-gray-500"><tr><th class="px-4 py-3 font-medium">{{ isUz ? "Yoʻlak" : "Дорожка" }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Suvchi" : "Стрелок" }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Qurol" : "Оружие" }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Aniqlik" : "Точность" }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Sana" : "Дата" }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Davomiyligi" : "Длит." }}</th><th class="px-4 py-3 font-medium">{{ isUz ? "Hajmi" : "Размер" }}</th><th class="px-4 py-3"></th></tr></thead>
         <tbody class="divide-y divide-shell-border">
           <tr v-for="r in recordings" :key="r.id" class="hover:bg-gray-50/50 transition">
             <td class="px-4 py-3"><span class="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-600">№{{ r.lane }}</span></td>

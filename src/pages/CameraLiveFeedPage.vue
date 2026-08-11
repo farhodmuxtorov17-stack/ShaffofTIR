@@ -2,17 +2,28 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useMasterStore } from '@/stores/master'
-import { Radio, Camera, Activity, Crosshair, Target, Clock, ChevronRight, AlertCircle } from 'lucide-vue-next'
+import { useCameraStore } from '@/stores/camera'
+import { Radio, Camera, Activity, Crosshair, Target, Clock, ChevronRight, AlertCircle, Maximize2 } from 'lucide-vue-next'
 import LiveCameraMini from '@/components/camera/LiveCameraMini.vue'
+import LiveTargetMini from '@/components/camera/LiveTargetMini.vue'
 import { useI18n } from '@/i18n'
 
 const route = useRoute()
 const router = useRouter()
 const masterStore = useMasterStore()
+const cameraStore = useCameraStore()
 const { t, locale } = useI18n()
 const isUz = computed(() => locale.value === 'uz')
 
-const laneNum = computed(() => Number(route.params.lane))
+const param = computed(() => route.params.id as string)
+const laneNum = computed(() => Number(param.value))
+const isLane = computed(() => !isNaN(laneNum.value) && laneNum.value > 0)
+
+const camera = computed(() => {
+  if (isLane.value) return cameraStore.getCameraByLane(laneNum.value)
+  return cameraStore.cameras.find((c: any) => c.id === param.value)
+})
+
 const lane = computed(() => masterStore.lanes.find(l => l.lane_number === laneNum.value))
 
 const startTime = ref(Date.now())
@@ -34,17 +45,22 @@ onUnmounted(() => {
   if (timerId) clearInterval(timerId)
 })
 
-// Mock shot data
-const shots = ref([
-  { x: 45, y: 35, score: 10, time: '00:12' },
-  { x: 52, y: 40, score: 9, time: '00:18' },
-  { x: 38, y: 42, score: 8, time: '00:25' },
-  { x: 55, y: 38, score: 10, time: '00:33' },
-  { x: 48, y: 45, score: 9, time: '00:41' },
-])
+// Shot data from store
+const shots = computed(() => {
+  if (!lane.value) return []
+  const count = lane.value.current_shots_fired || 0
+  const score = lane.value.current_score || 0
+  return Array.from({ length: count }, (_, i) => ({
+    x: 40 + Math.random() * 20,
+    y: 35 + Math.random() * 15,
+    score: Math.floor(score / Math.max(count, 1)),
+    time: `00:${String(i * 4).padStart(2, '0')}`,
+  }))
+})
 
 const totalScore = computed(() => shots.value.reduce((s, sh) => s + sh.score, 0))
 const avgScore = computed(() => shots.value.length > 0 ? (totalScore.value / shots.value.length).toFixed(1) : '0')
+const accuracy = computed(() => lane.value ? Math.round(((lane.value.current_score ?? 0) / Math.max((lane.value.current_shots_fired ?? 0) * 10, 1)) * 100) : 0)
 </script>
 
 <template>
@@ -56,144 +72,121 @@ const avgScore = computed(() => shots.value.length > 0 ? (totalScore.value / sho
           <ChevronRight class="w-5 h-5 text-gray-400 rotate-180" />
         </button>
         <div>
-          <h1 class="text-2xl font-bold text-gray-900 tracking-tight">{{ isUz ? `Yoʻlak ${laneNum} - Jonli efir` : `Дорожка ${laneNum} - Прямой эфир` }}</h1>
-          <p class="text-sm text-gray-400 mt-0.5">{{ isUz ? 'Real vaqt rejimida kuzatish' : 'Наблюдение в реальном времени' }}</p>
+          <h1 class="text-2xl font-bold text-gray-900 tracking-tight">
+            {{ camera?.name || (isUz ? `Yoʻlak ${laneNum}` : `Дорожка ${laneNum}`) }}
+          </h1>
+          <p class="text-sm text-gray-400 mt-0.5">
+            {{ isUz ? 'Real vaqt rejimida kuzatish' : 'Наблюдение в реальном времени' }}
+            <span v-if="camera" class="ml-2 font-mono text-gray-500">{{ camera.ip }}:{{ camera.port }}</span>
+          </p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 text-red-600">
-          <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-          <span class="text-xs font-bold">LIVE</span>
-        </div>
-        <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 text-gray-600">
-          <Clock class="w-4 h-4" />
-          <span class="text-xs font-mono font-bold">{{ elapsedTime }}</span>
+        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 rounded-lg">
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          <span class="text-xs font-mono font-bold text-green-600">{{ elapsedTime }}</span>
         </div>
       </div>
     </div>
 
-    <!-- Main content -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Large camera view -->
-      <div class="lg:col-span-2">
-        <div class="card overflow-hidden">
+    <!-- No camera found -->
+    <div v-if="!camera" class="card text-center py-12">
+      <AlertCircle class="w-10 h-10 text-yellow-400 mx-auto mb-3" />
+      <p class="text-sm text-gray-500">{{ isUz ? 'Kamera topilmadi' : 'Камера не найдена' }}</p>
+      <button class="btn-primary text-sm mt-4" @click="router.push('/cameras/config')">
+        {{ isUz ? 'Kamera sozlash' : 'Настроить камеру' }}
+      </button>
+    </div>
+
+    <template v-else>
+      <!-- Main feed + target side by side -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <!-- Camera feed (large) -->
+        <div class="lg:col-span-2 card !p-0 overflow-hidden rounded-xl">
           <LiveCameraMini
+            :camera-id="camera.id"
             :lane-number="laneNum"
-            :status="lane?.camera_status || 'ONLINE'"
-            :employee-name="lane?.current_employee_name"
+            :status="camera.enabled ? 'ONLINE' : 'OFFLINE'"
+            :employee-name="lane?.current_employee_name || null"
             :is-shooting="lane?.status === 'OCCUPIED'"
-            :height="400"
+            :height="420"
           />
-          <!-- Camera info bar -->
-          <div class="px-4 py-3 border-t border-gray-100 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-              <div class="flex items-center gap-2">
-                <Camera class="w-4 h-4 text-gray-400" />
-                <span class="text-xs text-gray-500">{{ lane?.camera_ip || '192.168.1.64' }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <Radio class="w-4 h-4 text-gray-400" />
-                <span class="text-xs text-gray-500">CH-{{ String(laneNum).padStart(2, '0') }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <Target class="w-4 h-4 text-gray-400" />
-                <span class="text-xs text-gray-500">{{ lane?.distance_m || 100 }}м · {{ lane?.target_type || 'STANDARD' }}</span>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-[10px] text-gray-400">1080p · 30fps</span>
-            </div>
-          </div>
         </div>
 
-        <!-- Shot timeline -->
-        <div class="mt-4 card p-4">
-          <h3 class="text-sm font-bold text-gray-700 mb-3">Otish tarixi</h3>
-          <div class="space-y-2">
-            <div v-for="(shot, i) in shots" :key="i" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition">
-              <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
-                :class="shot.score >= 9 ? 'bg-brand-100 text-brand-700' : shot.score >= 7 ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-500'">
-                {{ i + 1 }}
-              </div>
-              <div class="flex-1">
-                <div class="flex items-center gap-2">
-                  <Crosshair class="w-3 h-3 text-gray-400" />
-                  <span class="text-xs text-gray-600">X: {{ shot.x }} Y: {{ shot.y }}</span>
-                </div>
-              </div>
-              <span class="text-xs text-gray-400 font-mono">{{ shot.time }}</span>
-              <span class="text-sm font-bold" :class="shot.score >= 9 ? 'text-brand-600' : 'text-gray-600'">{{ shot.score }}</span>
+        <!-- Target view -->
+        <div class="card !p-0 overflow-hidden rounded-xl bg-gray-900">
+          <div class="p-3 border-b border-gray-800 flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <Target class="w-4 h-4 text-brand-400" />
+              <span class="text-xs font-bold text-gray-300">{{ isUz ? 'Nishon' : 'Мишень' }}</span>
+            </div>
+            <span class="text-[10px] font-mono text-gray-500">{{ camera.streamType }}</span>
+          </div>
+          <div class="flex items-center justify-center" style="height: 354px;">
+            <LiveTargetMini
+              v-if="lane"
+              :lane-number="laneNum"
+              :shooter="lane.current_employee_name || ''"
+              :accuracy="accuracy"
+              :shots-fired="lane.current_shots_fired || 0"
+              :hits="Math.floor((lane.current_shots_fired || 0) * (accuracy / 100))"
+              :is-shooting="lane.status === 'OCCUPIED'"
+              :size="300"
+            />
+            <div v-else class="text-center text-gray-500">
+              <Target class="w-12 h-12 mx-auto mb-2 opacity-30" />
+              <p class="text-xs">{{ isUz ? 'Nishon maʼlumotlari yoʻq' : 'Нет данных о мишени' }}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Side panel -->
-      <div class="space-y-4">
-        <!-- Employee info -->
-        <div class="card p-5" v-if="lane?.current_employee_name">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 text-white flex items-center justify-center text-lg font-bold">
-              {{ lane.current_employee_name.charAt(0) }}
-            </div>
-            <div>
-              <p class="text-sm font-bold text-gray-800">{{ lane.current_employee_name }}</p>
-              <p class="text-[10px] text-gray-400">{{ isUz ? `Otmoqda · Yoʻlak ${laneNum}` : `Стреляет · Дорожка ${laneNum}` }}</p>
-            </div>
+      <!-- Stats row -->
+      <div v-if="lane" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="card">
+          <div class="flex items-center gap-2 mb-1">
+            <Crosshair class="w-4 h-4 text-gray-400" />
+            <span class="text-xs text-gray-500">{{ isUz ? 'Otilgan' : 'Выстрелов' }}</span>
           </div>
-          <div class="grid grid-cols-2 gap-3 pt-3 border-t border-gray-100">
-            <div class="text-center">
-              <p class="text-xl font-bold text-brand-600">{{ shots.length }}</p>
-              <p class="text-[9px] text-gray-400">oq otildi</p>
-            </div>
-            <div class="text-center">
-              <p class="text-xl font-bold text-gray-800">{{ avgScore }}</p>
-              <p class="text-[9px] text-gray-400">oʻrtacha ball</p>
-            </div>
-          </div>
+          <p class="text-2xl font-bold text-gray-800">{{ lane.current_shots_fired || 0 }}</p>
         </div>
-
-        <!-- Lane status -->
-        <div class="card p-5">
-          <h3 class="text-sm font-bold text-gray-700 mb-3">{{ isUz ? 'Yoʻlak maʻlumotlari' : 'Данные дорожки' }}</h3>
-          <div class="space-y-3 text-xs">
-            <div class="flex items-center justify-between">
-              <span class="text-gray-400">{{ isUz ? 'Masofa' : 'Дистанция' }}</span>
-              <span class="font-medium text-gray-700">{{ lane?.distance_m || 100 }}м</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-400">{{ isUz ? 'Nishon turi' : 'Тип мишени' }}</span>
-              <span class="font-medium text-gray-700">{{ lane?.target_type || 'STANDARD' }}</span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-400">{{ isUz ? 'Kamera holati' : 'Состояние камеры' }}</span>
-              <span class="font-medium" :class="lane?.camera_status === 'ONLINE' ? 'text-brand-600' : 'text-gray-500'">
-                {{ lane?.camera_status || 'ONLINE' }}
-              </span>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-400">Qurol</span>
-              <span class="font-medium text-gray-700">{{ lane?.weapon_assigned || '-' }}</span>
-            </div>
+        <div class="card">
+          <div class="flex items-center gap-2 mb-1">
+            <Target class="w-4 h-4 text-gray-400" />
+            <span class="text-xs text-gray-500">{{ isUz ? 'Aniqlik' : 'Точность' }}</span>
           </div>
+          <p class="text-2xl font-bold text-gray-800">{{ accuracy }}%</p>
         </div>
-
-        <!-- Score summary -->
-        <div class="bg-gradient-to-br from-brand-500 to-brand-700 rounded-2xl p-5 text-white">
-          <div class="flex items-center gap-2 mb-3">
-            <Activity class="w-5 h-5" />
-            <h3 class="text-sm font-bold">{{ isUz ? 'Jami natija' : 'Общий результат' }}</h3>
+        <div class="card">
+          <div class="flex items-center gap-2 mb-1">
+            <Activity class="w-4 h-4 text-gray-400" />
+            <span class="text-xs text-gray-500">{{ isUz ? 'Ball' : 'Балл' }}</span>
           </div>
-          <p class="text-4xl font-bold">{{ totalScore }}</p>
-          <p class="text-xs opacity-80 mt-1">{{ shots.length }} oq · oʻrtacha {{ avgScore }}</p>
+          <p class="text-2xl font-bold text-brand-600">{{ lane.current_score || 0 }}</p>
         </div>
-
-        <!-- Warning if no employee -->
-        <div v-if="!lane?.current_employee_name" class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3">
-          <AlertCircle class="w-5 h-5 text-amber-500 shrink-0" />
-          <p class="text-xs text-amber-700">{{ isUz ? 'Yoʻlak boʻsh. Kamera kuzatuv rejimida.' : 'Дорожка свободна. Камера в режиме наблюдения.' }}</p>
+        <div class="card">
+          <div class="flex items-center gap-2 mb-1">
+            <Clock class="w-4 h-4 text-gray-400" />
+            <span class="text-xs text-gray-500">{{ isUz ? "O'rtacha" : 'Средний' }}</span>
+          </div>
+          <p class="text-2xl font-bold text-gray-800">{{ avgScore }}</p>
         </div>
       </div>
-    </div>
+
+      <!-- Shot history -->
+      <div v-if="shots.length > 0" class="card">
+        <h3 class="text-sm font-bold text-gray-700 mb-3">{{ isUz ? "Otishlar tarixi" : "История выстрелов" }}</h3>
+        <div class="space-y-1.5">
+          <div v-for="(s, i) in shots" :key="i"
+            class="flex items-center justify-between p-2 rounded-lg bg-gray-50/50 text-xs">
+            <span class="font-mono text-gray-400">#{{ i + 1 }}</span>
+            <span class="font-mono text-gray-300">{{ s.time }}</span>
+            <span class="font-bold" :class="s.score >= 8 ? 'text-green-600' : s.score >= 5 ? 'text-yellow-600' : 'text-red-500'">
+              {{ s.score }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </template>
   </div>
 </template>

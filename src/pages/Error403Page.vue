@@ -43,7 +43,7 @@ onMounted(() => { setTimeout(() => mounted.value = true, 50) })
       </div>
 
       <h1 class="fb-title">{{ isUz ? "Ruxsat berilmagan" : 'Доступ закрыт' }}</h1>
-      <p class="fb-subtitle">{{ isUz ? "Sizda ushbu sahifaga kirish huquqi yo'q. administratorga murojaat qiling." : 'У вас нет прав для просмотра этой страницы. Обратитесь к администратору для получения доступа.' }}</p>
+      <p class="fb-subtitle">{{ isUz ? "Sizda ushbu sahifaga kirish huquqi yoʻq. administratorga murojaat qiling." : 'У вас нет прав для просмотра этой страницы. Обратитесь к администратору для получения доступа.' }}</p>
 
       <div class="fb-actions">
         <button class="fb-btn fb-btn-primary" @click="router.push('/dashboard')">

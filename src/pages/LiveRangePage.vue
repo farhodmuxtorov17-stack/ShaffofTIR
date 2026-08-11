@@ -281,8 +281,8 @@ function simulateTick() {
             lane.accuracy = Math.round(lane.hits / lane.shotsFired * 100)
             const points = Math.floor(Math.random() * 3) + 8
             addEvent(lane.num, hit
-              ? (isUz.value ? `D${lane.num} - otib o'tdi (${points}-ball)` : `Д${lane.num} — попадание (${points} очк.)`)
-              : (isUz.value ? `D${lane.num} - o'tkazib yubordi` : `Д${lane.num} — промах`),
+              ? (isUz.value ? `D${lane.num} - otib oʻtdi (${points}-ball)` : `Д${lane.num} — попадание (${points} очк.)`)
+              : (isUz.value ? `D${lane.num} - oʻtkazib yubordi` : `Д${lane.num} — промах`),
               hit ? 'hit' : 'miss', `Р${r.number}`)
           }
           lane.timeRemaining = Math.max(0, lane.timeRemaining - 3)
@@ -613,7 +613,7 @@ onUnmounted(() => {
                     <!-- Camera + Target mini previews -->
                     <div class="grid grid-cols-2 gap-1 mb-1">
                       <div class="relative rounded overflow-hidden" @click.stop="openLaneDetail(lane, rubeg, polygon)">
-                        <LiveCameraMini :lane-number="lane.num" status="ONLINE" :employee-name="lane.shooter" :is-shooting="true" :height="100" />
+                        <LiveCameraMini :lane-number="lane.num" :use-real-camera="true" status="ONLINE" :employee-name="lane.shooter" :is-shooting="true" :height="100" />
                       </div>
                       <div class="relative rounded overflow-hidden" @click.stop="openLaneDetail(lane, rubeg, polygon)">
                         <LiveTargetMini :lane-number="lane.num" :accuracy="lane.accuracy" :shots-fired="lane.shotsFired" :hits="lane.hits" :is-shooting="true" :size="100" />
@@ -640,7 +640,7 @@ onUnmounted(() => {
               <div class="mt-3 flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50 text-xs">
                 <div class="flex items-center gap-4">
                   <span class="text-gray-400">{{ isUz ? "O'rt. aniqlik" : 'Ср. точность' }}: <b :class="accuracyColor(rubegAvgAccuracy(rubeg))" class="ml-1">{{ rubegAvgAccuracy(rubeg) }}%</b></span>
-                  <span class="text-gray-400">{{ isUz ? "Jami o'qlar" : 'Всего выстрелов' }}: <b class="text-gray-700 ml-1">{{ rubeg.lanes.reduce((s, l) => s + l.shotsFired, 0) }}</b></span>
+                  <span class="text-gray-400">{{ isUz ? "Jami oʻqlar" : 'Всего выстрелов' }}: <b class="text-gray-700 ml-1">{{ rubeg.lanes.reduce((s, l) => s + l.shotsFired, 0) }}</b></span>
                 </div>
                 <div v-if="isInstructor" class="flex gap-2">
                   <button class="text-xs px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 transition-colors flex items-center gap-1"><Play class="w-3 h-3" />{{ isUz ? "Yangi sessiya" : 'Новая сессия' }}</button>
@@ -716,7 +716,7 @@ onUnmounted(() => {
                   <tr v-for="lane in filteredLanes(rubeg)" :key="`tb_l_${polygon.id}_${rubeg.id}_${lane.num}`" class="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer transition-colors" @click="openLaneDetail(lane, rubeg, polygon)">
                     <td class="px-3 py-2 text-xs text-gray-500 truncate max-w-[120px]">{{ polygon.name }}</td>
                     <td class="px-3 py-2 text-xs text-gray-600">{{ rubeg.distance }}м · {{ weaponLabel(rubeg.weaponType) }}</td>
-                    <td class="px-3 py-2 text-xs font-bold text-gray-700">Д{{ lane.num }}</td>
+                    <td class="px-3 py-2 text-xs font-bold text-gray-700">{{ isUz ? 'D' : 'Д' }}{{ lane.num }}</td>
                     <td class="px-3 py-2 text-xs text-gray-700">{{ lane.shooter || '—' }}</td>
                     <td class="px-3 py-2 text-xs text-gray-500">{{ lane.weapon || '—' }}</td>
                     <td class="px-3 py-2 text-center text-xs text-gray-600">{{ lane.shotsFired }}/{{ lane.shotsTotal }}</td>
@@ -786,7 +786,7 @@ onUnmounted(() => {
                     <span class="text-[9px] font-mono text-red-500 font-bold">LIVE</span>
                   </span>
                 </div>
-                <LiveCameraMini :lane-number="selectedLane.lane.num" status="ONLINE" :employee-name="selectedLane.lane.shooter" :is-shooting="true" :height="260" />
+                <LiveCameraMini :lane-number="selectedLane.lane.num" :use-real-camera="true" status="ONLINE" :employee-name="selectedLane.lane.shooter" :is-shooting="true" :height="260" />
               </div>
               <div>
                 <div class="flex items-center gap-1.5 mb-1.5">
@@ -818,7 +818,7 @@ onUnmounted(() => {
               <p class="text-xs text-gray-400 mb-2">{{ isUz ? "O'qlar tarixi" : 'История выстрелов' }}</p>
               <div class="flex flex-wrap gap-1">
                 <div v-for="(shot, si) in selectedLane.lane.history" :key="si" class="w-6 h-6 rounded-md flex items-center justify-center text-[10px] font-bold" :class="shot ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-600'">{{ shot ? '✓' : '✗' }}</div>
-                <div v-if="!selectedLane.lane.history.length" class="text-xs text-gray-300">{{ isUz ? "Hozircha yo'q" : 'Пока нет выстрелов' }}</div>
+                <div v-if="!selectedLane.lane.history.length" class="text-xs text-gray-300">{{ isUz ? "Hozircha yoʻq" : 'Пока нет выстрелов' }}</div>
               </div>
             </div>
             <div class="flex items-center justify-between p-3 rounded-lg bg-gray-50">

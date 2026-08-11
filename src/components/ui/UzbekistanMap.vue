@@ -186,12 +186,18 @@ watch(locale, () => {
   }
 })
 
-onMounted(() => { initMap() })
+onMounted(() => {
+  initMap()
+  // Fix: invalidate size after mount to ensure correct rendering
+  setTimeout(() => {
+    if (map) map.invalidateSize()
+  }, 100)
+})
 onUnmounted(() => { if (map) { map.remove(); map = null } })
 </script>
 
 <template>
-  <div class="relative w-full" :style="{ height: compact ? '300px' : '500px' }">
+  <div class="relative w-full isolate" :style="{ height: compact ? '300px' : '500px' }">
     <div ref="mapContainer" class="w-full h-full rounded-2xl overflow-hidden" />
   </div>
 </template>

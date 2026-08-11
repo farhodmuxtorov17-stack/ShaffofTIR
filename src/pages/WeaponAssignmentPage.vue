@@ -33,7 +33,7 @@ function assign() {
   if (weapon && emp) {
     weapon.status = 'IN_USE'
     weapon.assigned_to = emp.id
-    uiStore.showToast('success', 'Назначено', `${weapon.name} → ${emp.full_name.split(' ').slice(0,2).join(' ')}`)
+    uiStore.showToast('success', isUz.value ? 'Tayinlandi' : 'Назначено', `${weapon.name} → ${emp.full_name.split(' ').slice(0,2).join(' ')}`)
     selectedWeapon.value = null
     selectedEmployee.value = null
   }
@@ -44,32 +44,32 @@ function assign() {
   <LoadingState v-if="loading" />
   <div v-if="!loading" class="space-y-6">
     <div>
-      <h1 class="text-xl font-bold text-gray-900">Назначение оружия</h1>
-      <p class="text-sm text-gray-500 mt-1">Выдача оружия сотрудникам</p>
+      <h1 class="text-xl font-bold text-gray-900">{{ isUz ? 'Qurol tayinlash' : 'Назначение оружия' }}</h1>
+      <p class="text-sm text-gray-500 mt-1">{{ isUz ? 'Xodimlarga qurol berish' : 'Выдача оружия сотрудникам' }}</p>
     </div>
     <div class="card space-y-4">
-      <h2 class="text-sm font-bold text-gray-700">Новое назначение</h2>
+      <h2 class="text-sm font-bold text-gray-700">{{ isUz ? 'Yangi tayinlash' : 'Новое назначение' }}</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="text-xs text-gray-500 mb-1 block">Оружие</label>
+          <label class="text-xs text-gray-500 mb-1 block">{{ isUz ? 'Qurol' : 'Оружие' }}</label>
           <select v-model="selectedWeapon" class="input text-sm">
-            <option value="">Выберите...</option>
+            <option value="">{{ isUz ? 'Tanlang...' : 'Выберите...' }}</option>
             <option v-for="w in availableWeapons" :key="w.id" :value="w.id">{{ w.name }} ({{ w.serial_number }})</option>
           </select>
         </div>
         <div>
-          <label class="text-xs text-gray-500 mb-1 block">Сотрудник</label>
+          <label class="text-xs text-gray-500 mb-1 block">{{ isUz ? 'Xodim' : 'Сотрудник' }}</label>
           <select v-model="selectedEmployee" class="input text-sm">
-            <option value="">Выберите...</option>
+            <option value="">{{ isUz ? 'Tanlang...' : 'Выберите...' }}</option>
             <option v-for="e in availableEmployees" :key="e.id" :value="e.id">{{ e.full_name }} ({{ e.rank }})</option>
           </select>
         </div>
       </div>
-      <button class="btn-primary text-xs" :disabled="!selectedWeapon || !selectedEmployee" @click="assign"><Check class="w-3.5 h-3.5" /> Назначить</button>
+      <button class="btn-primary text-xs" :disabled="!selectedWeapon || !selectedEmployee" @click="assign"><Check class="w-3.5 h-3.5" /> {{ isUz ? 'Tayinlash' : 'Назначить' }}</button>
     </div>
     <div class="card">
-      <h2 class="text-sm font-bold text-gray-700 mb-3">Текущие назначения</h2>
-      <div v-if="assignments.length === 0" class="text-sm text-gray-400 py-4 text-center">Нет активных назначений</div>
+      <h2 class="text-sm font-bold text-gray-700 mb-3">{{ isUz ? 'Joriy tayinlar' : 'Текущие назначения' }}</h2>
+      <div v-if="assignments.length === 0" class="text-sm text-gray-400 py-4 text-center">{{ isUz ? 'Faol tayinlar yoq' : 'Нет активных назначений' }}</div>
       <div class="space-y-2">
         <div v-for="a in assignments" :key="a.weapon.id" class="flex items-center justify-between p-3 rounded-xl bg-gray-50/50">
           <div class="flex items-center gap-3">

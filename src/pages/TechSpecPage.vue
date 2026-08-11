@@ -336,7 +336,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
       <div class="rounded-xl p-4 bg-white border border-gray-100">
         <MapPin class="w-4 h-4 text-gray-400 mb-2" />
         <p class="text-2xl font-black text-gray-900">{{ totalLanes }}</p>
-        <p class="text-[11px] text-gray-400">{{ isUz ? "Yo'liqlar" : 'Дорожек' }}</p>
+        <p class="text-[11px] text-gray-400">{{ isUz ? "Yoʻliqlar" : 'Дорожек' }}</p>
       </div>
     </div>
 
@@ -408,7 +408,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
                 <span class="text-gray-200">|</span>
                 <span>{{ range.total_rubegs }} {{ isUz ? 'rubeg' : 'рубеж.' }}</span>
                 <span class="text-gray-200">|</span>
-                <span>{{ range.total_lanes }} {{ isUz ? "yo'l" : 'дор.' }}</span>
+                <span>{{ range.total_lanes }} {{ isUz ? "yoʻl" : 'дор.' }}</span>
               </div>
             </div>
             <div class="flex items-center gap-3 shrink-0">
@@ -461,7 +461,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
                     <div class="flex items-center gap-3 mt-0.5 text-[11px] text-gray-400">
                       <span>{{ rubeg.distance_m }}{{ isUz ? 'm' : 'м' }}</span>
                       <span class="text-gray-200">|</span>
-                      <span>{{ rubeg.lane_count }} {{ isUz ? "yo'l" : 'дорожек' }}</span>
+                      <span>{{ rubeg.lane_count }} {{ isUz ? "yoʻl" : 'дорожек' }}</span>
                       <span class="text-gray-200">|</span>
                       <span class="font-mono">{{ range.ip_prefix }}.{{ (rubeg.rubeg_number - 1) * range.lanes_per_rubeg + 10 }}-{{ (rubeg.rubeg_number - 1) * range.lanes_per_rubeg + 10 + rubeg.lane_count - 1 }}</span>
                     </div>
@@ -486,7 +486,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
                         <Camera class="w-3.5 h-3.5" :class="Math.random() > 0.08 ? 'text-green-500' : 'text-red-400'" />
                       </div>
                       <div class="flex-1 min-w-0">
-                        <p class="text-xs font-medium text-gray-700">{{ isUz ? "Yo'l" : 'Дорожка' }} {{ lane }}</p>
+                        <p class="text-xs font-medium text-gray-700">{{ isUz ? "Yoʻl" : 'Дорожка' }} {{ lane }}</p>
                         <p class="text-[10px] text-gray-400 font-mono">{{ cameraIpFor(range, rubeg, lane) }}</p>
                       </div>
                       <div class="flex items-center gap-2 text-[10px]">
@@ -538,7 +538,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
               <p class="text-xs font-bold text-gray-800 truncate">{{ cam.range_name }}</p>
             </div>
             <p class="text-[11px] text-gray-400 mt-0.5">
-              {{ isUz ? 'Rubeg' : 'Рубеж' }} {{ cam.rubeg_num }} - {{ isUz ? "Yo'l" : 'Дорожка' }} {{ cam.lane }}
+              {{ isUz ? 'Rubeg' : 'Рубеж' }} {{ cam.rubeg_num }} - {{ isUz ? "Yoʻl" : 'Дорожка' }} {{ cam.lane }}
             </p>
             <div class="flex items-center gap-2 mt-1">
               <p class="text-[10px] font-mono text-gray-500">{{ cam.ip }}</p>
@@ -635,7 +635,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
               <span class="text-gray-700 font-medium">{{ rubeg.name }}</span>
               <span class="px-1.5 py-0.5 rounded text-[10px] font-medium border" :class="weaponTypeColor(rubeg.weapon_type)">{{ weaponTypeLabel(rubeg.weapon_type) }}</span>
               <span class="text-gray-400 font-mono ml-auto">{{ range.ip_prefix }}.{{ (rubeg.rubeg_number - 1) * range.lanes_per_rubeg + 10 }}-{{ (rubeg.rubeg_number - 1) * range.lanes_per_rubeg + 10 + rubeg.lane_count - 1 }}</span>
-              <span class="text-gray-300">{{ rubeg.lane_count }} {{ isUz ? "yo'l" : 'дор.' }}</span>
+              <span class="text-gray-300">{{ rubeg.lane_count }} {{ isUz ? "yoʻl" : 'дор.' }}</span>
             </div>
           </div>
         </div>
@@ -692,7 +692,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
               </select>
             </div>
             <div>
-              <label class="text-xs font-medium text-gray-500">{{ isUz ? "Yo'l / rubeg" : 'Дорожек / рубеж' }}</label>
+              <label class="text-xs font-medium text-gray-500">{{ isUz ? "Yoʻl / rubeg" : 'Дорожек / рубеж' }}</label>
               <input v-model.number="rangeForm.lanes_per_rubeg" type="number" min="1" max="20" class="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none" />
             </div>
           </div>
@@ -729,7 +729,7 @@ onUnmounted(() => { if (timer) clearInterval(timer) })
             </div>
           </div>
           <div>
-            <label class="text-xs font-medium text-gray-500">{{ isUz ? "Yo'liq soni" : 'Кол-во дорожек' }}</label>
+            <label class="text-xs font-medium text-gray-500">{{ isUz ? "Yoʻliq soni" : 'Кол-во дорожек' }}</label>
             <input v-model.number="rubegForm.lane_count" type="number" min="1" max="20" class="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 outline-none" />
           </div>
         </div>

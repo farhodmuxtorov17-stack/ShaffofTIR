@@ -11,6 +11,7 @@ import {
 } from 'lucide-vue-next'
 import LiveCameraMini from '@/components/camera/LiveCameraMini.vue'
 import LiveTargetMini from '@/components/camera/LiveTargetMini.vue'
+import ShootingSessionWorkflow from '@/components/shooting/ShootingSessionWorkflow.vue'
 
 const auth = useAuthStore()
 const masterStore = useMasterStore()
@@ -36,6 +37,7 @@ const isSearching = ref(false)
 const faceIdActive = ref(false)
 const faceIdError = ref('')
 const faceIdStep = ref<'scanning' | 'matched' | 'error'>('scanning')
+const cameraFacing = ref<'environment' | 'user'>('environment') // Default: rear camera
 const videoRef = ref<HTMLVideoElement | null>(null)
 let mediaStream: MediaStream | null = null
 
@@ -46,22 +48,26 @@ const sessionConfig = ref<{
   lane: any
   rubeg: any
   bullets: number
+  testBullets: number
   distance: number
   exerciseType: string
   seriesCount: number
   weaponType: string
   scoringMode: string
+  rangeType: 'OPEN' | 'CLOSED'
 }>({
   show: false,
   employee: null,
   lane: null,
   rubeg: null,
   bullets: 10,
+  testBullets: 3,
   distance: 100,
   exerciseType: 'basic',
   seriesCount: 1,
   weaponType: 'AK-12',
   scoringMode: 'POINTS',
+  rangeType: 'OPEN',
 })
 
 // --- Active sessions (lane id → session config)
@@ -107,6 +113,34 @@ function stopLiveSimulation() {
 
 onMounted(() => {
   setTimeout(() => { loading.value = false }, 400)
+  // Auto-populate activeSessions from existing OCCUPIED lanes
+  lanes.value.forEach(lane => {
+    if (lane.status === 'OCCUPIED' && lane.current_employee_id) {
+      const emp = masterStore.employees.find(e => e.id === lane.current_employee_id)
+      const empName = emp?.full_name || lane.current_employee_name || ''
+      activeSessions.value[lane.id] = {
+        employee_id: lane.current_employee_id,
+        employee_name: empName,
+        lane_id: lane.id,
+        lane_number: lane.lane_number,
+        bullets: 10,
+        distance: lane.distance_m || 100,
+        exercise_type: 'basic',
+        series_count: 1,
+        weapon_type: (lane as any).weapon_type || 'AK-12',
+        scoring_mode: 'POINTS',
+        start_time: lane.session_start_time || new Date(Date.now() - Math.random() * 900000).toISOString(),
+        shots_fired: lane.current_shots_fired || 0,
+        score: lane.current_score || 0,
+      }
+      liveShotData.value[lane.id] = {
+        shots: lane.current_shots_fired || 0,
+        hits: Math.floor((lane.current_shots_fired || 0) * 0.72),
+        accuracy: lane.current_shots_fired ? Math.round(72) : 0,
+        score: lane.current_score || 0,
+      }
+    }
+  })
   startLiveSimulation()
 })
 
@@ -171,7 +205,7 @@ async function startFaceId() {
 
   try {
     if (navigator.mediaDevices?.getUserMedia) {
-      mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } })
+      mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: cameraFacing.value, width: { ideal: 640 }, height: { ideal: 480 } } })
       await new Promise(resolve => setTimeout(resolve, 200))
       if (videoRef.value) {
         videoRef.value.srcObject = mediaStream
@@ -224,6 +258,8 @@ function autoAssignEmployee(employee: any) {
     seriesCount: 1,
     weaponType: (lane as any).weapon_type || 'AK-12',
     scoringMode: 'POINTS',
+    testBullets: 3,
+    rangeType: 'OPEN',
   }
   identifiedEmployee.value = null
 }
@@ -257,11 +293,13 @@ function confirmSessionConfig() {
     lane_id: cfg.lane?.id,
     lane_number: cfg.lane?.lane_number,
     bullets: cfg.bullets,
+    test_bullets: cfg.testBullets,
     distance: cfg.distance,
     exercise_type: cfg.exerciseType,
     series_count: cfg.seriesCount,
     weapon_type: cfg.weaponType,
     scoring_mode: cfg.scoringMode,
+    range_type: cfg.rangeType,
     start_time: new Date().toISOString(),
     shots_fired: 0,
     score: 0,
@@ -286,6 +324,31 @@ function onExerciseChange(exerciseId: string) {
   if (exercise) {
     sessionConfig.value.bullets = exercise.defaultBullets
     sessionConfig.value.distance = exercise.defaultDistance
+  }
+}
+
+// --- Switch camera (front/rear)
+async function switchCamera() {
+  cameraFacing.value = cameraFacing.value === 'environment' ? 'user' : 'environment'
+  if (faceIdActive.value && mediaStream) {
+    // Restart camera with new facing mode
+    mediaStream.getTracks().forEach(t => t.stop())
+    mediaStream = null
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: cameraFacing.value, width: { ideal: 640 }, height: { ideal: 480 } } })
+      if (videoRef.value) {
+        videoRef.value.srcObject = mediaStream
+        await videoRef.value.play().catch(() => {})
+      }
+    } catch (err: any) {
+      // If rear camera not available, fall back to front
+      cameraFacing.value = 'user'
+      mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } } })
+      if (videoRef.value) {
+        videoRef.value.srcObject = mediaStream
+        await videoRef.value.play().catch(() => {})
+      }
+    }
   }
 }
 
@@ -419,11 +482,11 @@ function getExerciseLabel(id: string) {
         <p class="text-sm text-white/90 flex items-center gap-1.5">
           <MapPin class="w-4 h-4" />
           <template v-if="!assignmentFlash.error">
-            → {{ isUz ? "Yo'lqa" : 'Дорожка' }} {{ assignmentFlash.lane.lane_number }} ({{ assignmentFlash.config?.distance }}{{ isUz ? 'm' : 'м' }})
-            · {{ assignmentFlash.config?.bullets }} {{ isUz ? "o'q" : 'патр.' }}
+            → {{ isUz ? "Yoʻlqa" : 'Дорожка' }} {{ assignmentFlash.lane.lane_number }} ({{ assignmentFlash.config?.distance }}{{ isUz ? 'm' : 'м' }})
+            · {{ assignmentFlash.config?.bullets }} {{ isUz ? "oʻq" : 'патр.' }}
             · {{ getExerciseLabel(assignmentFlash.config?.exercise) }}
           </template>
-          <template v-else>{{ isUz ? "Bo'sh yo'lqa yo'q" : 'Нет свободных дорожек' }}</template>
+          <template v-else>{{ isUz ? "Bo'sh yoʻlqa yoʻq" : 'Нет свободных дорожек' }}</template>
         </p>
       </div>
       <div v-if="!assignmentFlash.error" class="text-right">
@@ -441,7 +504,7 @@ function getExerciseLabel(id: string) {
           </div>
           <div>
             <h2 class="text-lg font-bold text-gray-900">{{ isUz ? 'Face ID orqali aniqlash' : 'Идентификация через Face ID' }}</h2>
-            <p class="text-sm text-gray-500">{{ isUz ? "Kameraga qarang — sistema avtomatik aniqlaydi va yo'lkaga tayinlaydi" : 'Посмотрите в камеру — система автоматически определит и назначит на дорожку' }}</p>
+            <p class="text-sm text-gray-500">{{ isUz ? "Kameraga qarang — sistema avtomatik aniqlaydi va yoʻlkaga tayinlaydi" : 'Смотрите в камеру — система автоматически определит и назначит на дорожку' }}</p>
           </div>
         </div>
         <button class="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 text-white font-bold text-sm shadow-lg hover:shadow-xl transition-all hover:scale-[1.02]"
@@ -491,7 +554,7 @@ function getExerciseLabel(id: string) {
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <Radio class="w-4 h-4 text-brand-600" />
-          <h2 class="text-sm font-bold text-gray-800">{{ isUz ? "Yo'lkalar holati" : 'Состояние дорожек' }}</h2>
+          <h2 class="text-sm font-bold text-gray-800">{{ isUz ? "Yoʻlkalar holati" : 'Состояние дорожек' }}</h2>
         </div>
         <div class="flex items-center gap-2 text-xs text-gray-400">
           <Shield class="w-3.5 h-3.5" />
@@ -508,7 +571,7 @@ function getExerciseLabel(id: string) {
                 {{ lane.lane_number }}
               </div>
               <div>
-                <p class="text-xs font-bold">{{ isUz ? `Yo'lqa ${lane.lane_number}` : `Дорожка ${lane.lane_number}` }}</p>
+                <p class="text-xs font-bold">{{ isUz ? `Yoʻlqa ${lane.lane_number}` : `Дорожка ${lane.lane_number}` }}</p>
                 <p class="text-[10px] opacity-70">{{ lane.distance_m }}{{ isUz ? 'm' : 'м' }} · {{ lane.target_type }}</p>
               </div>
             </div>
@@ -520,7 +583,7 @@ function getExerciseLabel(id: string) {
             <p class="text-sm font-medium truncate">{{ activeSessions[lane.id].employee_name.split(' ').slice(0, 2).join(' ') }}</p>
             <div class="flex items-center gap-2 text-[10px] opacity-70 flex-wrap">
               <span class="flex items-center gap-0.5"><Clock class="w-2.5 h-2.5" /> {{ minsAgo(lane.session_start_time) }}</span>
-              <span class="flex items-center gap-0.5"><Crosshair class="w-2.5 h-2.5" /> {{ activeSessions[lane.id].bullets }} {{ isUz ? "o'q" : 'патр.' }}</span>
+              <span class="flex items-center gap-0.5"><Crosshair class="w-2.5 h-2.5" /> {{ activeSessions[lane.id].bullets }} {{ isUz ? "oʻq" : 'патр.' }}</span>
               <span class="flex items-center gap-0.5"><Target class="w-2.5 h-2.5" /> {{ activeSessions[lane.id].distance }}{{ isUz ? 'm' : 'м' }}</span>
             </div>
             <div class="flex items-center gap-1 text-[10px]">
@@ -590,7 +653,13 @@ function getExerciseLabel(id: string) {
         <div class="relative bg-gray-900 rounded-2xl p-6 max-w-sm w-full mx-4">
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-white font-semibold text-sm">{{ isUz ? 'Yuzni aniqlash' : 'Face ID — Распознавание' }}</h3>
-            <button @click="stopCamera" class="text-gray-400 hover:text-white transition"><X class="w-5 h-5" /></button>
+            <div class="flex items-center gap-2">
+              <button @click="switchCamera" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 text-white text-xs font-medium hover:bg-white/20 transition">
+                <Repeat class="w-3.5 h-3.5" />
+                {{ cameraFacing === 'environment' ? (isUz ? 'Orqa' : 'Задняя') : (isUz ? 'Old' : 'Фронт') }}
+              </button>
+              <button @click="stopCamera" class="text-gray-400 hover:text-white transition"><X class="w-5 h-5" /></button>
+            </div>
           </div>
           <div class="relative rounded-xl overflow-hidden bg-black aspect-[4/3] mb-4">
             <video ref="videoRef" autoplay playsinline muted class="w-full h-full object-cover" />
@@ -646,12 +715,40 @@ function getExerciseLabel(id: string) {
             <div class="flex items-center gap-2 text-sm">
               <MapPin class="w-4 h-4 text-green-600" />
               <span class="text-green-700 font-medium">
-                {{ isUz ? "Avto-tayinlandi:" : 'Авто-назначен:' }} {{ isUz ? "Yo'lqa" : 'Дорожка' }} {{ sessionConfig.lane?.lane_number }}
+                {{ isUz ? "Avto-tayinlandi:" : 'Авто-назначен:' }} {{ isUz ? "Yoʻlqa" : 'Дорожка' }} {{ sessionConfig.lane?.lane_number }}
                 · {{ sessionConfig.rubeg ? (isUz ? `Rubeg ${sessionConfig.rubeg.rubeg_number}` : `Рубеж ${sessionConfig.rubeg.rubeg_number}`) : '' }}
               </span>
             </div>
           </div>
           <div class="px-6 py-4 space-y-4">
+            <!-- Range Type Selector -->
+            <div>
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">{{ isUz ? "Tir turi" : 'Тип тира' }}</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button class="px-3 py-2.5 rounded-lg text-xs font-bold border-2 transition text-left"
+                  :class="sessionConfig.rangeType === 'OPEN' ? 'border-orange-400 bg-orange-50 text-orange-700' : 'border-gray-200 text-gray-600 hover:border-gray-300'"
+                  @click="sessionConfig.rangeType = 'OPEN'; sessionConfig.scoringMode = 'POINTS'">
+                  <span class="flex items-center gap-1.5"><MapPin class="w-4 h-4" />{{ isUz ? "Ochiq poligon" : 'Открытый полигон' }}</span>
+                  <p class="text-[10px] font-normal mt-0.5 opacity-70">{{ isUz ? "Ball tizimi (harbiylar)" : 'Баллы (военные)' }}</p>
+                </button>
+                <button class="px-3 py-2.5 rounded-lg text-xs font-bold border-2 transition text-left"
+                  :class="sessionConfig.rangeType === 'CLOSED' ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-600 hover:border-gray-300'"
+                  @click="sessionConfig.rangeType = 'CLOSED'; sessionConfig.scoringMode = 'HIT_MISS'">
+                  <span class="flex items-center gap-1.5"><Home class="w-4 h-4" />{{ isUz ? "Yopiq tir" : 'Закрытый тир' }}</span>
+                  <p class="text-[10px] font-normal mt-0.5 opacity-70">{{ isUz ? "Faqat urish (prokuratura, GAI)" : 'Только попадание (прокуратура, ГАИ)' }}</p>
+                </button>
+              </div>
+            </div>
+            <!-- Test bullets -->
+            <div>
+              <label class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">{{ isUz ? "Sinov o'qlari soni" : 'Пробные патроны' }}</label>
+              <div class="flex items-center gap-2">
+                <button class="w-8 h-8 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold" @click="sessionConfig.testBullets = Math.max(0, sessionConfig.testBullets - 1)">−</button>
+                <input v-model.number="sessionConfig.testBullets" type="number" min="0" max="10" class="input text-sm text-center font-bold" />
+                <button class="w-8 h-8 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 font-bold" @click="sessionConfig.testBullets = Math.min(10, sessionConfig.testBullets + 1)">+</button>
+                <span class="text-xs text-gray-400 ml-1">{{ isUz ? "0 — sinovsiz" : '0 — без пробных' }}</span>
+              </div>
+            </div>
             <div>
               <label class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 block">{{ isUz ? "Mashq turi" : 'Тип упражнения' }}</label>
               <div class="grid grid-cols-2 gap-2">
@@ -725,7 +822,7 @@ function getExerciseLabel(id: string) {
         <div v-for="(session, laneId) in activeSessions" :key="laneId" class="bg-gray-900 rounded-xl overflow-hidden border border-gray-800">
           <div class="px-3 py-2 flex items-center justify-between bg-gray-800/50">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-white">{{ isUz ? "Yo'lqa" : 'Дорожка' }} {{ session.lane_number }}</span>
+              <span class="text-xs font-bold text-white">{{ isUz ? "Yoʻlqa" : 'Дорожка' }} {{ session.lane_number }}</span>
               <span class="text-[10px] text-gray-400">{{ session.employee_name.split(' ').slice(0, 2).join(' ') }}</span>
             </div>
             <div class="flex items-center gap-1">
@@ -743,7 +840,7 @@ function getExerciseLabel(id: string) {
           </div>
           <div class="px-3 py-2 bg-gray-800/30">
             <div class="flex items-center justify-between text-[10px]">
-              <span class="text-gray-400">{{ getLiveShots(laneId as string).shots }}/{{ session.bullets }} {{ isUz ? "o'q" : 'патр.' }}</span>
+              <span class="text-gray-400">{{ getLiveShots(laneId as string).shots }}/{{ session.bullets }} {{ isUz ? "oʻq" : 'патр.' }}</span>
               <span class="font-bold" :class="getLiveShots(laneId as string).accuracy >= 70 ? 'text-green-400' : getLiveShots(laneId as string).accuracy >= 50 ? 'text-amber-400' : 'text-red-400'">{{ getLiveShots(laneId as string).accuracy }}%</span>
               <span class="text-blue-400 font-bold">{{ getLiveShots(laneId as string).score }} {{ isUz ? 'ball' : 'балл' }}</span>
             </div>
@@ -766,7 +863,7 @@ function getExerciseLabel(id: string) {
                 <Video class="w-5 h-5 text-red-400" />
               </div>
               <div>
-                <p class="text-xs text-gray-400">{{ isUz ? "Yo'lqa" : 'Дорожка' }} {{ selectedLaneDetail.lane_number }} · {{ selectedLaneDetail.distance_m }}{{ isUz ? 'm' : 'м' }}</p>
+                <p class="text-xs text-gray-400">{{ isUz ? "Yoʻlqa" : 'Дорожка' }} {{ selectedLaneDetail.lane_number }} · {{ selectedLaneDetail.distance_m }}{{ isUz ? 'm' : 'м' }}</p>
                 <p class="text-sm font-bold">{{ activeSessions[selectedLaneDetail.id]?.employee_name }}</p>
               </div>
             </div>
@@ -837,6 +934,8 @@ function getExerciseLabel(id: string) {
               <span class="text-gray-500">{{ activeSessions[selectedLaneDetail.id]?.distance }}{{ isUz ? 'm' : 'м' }}</span>
             </div>
           </div>
+            <!-- Shooting Session Workflow -->
+            <ShootingSessionWorkflow v-if="activeSessions[selectedLaneDetail.id]" :lane-number="selectedLaneDetail.lane_number" :employee-name="activeSessions[selectedLaneDetail.id]?.employee_name" :weapon-type="activeSessions[selectedLaneDetail.id]?.weapon_type" :distance="activeSessions[selectedLaneDetail.id]?.distance" :bullet-count="activeSessions[selectedLaneDetail.id]?.bullets" :default-range-type="activeSessions[selectedLaneDetail.id]?.range_type" @close="closeLaneDetail" />
         </div>
       </div>
     </Teleport>

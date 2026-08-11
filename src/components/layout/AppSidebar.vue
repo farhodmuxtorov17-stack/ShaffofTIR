@@ -41,7 +41,6 @@ const managerNavGroups: NavGroup[] = [
     { labelKey: 'nav.commandCenter', path: '/command-center', icon: Monitor, roles: ['MANAGER'] },
     { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['MANAGER'] },
     { labelKey: 'nav.compare', path: '/compare/0', icon: GitCompare, roles: ['MANAGER'] },
-    { labelKey: 'nav.sessions', path: '/sessions', icon: Users, roles: ['MANAGER'] },
   ]},
   { labelKey: 'nav.kpi', items: [
     { labelKey: 'nav.kpiCatalog', path: '/kpi/catalog', icon: Target, roles: ['MANAGER'] },
@@ -73,7 +72,7 @@ const managerNavGroups: NavGroup[] = [
 const instructorNavGroups: NavGroup[] = [
   { labelKey: 'nav.main', items: [
     { labelKey: 'nav.dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['INSTRUCTOR'] },
-    { labelKey: 'nav.tablet', path: '/range/instructor-tablet', icon: Zap, roles: ['INSTRUCTOR'] },
+    { labelKey: 'nav.tablet', path: '/range/instructor-tablet', icon: Zap, roles: ['INSTRUCTOR', 'SUPER_ADMIN'] },
     { labelKey: 'nav.results', path: '/results', icon: Target, roles: ['INSTRUCTOR'] },
     { labelKey: 'nav.range', path: '/range/dashboard', icon: Target, roles: ['INSTRUCTOR'] },
     { labelKey: 'nav.sessions', path: '/sessions', icon: Users, roles: ['INSTRUCTOR'] },
@@ -123,6 +122,7 @@ const techSpecNavGroups: NavGroup[] = [
   ]},
   { labelKey: 'nav.equipment', items: [
     { labelKey: 'nav.cameras', path: '/cameras/dashboard', icon: Camera, roles: ['TECHSPEC'] },
+    { labelKey: 'nav.cameraConfig', path: '/cameras/config', icon: Settings, roles: ['TECHSPEC'] },
   ]},
   { labelKey: 'nav.system', items: [
     { labelKey: 'nav.help', path: '/help', icon: HelpCircle, roles: ['TECHSPEC'] },
@@ -254,6 +254,7 @@ function handleNavigate() {
   background: linear-gradient(180deg, #080c0a 0%, #0a0f0d 100%);
   border-right: 1px solid rgba(22,163,74,0.04);
   position: relative;
+  z-index: 1000;
 }
 .sidebar-top-glow {
   position: absolute; top: 0; left: 0; right: 0; height: 200px;

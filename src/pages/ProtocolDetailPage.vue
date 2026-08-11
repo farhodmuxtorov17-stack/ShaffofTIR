@@ -66,6 +66,17 @@ function handleApprove() {
     historyStore.approveProtocol(protocol.value.id)
   }
 }
+
+function handleArchive() {
+  if (protocol.value) {
+    historyStore.archiveProtocol(protocol.value.id)
+  }
+}
+
+const isLocked = computed(() => {
+  if (!protocol.value) return false
+  return protocol.value.status === 'APPROVED' || protocol.value.status === 'ARCHIVED'
+})
 </script>
 
 <template>
@@ -176,6 +187,16 @@ function handleApprove() {
           <button v-if="protocol.status === 'SIGNED'" class="btn-primary text-xs" @click="handleApprove">
             <CheckCircle class="w-3.5 h-3.5" /> {{ t('detail.approve') }}
           </button>
+          <button v-if="protocol.status === 'APPROVED'" class="btn-secondary text-xs" @click="handleArchive">
+            <CheckCircle class="w-3.5 h-3.5" /> {{ isUz ? 'Arxivlash' : 'Архивировать' }}
+          </button>
+        </div>
+
+        <div v-if="isLocked" class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-center gap-2">
+          <CheckCircle class="w-4 h-4 text-amber-500" />
+          <p class="text-xs text-amber-700">
+            {{ isUz ? 'Bayonnoma tasdiqlangan/arxivlangan — tahrir qilish mumkin emas' : 'Протокол утверждён/архивирован — редактирование запрещено' }}
+          </p>
         </div>
 
         <div v-if="isLocal && protocol?.qr_code" class="mt-4 text-center">

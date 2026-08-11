@@ -182,7 +182,7 @@ function regionLabel(value: string) {
         <div class="bg-white rounded-xl border border-gray-100 p-4">
           <Zap class="w-5 h-5 text-purple-500 mb-2" />
           <p class="text-2xl font-bold text-gray-900">{{ techStats.totalLanes }}</p>
-          <p class="text-[10px] text-gray-400">{{ isUz ? "Yo'liqlar" : "Дорожки" }}</p>
+          <p class="text-[10px] text-gray-400">{{ isUz ? "Yoʻliqlar" : "Дорожки" }}</p>
         </div>
         <div class="bg-white rounded-xl border border-gray-100 p-4">
           <Camera class="w-5 h-5 text-emerald-500 mb-2" />
@@ -235,7 +235,7 @@ function regionLabel(value: string) {
                 </div>
                 <div class="text-center">
                   <p class="text-xs font-bold text-gray-700">{{ range.total_lanes }}</p>
-                  <p class="text-[9px] text-gray-400">{{ isUz ? "yo'l" : "дор." }}</p>
+                  <p class="text-[9px] text-gray-400">{{ isUz ? "yoʻl" : "дор." }}</p>
                 </div>
                 <div class="text-center">
                   <p class="text-xs font-bold" :class="range.cameras_online === range.cameras_total ? 'text-green-600' : 'text-yellow-600'">{{ range.cameras_online }}/{{ range.cameras_total }}</p>
@@ -421,7 +421,7 @@ function regionLabel(value: string) {
               <p class="text-xs text-gray-400">{{ isUz ? "Interfeys tili" : "Язык интерфейса" }}</p>
             </div>
           </div>
-          <span class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-gray-200">{{ locale === 'ru' ? 'Русский' : "O'zbek" }}</span>
+          <span class="px-3 py-1.5 rounded-lg text-xs font-medium bg-white border border-gray-200">{{ locale === 'ru' ? 'Русский' : "Oʻzbek" }}</span>
         </div>
         <!-- Password -->
         <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50">
@@ -429,10 +429,10 @@ function regionLabel(value: string) {
             <Lock class="w-4 h-4 text-gray-400" />
             <div>
               <p class="text-sm font-medium text-gray-700">{{ isUz ? "Parol" : "Пароль" }}</p>
-              <p class="text-xs text-gray-400">{{ isUz ? "Parolni o'zgartirish" : "Сменить пароль" }}</p>
+              <p class="text-xs text-gray-400">{{ isUz ? "Parolni oʻzgartirish" : "Сменить пароль" }}</p>
             </div>
           </div>
-          <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-brand-600 border border-brand-200 hover:bg-brand-50 transition">{{ isUz ? "O'zgartirish" : "Изменить" }}</button>
+          <button class="px-3 py-1.5 rounded-lg text-xs font-medium text-brand-600 border border-brand-200 hover:bg-brand-50 transition">{{ isUz ? "Oʻzgartirish" : "Изменить" }}</button>
         </div>
         <!-- Help -->
         <div class="flex items-center justify-between p-3 rounded-xl bg-gray-50">

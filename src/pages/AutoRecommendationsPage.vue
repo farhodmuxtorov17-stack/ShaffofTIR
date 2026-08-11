@@ -73,7 +73,7 @@ const recommendations = computed<Recommendation[]>(() => {
       title_ru: '\u041D\u0438\u0437\u043A\u0430\u044F \u0442\u043E\u0447\u043D\u043E\u0441\u0442\u044C',
       title_uz: 'Past aniqlik',
       desc_ru: '\u0412\u0430\u0448\u0430 \u0441\u0440\u0435\u0434\u043D\u044F\u044F \u0442\u043E\u0447\u043D\u043E\u0441\u0442\u044C ' + avgAccuracy.value + '%. \u041D\u0435\u043E\u0431\u0445\u043E\u0434\u0438\u043C\u0430 \u0434\u043E\u043F\u043E\u043B\u043D\u0438\u0442\u0435\u043B\u044C\u043D\u0430\u044F \u0442\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u043A\u0430 \u043F\u043E \u0431\u0430\u0437\u043E\u0432\u044B\u043C \u0443\u043F\u0440\u0430\u0436\u043D\u0435\u043D\u0438\u044F\u043C.',
-      desc_uz: "Sizning o'rtacha aniqlikingiz " + avgAccuracy.value + "%. Asosiy mashqlar bo'yicha qo'shimcha mashg'ulot kerak.",
+      desc_uz: "Sizning oʻrtacha aniqlikingiz " + avgAccuracy.value + "%. Asosiy mashqlar bo'yicha qo'shimcha mashg'ulot kerak.",
       action_ru: '\u041D\u0430\u0447\u0430\u0442\u044C \u0442\u0440\u0435\u043D\u0438\u0440\u043E\u0432\u043A\u0443',
       action_uz: "Mashg'ulotni boshlash",
     })
@@ -121,9 +121,9 @@ const recommendations = computed<Recommendation[]>(() => {
       title_ru: '\u041E\u0442\u043B\u0438\u0447\u043D\u044B\u0435 \u0440\u0435\u0437\u0443\u043B\u044C\u0442\u0430\u0442\u044B',
       title_uz: "Ajoyib natijalar",
       desc_ru: '\u0412\u044B \u0441\u0434\u0430\u043B\u0438 100% \u0441\u0435\u0441\u0441\u0438\u0439! \u0420\u0435\u043A\u043E\u043C\u0435\u043D\u0434\u0443\u0435\u0442\u0441\u044F \u043F\u0435\u0440\u0435\u0439\u0442\u0438 \u043A \u0431\u043E\u043B\u0435\u0435 \u0441\u043B\u043E\u0436\u043D\u044B\u043C \u0443\u043F\u0440\u0430\u0436\u043D\u0435\u043D\u0438\u044F\u043C \u0438 \u043F\u043E\u0432\u044B\u0448\u0435\u043D\u0438\u044E \u043A\u043B\u0430\u0441\u0441\u0430.',
-      desc_uz: "Barcha sessiyalarni muvaffaqiyatli topshirdingiz! Murakkabroq mashqlarga va sinf ko'tarishga o'tish tavsiya etiladi.",
+      desc_uz: "Barcha sessiyalarni muvaffaqiyatli topshirdingiz! Murakkabroq mashqlarga va sinf ko'tarishga oʻtish tavsiya etiladi.",
       action_ru: '\u041F\u0435\u0440\u0435\u0439\u0442\u0438 \u043D\u0430 \u0441\u043B\u0435\u0434\u0443\u044E\u0449\u0438\u0439 \u0443\u0440\u043E\u0432\u0435\u043D\u044C',
-      action_uz: "Keyingi darajaga o'tish",
+      action_uz: "Keyingi darajaga oʻtish",
     })
   }
 
