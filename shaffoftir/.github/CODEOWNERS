@@ -1,0 +1,25 @@
+# Default owners — notified for all PRs
+* @farhodmuxtorov17-stack
+
+# Frontend
+/src/ @farhodmuxtorov17-stack
+/src/pages/ @farhodmuxtorov17-stack
+/src/components/ @farhodmuxtorov17-stack
+/src/stores/ @farhodmuxtorov17-stack
+
+# Backend
+/backend/ @farhodmuxtorov17-stack
+/backend_fastapi/ @farhodmuxtorov17-stack
+
+# CI/CD
+/.github/ @farhodmuxtorov17-stack
+
+# Documentation
+/docs/ @farhodmuxtorov17-stack
+/README.md @farhodmuxtorov17-stack
+/SECURITY.md @farhodmuxtorov17-stack
+
+# Security-sensitive files
+/src/stores/auth.ts @farhodmuxtorov17-stack
+/src/pages/LoginPage.vue @farhodmuxtorov17-stack
+/.env.example @farhodmuxtorov17-stack

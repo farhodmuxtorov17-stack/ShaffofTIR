@@ -1,0 +1,27 @@
+[build]
+  command = "npm install && npx vite build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  VITE_API_URL = "https://soldier.mrdev.uz"
+  VITE_API_URL_EXTENDED = "https://soldier.mrdev.uz"
+
+# API proxy to backend - MUST come before SPA fallback
+[[redirects]]
+  from = "/api/*"
+  to = "https://soldier.mrdev.uz/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback - all other routes to index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+db.sqlite3
+*.pyc
+__pycache__/
+.env
+.env.local
+video_project/stock/*.mp4
+video_project/stock/*.wav
+*_deploy.tar.gz
+*_deploy.zip
+*.wav

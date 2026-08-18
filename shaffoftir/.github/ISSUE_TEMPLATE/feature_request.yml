@@ -1,0 +1,57 @@
+name: Feature Request
+description: Предложить новую функцию или улучшение
+title: "[FEATURE] "
+labels: ["enhancement", "triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Какую проблему решает эта функция?
+      description: Опишите текущую проблему или ограничение
+    validations:
+      required: true
+  
+  - type: textarea
+    id: solution
+    attributes:
+      label: Предлагаемое решение
+      description: Как должна работать новая функция
+    validations:
+      required: true
+  
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Рассмотренные альтернативы
+      description: Другие варианты решения, которые вы рассматривали
+  
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Приоритет
+      options:
+        - Низкий
+        - Средний
+        - Высокий
+        - Критический
+    validations:
+      required: true
+  
+  - type: dropdown
+    id: module
+    attributes:
+      label: Затронутый модуль
+      options:
+        - Командный центр
+        - Сессии
+        - Протоколы
+        - Оружие
+        - Камеры
+        - Обучение
+        - Аналитика
+        - Авторизация/Роли
+        - UI/UX
+        - Инфраструктура
+        - Другое
+    validations:
+      required: true
