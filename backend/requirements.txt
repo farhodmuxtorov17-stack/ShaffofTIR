@@ -1,0 +1,25 @@
+# ── Core ─────────────────────────────────────────────────
+Django==5.1.4
+djangorestframework==3.15.2
+django-filter==24.3
+django-cors-headers==4.6.0
+
+# ── Auth ────────────────────────────────────────────────
+djangorestframework-simplejwt==5.3.1
+PyJWT==2.10.1
+
+# ── API Docs ────────────────────────────────────────────
+drf-spectacular==0.27.2
+
+# ── Server ─────────────────────────────────────────────
+gunicorn==23.0.0
+whitenoise==6.8.2
+psycopg2-binary==2.9.10
+
+# ── Utils ───────────────────────────────────────────────
+python-dotenv==1.0.1
+opencv-python-headless>=4.10.0
+numpy>=1.26.0
+Pillow>=10.4.0
+channels>=4.1.0
+daphne>=4.1.0
