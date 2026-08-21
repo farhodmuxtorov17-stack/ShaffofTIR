@@ -5,8 +5,8 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'shaffoftir-dev-secret-key-change-in-production')
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = ['*']
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -101,5 +101,15 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 CORS_ALLOW_CREDENTIALS = True
+
+# Production CORS whitelist
+CORS_ALLOWED_ORIGINS = [
+    "https://farhodmuxtorov17-stack.github.io",
+    "https://e-shaffoftir.netlify.app",
+]
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"https://.*\.netlify\.app",
+    r"https://.*\.github\.io",
+]
