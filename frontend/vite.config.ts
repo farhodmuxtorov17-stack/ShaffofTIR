@@ -4,6 +4,7 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [vue()],
+  base: '/ShaffofTIR/',
   resolve: { alias: { '@': resolve(__dirname, 'src') } },
   server: { port: 5174, proxy: { '/api': 'http://localhost:8000' } },
   build: { outDir: 'dist', chunkSizeWarningLimit: 600 }
